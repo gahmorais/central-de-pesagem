@@ -1,0 +1,3 @@
+package br.com.backupautomacao.centraldepesagem.network
+
+data class MgvResponseNutritionalInfo(val informacoesNutricionais: MgvInformacoesNutricionais, val ExportaInformacaoNutricionalResult: MgvError)

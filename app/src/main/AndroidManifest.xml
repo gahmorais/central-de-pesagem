@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="br.com.backupautomacao.howworkswithviewmodel">
+    package="br.com.backupautomacao.centraldepesagem">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
@@ -20,7 +20,8 @@
         android:theme="@style/Theme.HowWorksWithViewModel"
         tools:targetApi="31">
         <activity
-            android:name=".ui.MainActivity"
+            android:name="br.com.backupautomacao.centraldepesagem.ui.MainActivity"
+            android:screenOrientation="reverseLandscape"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

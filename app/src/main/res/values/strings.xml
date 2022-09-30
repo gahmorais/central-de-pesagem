@@ -6,4 +6,7 @@
     <string name="text_button_search">Busca produto</string>
     <string name="text_button_weighing">Pesar</string>
     <string name="text_button_print">Imprimir</string>
+    <string name="message_connecting">Conectando…</string>
+    <string name="message_printing_error">Não foi possível realizar impressão</string>
+    <string name="message_error_ip_not_setted">IP do equipamento não configurado</string>
 </resources>
