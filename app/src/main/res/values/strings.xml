@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Central de pesagem V2</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="placeholder_input_text">Digite o produto desejado</string>
+    <string name="text_button_search">Busca produto</string>
+    <string name="text_button_weighing">Pesar</string>
+    <string name="text_button_print">Imprimir</string>
+</resources>

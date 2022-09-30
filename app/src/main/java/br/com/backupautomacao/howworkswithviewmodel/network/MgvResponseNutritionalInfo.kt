@@ -1,0 +1,3 @@
+package br.com.backupautomacao.howworkswithviewmodel.network
+
+data class MgvResponseNutritionalInfo(val informacoesNutricionais: MgvInformacoesNutricionais, val ExportaInformacaoNutricionalResult: MgvError)
