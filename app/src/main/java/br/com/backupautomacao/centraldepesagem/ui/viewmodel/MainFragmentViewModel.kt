@@ -25,13 +25,16 @@ import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_SCALE
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectedThread
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
+import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
-import br.com.backupautomacao.centraldepesagem.utils.Formatter
-import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository.Companion.PRINTER_IP
+import br.com.backupautomacao.centraldepesagem.utils.Formatter
+import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.tabletinteligente.Printer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 
 
@@ -44,6 +47,9 @@ class MainFragmentViewModel(
 
   private val _mgvProduct: MutableLiveData<MgvProduct?> = MutableLiveData()
   val mgvProduct: LiveData<MgvProduct?> = _mgvProduct
+
+  private val _mgvNutritionalInfo: MutableLiveData<MgvInformacoesNutricionais> = MutableLiveData()
+  val mgvNutritionalInfo: LiveData<MgvInformacoesNutricionais> = _mgvNutritionalInfo
 
   private val _statusMessage: MutableLiveData<String> = MutableLiveData()
   val statusMessage: LiveData<String> = _statusMessage
@@ -92,11 +98,21 @@ class MainFragmentViewModel(
   fun fetchItem(codItem: String) {
     viewModelScope.launch {
       try {
-        val response = MgvApi.retrofitService.queryItem("bkp@2018", "1", codItem)
-        response.ConsultaItemResult?.let { error ->
+        val (ConsultaItemResult, item) = withContext(Dispatchers.Default) {
+          MgvApi.retrofitService.queryItem(item = codItem)
+        }
+
+        ConsultaItemResult?.let { error ->
           _statusMessage.value = ERROR_RESPONSE_MGV(error.Msg, error.Codigo)
         }
-        response.item?.let { product ->
+        item?.let { product ->
+          val responseNutritionalInfo =
+            withContext(Dispatchers.Default) {
+              val response = MgvApi.retrofitService.queryNutritionalInfo()
+              val (informacoesNutricionais) = response
+              informacoesNutricionais.find { it.Codigo == item.CodInfoNutricional.toString() }
+            }
+          product.nutrictionFacts = responseNutritionalInfo
           _mgvProduct.value = product
         }
       } catch (e: Exception) {
@@ -155,8 +171,9 @@ class MainFragmentViewModel(
   }
 
   @Throws(SecurityException::class)
-  fun getAvailableDevices(): LiveData<Set<BluetoothDevice>> {
-    return MutableLiveData(bluetoothAdapter.bondedDevices)
+  fun getAvailableDevices(): LiveData<List<BluetoothDevice>> {
+    val devices = bluetoothAdapter.bondedDevices.sortedByDescending { it.address }
+    return MutableLiveData(devices)
   }
 
   fun setActiveThread(currentThread: ConnectedThread) {
@@ -167,7 +184,7 @@ class MainFragmentViewModel(
     _mgvProduct.value = MgvProduct()
   }
 
-  fun connectToDevices(devices: Set<BluetoothDevice>) {
+  fun connectToDevices(devices: List<BluetoothDevice>) {
     devices.forEach {
       val executor = Executors.newSingleThreadExecutor()
       val newThread = ConnectingThread(bluetoothAdapter, it.address, mHandler)

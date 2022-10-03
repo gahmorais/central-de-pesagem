@@ -1,8 +1,8 @@
 package br.com.backupautomacao.centraldepesagem.network
 
 data class MgvInformacoesNutricionais(
-  val Codigo: String,
-  val Carboidrato: Double,
+  val Codigo: String?,
+  val Carboidrato: Double?,
   val DescricaoMedidaCaseira: Int?,
   val FibraAlimentar: Double?,
   val FracaoMedidaCaseira: Double?,

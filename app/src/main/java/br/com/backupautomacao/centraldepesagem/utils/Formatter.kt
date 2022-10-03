@@ -28,10 +28,21 @@ class Formatter {
         .substringBefore("k")
         .toDouble()
     }
+
     fun formatBarcode(code: String, price: Double): String {
       val priceDoubleToInt = round(price * 100).toInt()
       val priceFormat = priceDoubleToInt.toString().padStart(5, '0')
       return "2${code.padStart(6, '0')}${priceFormat}"
+    }
+
+    fun <T> formatNutriction(value: T?): String {
+      if (value == null) {
+        return ""
+      }
+      if (value is Int) {
+        return String.format(Locale.ENGLISH, "%d g", value)
+      }
+      return String.format(Locale.ENGLISH, "%.1f g", value).replace(".",",")
     }
   }
 }
