@@ -3,6 +3,8 @@ package br.com.backupautomacao.centraldepesagem.ui
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import br.com.backupautomacao.centraldepesagem.ui.fragments.MainFragment
+import br.com.backupautomacao.centraldepesagem.ui.fragments.SettingsFragment
 
 private const val NUM_PAGES = 2
 

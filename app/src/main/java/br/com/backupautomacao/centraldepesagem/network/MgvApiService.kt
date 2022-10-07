@@ -5,7 +5,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-private val BASE_URL = "http://172.16.0.14:9300/MGV6_WCF/REST/"
+private const val BASE_URL = "http://172.16.0.14:9300/MGV6_WCF/REST/"
 private const val PALAVRA_CHAVE = "bkp@2018"
 private const val NUMERO_LOJA = "1"
 

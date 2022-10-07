@@ -1,12 +1,15 @@
 <resources>
     <string name="app_name">Central de pesagem V2</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="placeholder_input_text">Digite o produto desejado</string>
     <string name="text_button_search">Busca produto</string>
     <string name="text_button_weighing">Pesar</string>
     <string name="text_button_print">Imprimir</string>
-    <string name="message_connecting">Conectando…</string>
-    <string name="message_printing_error">Não foi possível realizar impressão</string>
-    <string name="message_error_ip_not_setted">IP do equipamento não configurado</string>
+    <string name="text_button_listening">Ouvir</string>
+    <string name="title_select_scale">Balança selecionada:</string>
+    <string name="text_title_description">Descrição:</string>
+    <string name="text_title_price">Preço:</string>
+    <string name="text_title_weight">Peso:</string>
+    <string name="text_title_barcode">Código:</string>
+    <string name="text_placeholder_printer_address">Digite o IP da impressora</string>
+    <string name="text_button_save">Salvar</string>
 </resources>

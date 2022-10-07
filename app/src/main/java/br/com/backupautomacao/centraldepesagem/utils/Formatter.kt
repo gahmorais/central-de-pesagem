@@ -14,7 +14,7 @@ class Formatter {
       ).replace(".", ",")
     }
 
-    fun formatWeight(value: Double?): String {
+    fun<T> formatWeight(value: T?): String {
       return String.format(Locale.ENGLISH, "%.3f Kg", value).replace(".", ",")
     }
 

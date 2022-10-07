@@ -6,6 +6,7 @@ data class MgvProduct(
   val Descritivo1aLinha: String = "",
   val CodInfoExtra: Int? = null,
   val CodInfoNutricional: Int? = null,
+  val CodTara: Int? = null,
   val DiasValidade: Int = 0,
   val Preco: Double = 0.0,
   val Lote: String = "",

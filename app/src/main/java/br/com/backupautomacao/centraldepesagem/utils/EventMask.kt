@@ -1,4 +1,4 @@
-package br.com.backupautomacao.tabletinteligente.utils
+package br.com.backupautomacao.centraldepesagem.utils
 
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,7 +8,6 @@ import java.lang.Exception
 class EventMask(private val editText: EditText, private var opt: Int) : TextWatcher {
     private var isUpdating: Boolean = false
     private var old: String = ""
-    private val TAG = "EventMask"
     private var mask = ""
 
     companion object {
