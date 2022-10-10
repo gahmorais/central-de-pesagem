@@ -14,7 +14,6 @@ class ConnectingThread(
   private val deviceAddress: String,
   private val handler: Handler
 ) : Thread() {
-  private val TAG = "ConnectingThread"
   private var mBTSocket: BluetoothSocket? = null
   @Throws(SecurityException::class)
   override fun run() {
@@ -24,8 +23,8 @@ class ConnectingThread(
       mBTSocket = createBluetoothSocket(device)
     } catch (e: Exception) {
       fail = true
-      handler.obtainMessage(ERROR_MESSAGE,-1,-1, ).sendToTarget()
-      Log.e(TAG, "run: Falha ao criar socket", e)
+      handler.obtainMessage(ERROR_MESSAGE,-1,-1).sendToTarget()
+      Log.e("ConnectingThread", "run: Falha ao criar socket", e )
     }
 
     try{
@@ -36,7 +35,7 @@ class ConnectingThread(
       handler.obtainMessage(ERROR_MESSAGE,-1,-1,"Falha ao realizar conexão").sendToTarget()
       try{
         mBTSocket?.close()
-        Log.e(TAG, "run: Falha ao realizar conexão", e)
+        Log.e("ConnectingThread", "run: Falha ao realizar conexão", e )
       }catch (e: Exception){
         handler.obtainMessage(ERROR_MESSAGE,-1,-1,"Falha ao fechar o socket").sendToTarget()
       }

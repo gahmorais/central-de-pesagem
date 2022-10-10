@@ -9,26 +9,26 @@ import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_READ
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
-class ConnectedThread(private val socket: BluetoothSocket, private val handler: Handler) : Thread() {
-  private val TAG = "ConnectedThread"
+class ConnectedThread(private val socket: BluetoothSocket, private val handler: Handler) :
+  Thread() {
   private val mInputStream = socket.inputStream
   private val mOutputStream = socket.outputStream
 
   override fun run() {
     super.run()
     val buffer = ByteArray(1024)
-    var bytes:Int
-    while (true){
-      try{
+    var bytes: Int
+    while (true) {
+      try {
         bytes = mInputStream.available()
-        if(bytes != 0){
+        if (bytes != 0) {
           SystemClock.sleep(100)
           bytes = mInputStream.read(buffer)
           val data = buffer.copyOf(bytes)
-          Log.i(TAG, "run: ${String(data, StandardCharsets.UTF_8)}")
-          handler.obtainMessage(MESSAGE_READ,-1,-1,data).sendToTarget()
+          Log.i("ConnectedThread", "run: ${String(data, StandardCharsets.UTF_8)}")
+          handler.obtainMessage(MESSAGE_READ, -1, -1, data).sendToTarget()
         }
-      }catch (e: IOException){
+      } catch (e: IOException) {
         e.printStackTrace()
         break
       }
@@ -39,8 +39,8 @@ class ConnectedThread(private val socket: BluetoothSocket, private val handler: 
     try {
       mOutputStream.write(data)
     } catch (e: Exception) {
-      handler.obtainMessage(ERROR_MESSAGE,-1,-1,"Falha na comunicação")
-      Log.e(TAG, "write: Erro", e)
+      handler.obtainMessage(ERROR_MESSAGE, -1, -1, "Falha na comunicação")
+      Log.e("ConnectedThread", "write: Erro", e)
     }
   }
 
@@ -48,7 +48,7 @@ class ConnectedThread(private val socket: BluetoothSocket, private val handler: 
     try {
       socket.close()
     } catch (e: Exception) {
-      Log.e(TAG, "cancel: Erro", e)
+      Log.e("ConnectedThread", "cancel: Erro", e )
     }
   }
 }

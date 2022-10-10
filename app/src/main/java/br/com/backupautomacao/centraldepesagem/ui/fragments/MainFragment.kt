@@ -1,9 +1,11 @@
-package br.com.backupautomacao.centraldepesagem.ui
+package br.com.backupautomacao.centraldepesagem.ui.fragments
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.pm.PackageManager
+import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,31 +17,36 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentMainBinding
+import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainFragmentViewModel
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.factory.MainFragmentViewModelFactory
-import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
+import kotlinx.coroutines.flow.collectLatest
+import net.gotev.speech.Speech
 
 
 class MainFragment : Fragment() {
-  private val TAG = "MainFragment"
+
   private var _binding: FragmentMainBinding? = null
   private val binding get() = _binding!!
   private val bluetoothAdapter: BluetoothAdapter by lazy {
     val bluetoothManager = activity?.getSystemService(BluetoothManager::class.java)
     bluetoothManager!!.adapter
   }
-  private val viewModel: MainFragmentViewModel by lazy {
+
+  private val viewModel: MainFragmentViewModel by activityViewModels {
     val configRepository = ConfigRepository(requireActivity())
-    val factory = MainFragmentViewModelFactory(configRepository, bluetoothAdapter)
-    ViewModelProvider(this, factory)[MainFragmentViewModel::class.java]
+    val audioManager = requireActivity().getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    Speech.init(requireActivity())
+    MainFragmentViewModelFactory(configRepository, bluetoothAdapter, audioManager)
   }
 
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
 
     _binding = FragmentMainBinding.inflate(inflater)
     binding.lifecycleOwner = this
@@ -70,19 +77,36 @@ class MainFragment : Fragment() {
   }
 
   private fun configureSpinner() {
-    binding.spinnerScale.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-      override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, index: Int, p3: Long) {
-        viewModel.connectedThreads.value?.let { threadList ->
-          if (threadList.size > 0) {
-            viewModel.setActiveThread(threadList[index])
-          }
+    lifecycleScope.launchWhenStarted {
+      viewModel.scale.collectLatest { value ->
+        Log.i("MainFragment", "configureSpinner: $value")
+        value?.let {
+          Log.i("MainFragment", "configureSpinner: Update spinner $value")
+          binding.spinnerScale.setSelection(value)
         }
       }
-
-      override fun onNothingSelected(p0: AdapterView<*>?) {
-
-      }
     }
+
+
+    binding.spinnerScale.onItemSelectedListener =
+      object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(
+          adapterView: AdapterView<*>?,
+          p1: View?,
+          i: Int,
+          p3: Long
+        ) {
+          viewModel.connectedThreads.value?.let { threadList ->
+            if (threadList.size > 0) {
+              viewModel.setActiveThread(i)
+            }
+          }
+        }
+
+        override fun onNothingSelected(p0: AdapterView<*>?) {
+
+        }
+      }
   }
 
   private fun handleButtons() {
@@ -93,7 +117,7 @@ class MainFragment : Fragment() {
 
     binding.buttonPrint.setOnClickListener {
       if (!checkPermissionToReadAndWriteStorage()) {
-        requestPermissionResult.launch(
+        requestStoragePermissionResult.launch(
           arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -105,6 +129,23 @@ class MainFragment : Fragment() {
 
     binding.buttonWeighing.setOnClickListener {
       viewModel.makeWeighing()
+    }
+
+    binding.buttonRecord.setOnClickListener {
+      if (!checkPermissionToRecord()) {
+        requestRecordPermission.launch(Manifest.permission.RECORD_AUDIO)
+      } else {
+        if (!checkBluetoothPermission()) {
+          requestBluetoothPermissions.launch(
+            arrayOf(
+              Manifest.permission.BLUETOOTH_ADMIN,
+              Manifest.permission.BLUETOOTH_CONNECT,
+              Manifest.permission.BLUETOOTH
+            )
+          )
+        }
+        viewModel.listening()
+      }
     }
   }
 
@@ -126,20 +167,61 @@ class MainFragment : Fragment() {
     return resultRead == PackageManager.PERMISSION_GRANTED && resultWrite == PackageManager.PERMISSION_GRANTED
   }
 
-  private val requestPermissionResult =
+  private fun checkPermissionToRecord(): Boolean {
+    val permission =
+      ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.RECORD_AUDIO)
+    return permission == PackageManager.PERMISSION_GRANTED
+  }
+
+  private fun checkBluetoothPermission(): Boolean {
+    val permissionBluetooth =
+      ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.BLUETOOTH)
+    val permissionBluetoothAdmin =
+      ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.BLUETOOTH_ADMIN)
+    val permissionBluetoothConnect =
+      ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.BLUETOOTH_CONNECT)
+    return permissionBluetooth == PackageManager.PERMISSION_GRANTED &&
+        permissionBluetoothAdmin == PackageManager.PERMISSION_GRANTED &&
+        permissionBluetoothConnect == PackageManager.PERMISSION_GRANTED
+  }
+
+  private val requestBluetoothPermissions =
+    registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+      val isGranted = permissions.entries.filter { !it.value }
+      if (isGranted.isEmpty()) {
+        viewModel.listening()
+      } else {
+        isGranted.forEach {
+          Log.i("MainFragment", ": Permissões negada ${it.key}")
+        }
+      }
+    }
+
+  private val requestStoragePermissionResult =
     registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
       val isGranted = permissions.entries.filter { !it.value }
       if (isGranted.isEmpty()) {
         viewModel.makePrint()
       } else {
         isGranted.forEach {
-          Log.i(TAG, "Permissões negadas: ${it.key}")
+          Log.i("MainFragment", "Permissões negadas: ${it.key}")
         }
       }
     }
+
+  private val requestRecordPermission = registerForActivityResult(
+    ActivityResultContracts.RequestPermission()
+  ) { isGranted ->
+    if (isGranted) {
+      viewModel.listening()
+    } else {
+      Log.i("MainFragment", "Permissão negada")
+    }
+  }
 
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
   }
 }
+

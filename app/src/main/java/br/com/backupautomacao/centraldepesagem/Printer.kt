@@ -1,15 +1,20 @@
-package br.com.backupautomacao.tabletinteligente
+package br.com.backupautomacao.centraldepesagem
 
 import java.io.OutputStream
 import java.io.PrintWriter
 import java.net.Socket
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
-open class Printer(private val ipImpressora: String) : Runnable {
+open class Printer(private val printerAddress: String) : Runnable {
   private lateinit var dataToPrint: String
 
   override fun run() {
-    val client = Socket(ipImpressora, 9100)
+    val client = try {
+      Socket(printerAddress, 9100)
+    } catch (e: Exception) {
+      throw e
+    }
     println("Cliente conectado do IP: ${client.inetAddress.hostAddress}")
     val outputStream: OutputStream = client.getOutputStream()
     val pw = PrintWriter(outputStream)
@@ -18,11 +23,17 @@ open class Printer(private val ipImpressora: String) : Runnable {
     client.close()
   }
 
-  fun print(etiqueta: String) {
-    dataToPrint = etiqueta
+  fun print(label: String) {
+    dataToPrint = label
     val executor = Executors.newSingleThreadExecutor()
-    executor.execute(this)
-    executor.shutdown()
+    try {
+      val futureResult = executor.submit(this)
+      futureResult.get()  //Pega o resultado da thread e
+      //se ocorreu erro, lança a exceção ExecutionException
+    } catch (e: ExecutionException) {
+      throw e
+    }finally {
+      executor.shutdown()
+    }
   }
-
 }

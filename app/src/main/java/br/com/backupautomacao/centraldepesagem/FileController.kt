@@ -7,16 +7,19 @@ import java.io.FileReader
 import java.util.*
 
 class FileController {
-    private val downloadFolder: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-    fun readFile(filename: String): String{
-        val file = File(downloadFolder, filename)
-        val bufferedReader = BufferedReader(FileReader(file))
-        val readingFile = Scanner(bufferedReader)
-        val text = StringBuilder()
-        while(readingFile.hasNext()){
-            text.append(readingFile.nextLine())
-        }
+  private val downloadFolder: File by lazy {
+    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+  }
 
-        return String(text)
+  fun readFile(filename: String): String {
+    val file = File(downloadFolder, filename)
+    val bufferedReader = BufferedReader(FileReader(file))
+    val readingFile = Scanner(bufferedReader)
+    val text = StringBuilder()
+    while (readingFile.hasNext()) {
+      text.append(readingFile.nextLine())
     }
+
+    return String(text)
+  }
 }

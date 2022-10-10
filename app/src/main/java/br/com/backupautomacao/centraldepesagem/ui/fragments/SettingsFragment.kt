@@ -1,19 +1,19 @@
-package br.com.backupautomacao.centraldepesagem.ui
+package br.com.backupautomacao.centraldepesagem.ui.fragments
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentSettingsBinding
 import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModelFactory
-import br.com.backupautomacao.tabletinteligente.utils.EventMask
+import br.com.backupautomacao.centraldepesagem.utils.EventMask
 
-private const val TAG = "SettingsFragment"
 class SettingsFragment : Fragment() {
   private var _binding: FragmentSettingsBinding? = null
   private val binding get() = _binding!!
@@ -39,6 +39,7 @@ class SettingsFragment : Fragment() {
     handleMessages()
     handleButtons()
     handleTextInputs()
+    handleCheckbox()
   }
 
   private fun handleTextInputs() {
@@ -59,8 +60,21 @@ class SettingsFragment : Fragment() {
     }
   }
 
+  private fun handleCheckbox() {
+    binding.checkboxAutomaticPrint.setOnCheckedChangeListener { _, isChecked ->
+      viewModel.enableAutomaticPrint(isChecked)
+    }
+  }
+
   override fun onDestroyView() {
     super.onDestroyView()
     _binding = null
   }
+
+  override fun onResume() {
+    super.onResume()
+    binding.checkboxAutomaticPrint.isChecked = viewModel.automaticPrintingEnable
+  }
+
+
 }

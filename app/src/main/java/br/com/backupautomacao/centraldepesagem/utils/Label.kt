@@ -10,8 +10,9 @@ import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatW
 import java.text.SimpleDateFormat
 import java.util.*
 
+private const val ONE_DAY_MILLIS = 60 * 60 * 24 * 1000
 class Label {
-  fun createSimpleLabel(mgvProduct: MgvProduct): String {
+  fun createLabelRdc429(mgvProduct: MgvProduct): String {
     val fileController = FileController()
     var label: String = fileController.readFile("etiqueta_rdc429.prn")
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
@@ -19,7 +20,6 @@ class Label {
     val now = System.currentTimeMillis()
     val currentDateFormatted = formatter.format(now)
 
-    val ONE_DAY_MILLIS = 60 * 60 * 24 * 1000
     val dateForward = now + (ONE_DAY_MILLIS * mgvProduct.DiasValidade)
     val dateForwardFormatted = formatter.format(dateForward)
     val weightFormatted = formatWeight(mgvProduct.weight)
@@ -35,6 +35,7 @@ class Label {
       .replace("var_peso", weightFormatted)
       .replace("var_preco_kilo", pricePerKilogramFormatted)
       .replace("var_preco", totalPriceFormatted)
+      .replace("var_tara", formatWeight(mgvProduct.CodTara))
     if (nutrictionFacts == null) {
       return label
     }
@@ -104,5 +105,29 @@ class Label {
       .replace("ac_add_100", formatNutriction(randomNumbers[19]))
       .replace("ac_add_000", formatNutriction(randomNumbers[20]))
       .replace("ac_add_vd", formatNutriction(randomNumbers[21]))
+  }
+
+  fun createSimpleLabel(mgvProduct: MgvProduct): String {
+    val fileController = FileController()
+    val label: String = fileController.readFile("etiqueta_modelo_simples.prn")
+    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
+    val now = System.currentTimeMillis()
+    val currentDateFormatted = formatter.format(now)
+
+    val dateForward = now + (ONE_DAY_MILLIS * mgvProduct.DiasValidade)
+    val dateForwardFormatted = formatter.format(dateForward)
+    val weightFormatted = formatWeight(mgvProduct.weight)
+
+    val totalPrice = mgvProduct.Preco.times(mgvProduct.weight!!)
+    val totalPriceFormatted = formatPrice(totalPrice)
+    val pricePerKilogramFormatted = formatPrice(mgvProduct.Preco)
+    return label
+      .replace("var_descricao", mgvProduct.Descritivo1aLinha)
+      .replace("var_codigo", formatBarcode(mgvProduct.Codigo, mgvProduct.Preco))
+      .replace("var_data_embalado", currentDateFormatted)
+      .replace("var_data_validade", dateForwardFormatted)
+      .replace("var_peso", weightFormatted)
+      .replace("var_preco_kilo", pricePerKilogramFormatted)
+      .replace("var_preco", totalPriceFormatted)
   }
 }
