@@ -16,6 +16,7 @@ class ConfigRepository(context: Context) {
   companion object {
     const val PRINTER_IP = "ip"
     const val AUTOMATIC_PRINT = "automatic_print"
+    const val SERVER_ADDRESS = "server"
   }
 
   fun setTextConfig(key: String, value: String) {

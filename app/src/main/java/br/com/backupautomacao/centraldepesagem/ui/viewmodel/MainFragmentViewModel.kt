@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -32,6 +33,7 @@ import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectedThread
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
+import br.com.backupautomacao.centraldepesagem.network.MgvService
 import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository.Companion.PRINTER_IP
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
@@ -46,6 +48,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.gotev.speech.Speech
 import net.gotev.speech.SpeechDelegate
+import java.lang.IllegalArgumentException
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
@@ -60,9 +64,13 @@ enum class ProcessStatus {
 
 class MainFragmentViewModel(
   private val configRepository: ConfigRepository,
-  private val bluetoothAdapter: BluetoothAdapter,
-  private val audioManager: AudioManager
+  private val bluetoothAdapter: BluetoothAdapter
 ) : ViewModel(), SpeechDelegate {
+
+  private val retrofitInstance by lazy {
+    val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
+    MgvApi.retrofitService(serverAddress)
+  }
 
   private val speechInstance: Speech = Speech.getInstance()
   private val _mgvProduct: MutableLiveData<MgvProduct?> = MutableLiveData()
@@ -86,6 +94,7 @@ class MainFragmentViewModel(
       _updateStatus.collectLatest { status ->
         val automaticPrint = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
         when (status) {
+          ProcessStatus.INICIO -> Log.i("MainFragmentViewModel", "Inicio: ")
           ProcessStatus.BUSCAR_PRODUTO -> Log.i("MainFragmentViewModel", "Buscando produto")
           ProcessStatus.REALIZAR_PESAGEM -> makeWeighing()
           ProcessStatus.REALIZAR_IMPRESSAO -> if (automaticPrint) makePrint()
@@ -106,6 +115,7 @@ class MainFragmentViewModel(
           val message = msg.obj as ByteArray
           val updateWeightProduct = _mgvProduct.value
           updateWeightProduct?.weight = Formatter.formatFromUranoUseCb2Protocol(message)
+          updateWeightProduct?.totalPrice = updateWeightProduct!!.Preco.times(updateWeightProduct.weight!!)
           _mgvProduct.value = updateWeightProduct
           _updateStatus.value = ProcessStatus.REALIZAR_IMPRESSAO
         }
@@ -141,7 +151,7 @@ class MainFragmentViewModel(
     viewModelScope.launch {
       try {
         val (ConsultaItemResult, item) = withContext(Dispatchers.Default) {
-          MgvApi.retrofitService.queryItem(item = codItem)
+          retrofitInstance.queryItem(item = codItem)
         }
 
         ConsultaItemResult?.let { error ->
@@ -149,13 +159,22 @@ class MainFragmentViewModel(
         }
         item?.also { product ->
           val responseNutritionalInfo = withContext(Dispatchers.Default) {
-            MgvApi.retrofitService.queryNutritionalInfo()
+            retrofitInstance.queryNutritionalInfo()
+          }
+
+          val responseExtraInfo = withContext(Dispatchers.Default) {
+            retrofitInstance.queryExtraInfo()
           }
           val (informacoesNutricionais) = responseNutritionalInfo
-          val nutrictionFact = informacoesNutricionais.find {
+          val (informacoesExtra) = responseExtraInfo
+          val nutrictionFact = informacoesNutricionais?.find {
             it.Codigo == product.CodInfoNutricional.toString()
           }
 
+          val extraInfo = informacoesExtra?.find {
+            it.Codigo == product.CodInfoExtra.toString()
+          }
+          product.extraInfo = extraInfo
           product.nutrictionFacts = nutrictionFact
           _mgvProduct.value = product
 
@@ -163,6 +182,9 @@ class MainFragmentViewModel(
           _updateStatus.value = ProcessStatus.REALIZAR_PESAGEM
 
         }
+      } catch (e: IllegalArgumentException) {
+        _statusMessage.value = "Endereço do servidor inválido"
+        Log.e("MainFragmentViewModel", "fetchItem: ", e)
       } catch (e: Exception) {
         _statusMessage.value = ERROR_REQUEST
         Log.e("MainFragmentViewModel", "fetchItem: ", e)
@@ -171,7 +193,7 @@ class MainFragmentViewModel(
   }
 
   fun makeWeighing() {
-    if (checkProductStatus()) {
+    if (checkProductIsNullOrEmpty()) {
       _statusMessage.value = ERROR_GET_PRODUCT("pesagem")
       return
     }
@@ -187,7 +209,7 @@ class MainFragmentViewModel(
       return
     }
 
-    if (checkProductStatus()) {
+    if (checkProductIsNullOrEmpty()) {
       _statusMessage.value = ERROR_GET_PRODUCT("impressão")
       return
     }
@@ -200,9 +222,11 @@ class MainFragmentViewModel(
 
     try {
       val label = Label()
-      val newLabel = product.nutrictionFacts?.let {
-        label.createLabelRdc429(product)
-      } ?: label.createSimpleLabel(product)
+//      val newLabel = product.nutrictionFacts?.let {
+//        label.createLabelRdc429(product)
+//      } ?: label.createSimpleLabel(product)
+      val newLabel = label.createLabelBase(product)
+      Log.i("MainFragmentViewModel", "makePrint: $newLabel")
       val printer = Printer(printerIp)
       printer.print(newLabel)
     } catch (e: ExecutionException) {
@@ -219,7 +243,7 @@ class MainFragmentViewModel(
     }
   }
 
-  private fun checkProductStatus(): Boolean {
+  private fun checkProductIsNullOrEmpty(): Boolean {
     return _mgvProduct.value?.run {
       Codigo.isEmpty()
     } ?: true
@@ -278,15 +302,7 @@ class MainFragmentViewModel(
     executeTask(wordsArray)
   }
 
-  @Throws(SecurityException::class)
   fun listening() {
-    if (bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET) == BluetoothProfile.STATE_CONNECTED) {
-      Handler(Looper.getMainLooper()).postDelayed({
-        audioManager.startBluetoothSco()
-        audioManager.isMicrophoneMute = true
-        Log.i("MainFragmentViewModel", "listening: ${audioManager.isMicrophoneMute}")
-      }, 1000)
-    }
     speechInstance.startListening(this)
   }
 

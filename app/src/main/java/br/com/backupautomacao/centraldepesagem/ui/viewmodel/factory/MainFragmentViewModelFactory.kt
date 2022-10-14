@@ -11,10 +11,9 @@ import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainFragmentViewMode
 class MainFragmentViewModelFactory(
   private val configRepository: ConfigRepository,
   private val bluetoothAdapter: BluetoothAdapter,
-  private val audioManager: AudioManager
 ) : ViewModelProvider.Factory {
   @Suppress("UNCHECKED_CAST")
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
-    return MainFragmentViewModel(configRepository, bluetoothAdapter, audioManager) as T
+    return MainFragmentViewModel(configRepository, bluetoothAdapter) as T
   }
 }

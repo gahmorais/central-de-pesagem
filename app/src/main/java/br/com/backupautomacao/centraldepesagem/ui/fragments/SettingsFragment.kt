@@ -52,6 +52,11 @@ class SettingsFragment : Fragment() {
       val printerIp: String = binding.textInputPrinterIp.text.toString()
       viewModel.savePrinterAddress(printerIp)
     }
+
+    binding.buttonSaveServerAddress.setOnClickListener {
+      val serverAddress: String = binding.textInputServerAddress.text.toString()
+      viewModel.saveServerAddress(serverAddress)
+    }
   }
 
   private fun handleMessages() {
@@ -74,7 +79,10 @@ class SettingsFragment : Fragment() {
   override fun onResume() {
     super.onResume()
     binding.checkboxAutomaticPrint.isChecked = viewModel.automaticPrintingEnable
+    val configRepository = ConfigRepository(requireActivity())
+    val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
+    val printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP)
+    binding.textInputServerAddress.setText(serverAddress)
+    binding.textInputPrinterIp.setText(printerAddress)
   }
-
-
 }
