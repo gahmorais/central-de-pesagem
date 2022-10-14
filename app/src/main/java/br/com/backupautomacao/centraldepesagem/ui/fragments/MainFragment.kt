@@ -38,9 +38,8 @@ class MainFragment : Fragment() {
 
   private val viewModel: MainFragmentViewModel by activityViewModels {
     val configRepository = ConfigRepository(requireActivity())
-    val audioManager = requireActivity().getSystemService(Context.AUDIO_SERVICE) as AudioManager
     Speech.init(requireActivity())
-    MainFragmentViewModelFactory(configRepository, bluetoothAdapter, audioManager)
+    MainFragmentViewModelFactory(configRepository, bluetoothAdapter)
   }
 
   override fun onCreateView(
@@ -87,15 +86,9 @@ class MainFragment : Fragment() {
       }
     }
 
-
     binding.spinnerScale.onItemSelectedListener =
       object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(
-          adapterView: AdapterView<*>?,
-          p1: View?,
-          i: Int,
-          p3: Long
-        ) {
+        override fun onItemSelected(adapterView: AdapterView<*>?,p1: View?,i: Int,p3: Long) {
           viewModel.connectedThreads.value?.let { threadList ->
             if (threadList.size > 0) {
               viewModel.setActiveThread(i)
@@ -164,7 +157,8 @@ class MainFragment : Fragment() {
       requireActivity(),
       Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-    return resultRead == PackageManager.PERMISSION_GRANTED && resultWrite == PackageManager.PERMISSION_GRANTED
+    return  resultRead == PackageManager.PERMISSION_GRANTED &&
+            resultWrite == PackageManager.PERMISSION_GRANTED
   }
 
   private fun checkPermissionToRecord(): Boolean {

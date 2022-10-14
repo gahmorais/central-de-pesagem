@@ -19,6 +19,16 @@ class SettingsViewModel(private val configRepository: ConfigRepository) : ViewMo
     _statusMessage.value = "IP Salvo com sucesso"
   }
 
+  fun saveServerAddress(address: String){
+    if(address.isEmpty()){
+      _statusMessage.value = "Endereço inválido"
+      return
+    }
+
+    configRepository.setTextConfig(ConfigRepository.SERVER_ADDRESS, address)
+    _statusMessage.value = "Endereço do servidor salvo com sucesso"
+  }
+
   fun enableAutomaticPrint(isEnable: Boolean) {
     val currentValue = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
     if (isEnable != currentValue) {
