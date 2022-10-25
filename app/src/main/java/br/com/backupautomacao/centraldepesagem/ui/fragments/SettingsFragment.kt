@@ -1,7 +1,6 @@
 package br.com.backupautomacao.centraldepesagem.ui.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentSettingsBinding
 import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
-import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModelFactory
+import br.com.backupautomacao.centraldepesagem.ui.viewmodel.factory.SettingsViewModelFactory
 import br.com.backupautomacao.centraldepesagem.utils.EventMask
 
 class SettingsFragment : Fragment() {

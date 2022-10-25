@@ -13,4 +13,5 @@
     <string name="text_placeholder_printer_address">Digite o IP da impressora</string>
     <string name="text_button_save">Salvar</string>
     <string name="text_placeholder_server_address">Digite o endereço do servidor</string>
+    <string name="text_button_load_price">Carregar preço</string>
 </resources>
