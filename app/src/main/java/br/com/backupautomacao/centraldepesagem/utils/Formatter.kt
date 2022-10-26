@@ -14,16 +14,29 @@ class Formatter {
       ).replace(".", ",")
     }
 
-    fun<T> formatWeight(value: T?): String {
+    fun <T> formatWeight(value: T?): String {
       return String.format(Locale.ENGLISH, "%.3f Kg", value).replace(".", ",")
     }
 
-    fun formatFromUranoUseCb2Protocol(data: ByteArray): Double {
-      val s = String(data, StandardCharsets.UTF_8)
-      val noAlphaNum = "[^a-zA-Z0-9.]".toRegex()
+    fun formatFromToledoProtocolP05(data: ByteArray): Double {
+      val s = convertByteArrayToString(data)
+      val number = removeNonAlphaCharacters(s).toDouble()
+      return number / 1000
+    }
 
-      return s
-        .replace(noAlphaNum, "")
+    fun formatDataToLoadPriceToledo(value: Double): ByteArray {
+      val stx = "\u0002"
+      val etx = "\u0003"
+      val priceInteger = round(value * 100).toInt()
+      val priceText = priceInteger.toString().padStart(6, '0')
+      val data = "$stx$priceText$etx"
+      return data.toByteArray()
+    }
+
+    fun formatFromUranoProtocolUseCb2(data: ByteArray): Double {
+      val s = convertByteArrayToString(data)
+
+      return removeNonAlphaCharacters(s)
         .substringAfter("PESOL")
         .substringBefore("k")
         .toDouble()
@@ -42,7 +55,16 @@ class Formatter {
       if (value is Int) {
         return String.format(Locale.ENGLISH, "%d g", value)
       }
-      return String.format(Locale.ENGLISH, "%.1f g", value).replace(".",",")
+      return String.format(Locale.ENGLISH, "%.1f g", value).replace(".", ",")
+    }
+
+    private fun removeNonAlphaCharacters(s: String): String {
+      val regex = "[^a-zA-Z0-9.]".toRegex()
+      return s.replace(regex, "")
+    }
+
+    private fun convertByteArrayToString(data: ByteArray): String {
+      return String(data, StandardCharsets.UTF_8)
     }
   }
 }

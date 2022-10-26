@@ -3,9 +3,7 @@ package br.com.backupautomacao.centraldepesagem.ui.fragments
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.content.Context
 import android.content.pm.PackageManager
-import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,7 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentMainBinding
 import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainFragmentViewModel
-import br.com.backupautomacao.centraldepesagem.ui.viewmodel.factory.MainFragmentViewModelFactory
+import br.com.backupautomacao.centraldepesagem.ui.viewmodel.factory.MainViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
 import net.gotev.speech.Speech
 
@@ -36,10 +34,10 @@ class MainFragment : Fragment() {
     bluetoothManager!!.adapter
   }
 
-  private val viewModel: MainFragmentViewModel by activityViewModels {
+  private val mainViewModel: MainFragmentViewModel by activityViewModels {
     val configRepository = ConfigRepository(requireActivity())
     Speech.init(requireActivity())
-    MainFragmentViewModelFactory(configRepository, bluetoothAdapter)
+    MainViewModelFactory(configRepository, bluetoothAdapter)
   }
 
   override fun onCreateView(
@@ -49,7 +47,7 @@ class MainFragment : Fragment() {
 
     _binding = FragmentMainBinding.inflate(inflater)
     binding.lifecycleOwner = this
-    binding.viewModel = viewModel
+    binding.viewModel = mainViewModel
 
     return binding.root
   }
@@ -61,8 +59,8 @@ class MainFragment : Fragment() {
     handleButtons()
     configureSpinner()
 
-    viewModel.getAvailableDevices().observe(viewLifecycleOwner) { deviceList ->
-      viewModel.connectToDevices(deviceList)
+    mainViewModel.getAvailableDevices().observe(viewLifecycleOwner) { deviceList ->
+      mainViewModel.connectToDevices(deviceList)
       val devices = deviceList.mapIndexed { i, _ -> "Balança ${i + 1}" }
       ArrayAdapter(
         requireActivity(),
@@ -77,7 +75,7 @@ class MainFragment : Fragment() {
 
   private fun configureSpinner() {
     lifecycleScope.launchWhenStarted {
-      viewModel.scale.collectLatest { value ->
+      mainViewModel.scale.collectLatest { value ->
         Log.i("MainFragment", "configureSpinner: $value")
         value?.let {
           Log.i("MainFragment", "configureSpinner: Update spinner $value")
@@ -88,10 +86,10 @@ class MainFragment : Fragment() {
 
     binding.spinnerScale.onItemSelectedListener =
       object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(adapterView: AdapterView<*>?,p1: View?,i: Int,p3: Long) {
-          viewModel.connectedThreads.value?.let { threadList ->
+        override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, i: Int, p3: Long) {
+          mainViewModel.connectedThreads.value?.let { threadList ->
             if (threadList.size > 0) {
-              viewModel.setActiveThread(i)
+              mainViewModel.setActiveThread(i)
             }
           }
         }
@@ -103,47 +101,53 @@ class MainFragment : Fragment() {
   }
 
   private fun handleButtons() {
-    binding.buttonFetchProduct.setOnClickListener {
-      val code = binding.inputProductCode.text.toString()
-      viewModel.fetchItem(code)
-    }
-
-    binding.buttonPrint.setOnClickListener {
-      if (!checkPermissionToReadAndWriteStorage()) {
-        requestStoragePermissionResult.launch(
-          arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-          )
-        )
+    binding.apply {
+      buttonFetchProduct.setOnClickListener {
+        val code = inputProductCode.text.toString()
+        viewModel!!.fetchItem(code)
       }
-      viewModel.makePrint()
-    }
 
-    binding.buttonWeighing.setOnClickListener {
-      viewModel.makeWeighing()
-    }
-
-    binding.buttonRecord.setOnClickListener {
-      if (!checkPermissionToRecord()) {
-        requestRecordPermission.launch(Manifest.permission.RECORD_AUDIO)
-      } else {
-        if (!checkBluetoothPermission()) {
-          requestBluetoothPermissions.launch(
+      buttonPrint.setOnClickListener {
+        if (!checkPermissionToReadAndWriteStorage()) {
+          requestStoragePermissionResult.launch(
             arrayOf(
-              Manifest.permission.BLUETOOTH_ADMIN,
-              Manifest.permission.BLUETOOTH_CONNECT,
-              Manifest.permission.BLUETOOTH
+              Manifest.permission.READ_EXTERNAL_STORAGE,
+              Manifest.permission.WRITE_EXTERNAL_STORAGE
             )
           )
         }
-        viewModel.listening()
+        viewModel!!.makePrint()
+      }
+
+      buttonWeighing.setOnClickListener {
+        viewModel!!.makeWeighing()
+      }
+
+      buttonRecord.setOnClickListener {
+        if (!checkPermissionToRecord()) {
+          requestRecordPermission.launch(Manifest.permission.RECORD_AUDIO)
+        } else {
+//          if (!checkBluetoothPermission()) {
+//            requestBluetoothPermissions.launch(
+//              arrayOf(
+//                Manifest.permission.BLUETOOTH_ADMIN,
+//                Manifest.permission.BLUETOOTH_CONNECT,
+//                Manifest.permission.BLUETOOTH
+//              )
+//            )
+//          }
+          viewModel!!.listening()
+        }
+      }
+
+      buttonLoadPrice.setOnClickListener {
+        viewModel!!.loadPrice(10.00)
       }
     }
   }
 
   private fun handleMessages() {
-    viewModel.statusMessage.observe(viewLifecycleOwner) { message ->
+    mainViewModel.statusMessage.observe(viewLifecycleOwner) { message ->
       Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
     }
   }
@@ -157,8 +161,8 @@ class MainFragment : Fragment() {
       requireActivity(),
       Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
-    return  resultRead == PackageManager.PERMISSION_GRANTED &&
-            resultWrite == PackageManager.PERMISSION_GRANTED
+    return resultRead == PackageManager.PERMISSION_GRANTED &&
+        resultWrite == PackageManager.PERMISSION_GRANTED
   }
 
   private fun checkPermissionToRecord(): Boolean {
@@ -183,7 +187,7 @@ class MainFragment : Fragment() {
     registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
       val isGranted = permissions.entries.filter { !it.value }
       if (isGranted.isEmpty()) {
-        viewModel.listening()
+        mainViewModel.listening()
       } else {
         isGranted.forEach {
           Log.i("MainFragment", ": Permissões negada ${it.key}")
@@ -195,7 +199,7 @@ class MainFragment : Fragment() {
     registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
       val isGranted = permissions.entries.filter { !it.value }
       if (isGranted.isEmpty()) {
-        viewModel.makePrint()
+        mainViewModel.makePrint()
       } else {
         isGranted.forEach {
           Log.i("MainFragment", "Permissões negadas: ${it.key}")
@@ -207,7 +211,7 @@ class MainFragment : Fragment() {
     ActivityResultContracts.RequestPermission()
   ) { isGranted ->
     if (isGranted) {
-      viewModel.listening()
+      mainViewModel.listening()
     } else {
       Log.i("MainFragment", "Permissão negada")
     }

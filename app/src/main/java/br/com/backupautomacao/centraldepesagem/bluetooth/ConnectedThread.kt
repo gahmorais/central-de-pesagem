@@ -26,7 +26,9 @@ class ConnectedThread(private val socket: BluetoothSocket, private val handler: 
           bytes = mInputStream.read(buffer)
           val data = buffer.copyOf(bytes)
           Log.i("ConnectedThread", "run: ${String(data, StandardCharsets.UTF_8)}")
-          handler.obtainMessage(MESSAGE_READ, -1, -1, data).sendToTarget()
+          if (bytes > 2) {
+            handler.obtainMessage(MESSAGE_READ, -1, -1, data).sendToTarget()
+          }
         }
       } catch (e: IOException) {
         e.printStackTrace()
@@ -48,7 +50,7 @@ class ConnectedThread(private val socket: BluetoothSocket, private val handler: 
     try {
       socket.close()
     } catch (e: Exception) {
-      Log.e("ConnectedThread", "cancel: Erro", e )
+      Log.e("ConnectedThread", "cancel: Erro", e)
     }
   }
 }

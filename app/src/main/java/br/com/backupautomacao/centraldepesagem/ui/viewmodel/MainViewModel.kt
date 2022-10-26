@@ -2,13 +2,10 @@ package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothProfile
-import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,7 +30,6 @@ import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectedThread
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
-import br.com.backupautomacao.centraldepesagem.network.MgvService
 import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository.Companion.PRINTER_IP
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
@@ -49,7 +45,6 @@ import kotlinx.coroutines.withContext
 import net.gotev.speech.Speech
 import net.gotev.speech.SpeechDelegate
 import java.lang.IllegalArgumentException
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
@@ -57,6 +52,7 @@ import java.util.concurrent.Executors
 enum class ProcessStatus {
   INICIO,
   BUSCAR_PRODUTO,
+  CARREGAR_PRECO,
   REALIZAR_PESAGEM,
   REALIZAR_IMPRESSAO,
   FINALIZAR
@@ -113,9 +109,12 @@ class MainFragmentViewModel(
 
         if (msg.what == MESSAGE_READ) {
           val message = msg.obj as ByteArray
-          val updateWeightProduct = _mgvProduct.value
-          updateWeightProduct?.weight = Formatter.formatFromUranoUseCb2Protocol(message)
-          updateWeightProduct?.totalPrice = updateWeightProduct!!.Preco.times(updateWeightProduct.weight!!)
+          val updateWeightProduct = _mgvProduct.value!!
+//          updateWeightProduct?.weight = Formatter.formatFromUranoUseCb2Protocol(message)
+          updateWeightProduct.weight = Formatter.formatFromToledoProtocolP05(message)
+          updateWeightProduct.totalPrice =
+            updateWeightProduct.Preco.times(updateWeightProduct.weight!!)
+          loadPrice(updateWeightProduct.Preco)
           _mgvProduct.value = updateWeightProduct
           _updateStatus.value = ProcessStatus.REALIZAR_IMPRESSAO
         }
@@ -222,9 +221,6 @@ class MainFragmentViewModel(
 
     try {
       val label = Label()
-//      val newLabel = product.nutrictionFacts?.let {
-//        label.createLabelRdc429(product)
-//      } ?: label.createSimpleLabel(product)
       val newLabel = label.createLabelBase(product)
       Log.i("MainFragmentViewModel", "makePrint: $newLabel")
       val printer = Printer(printerIp)
@@ -239,7 +235,6 @@ class MainFragmentViewModel(
       clearFields()
       _scale.value = null
       _updateStatus.value = ProcessStatus.FINALIZAR
-
     }
   }
 
@@ -265,6 +260,11 @@ class MainFragmentViewModel(
         _currentDeviceConnected.value = it[currentThread]
       }
     }
+  }
+
+  fun loadPrice(value: Double) {
+    val priceByteArray = Formatter.formatDataToLoadPriceToledo(value)
+    _currentDeviceConnected.value?.write(priceByteArray)
   }
 
   private fun clearFields() {
@@ -313,7 +313,7 @@ class MainFragmentViewModel(
         .drop(2)
         .joinToString { words -> words }
         .replace(",", "")
-      val scaleNumber = Util.stringToNumberTransform(index) - 1
+      val scaleNumber = Util.transformStringToNumber(index) - 1
       val code = findItem(product)
       Log.i("MainFragmentViewModel", "executeTask: scale: $scaleNumber")
       Log.i("MainFragmentViewModel", "executeTask: Número Balança -> $index")

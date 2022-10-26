@@ -14,7 +14,7 @@ class Util {
       return (0..300).random()
     }
 
-    fun <T> stringToNumberTransform(value: T): Int {
+    fun <T> transformStringToNumber(value: T): Int {
       if (value is Int) {
         return value
       }

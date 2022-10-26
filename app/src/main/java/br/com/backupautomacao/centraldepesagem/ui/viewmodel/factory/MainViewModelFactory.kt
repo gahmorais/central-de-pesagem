@@ -8,7 +8,7 @@ import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainFragmentViewModel
 
 
-class MainFragmentViewModelFactory(
+class MainViewModelFactory(
   private val configRepository: ConfigRepository,
   private val bluetoothAdapter: BluetoothAdapter,
 ) : ViewModelProvider.Factory {
