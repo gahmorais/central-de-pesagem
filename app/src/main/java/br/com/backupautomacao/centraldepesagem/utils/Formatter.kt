@@ -58,7 +58,7 @@ class Formatter {
       return String.format(Locale.ENGLISH, "%.1f g", value).replace(".", ",")
     }
 
-    private fun removeNonAlphaCharacters(s: String): String {
+    fun removeNonAlphaCharacters(s: String): String {
       val regex = "[^a-zA-Z0-9.]".toRegex()
       return s.replace(regex, "")
     }

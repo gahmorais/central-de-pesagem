@@ -6,8 +6,10 @@ import android.os.SystemClock
 import android.util.Log
 import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_MESSAGE
 import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_READ
+import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import java.io.IOException
 import java.nio.charset.StandardCharsets
+import java.text.Format
 
 class ConnectedThread(private val socket: BluetoothSocket, private val handler: Handler) :
   Thread() {
@@ -25,8 +27,11 @@ class ConnectedThread(private val socket: BluetoothSocket, private val handler: 
           SystemClock.sleep(100)
           bytes = mInputStream.read(buffer)
           val data = buffer.copyOf(bytes)
+          val hasPrintableChar = Formatter
+            .removeNonAlphaCharacters(String(data, StandardCharsets.UTF_8))
+            .isNotEmpty()
           Log.i("ConnectedThread", "run: ${String(data, StandardCharsets.UTF_8)}")
-          if (bytes > 2) {
+          if (hasPrintableChar) {
             handler.obtainMessage(MESSAGE_READ, -1, -1, data).sendToTarget()
           }
         }

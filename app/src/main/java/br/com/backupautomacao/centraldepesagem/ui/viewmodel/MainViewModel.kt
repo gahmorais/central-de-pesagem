@@ -109,13 +109,15 @@ class MainFragmentViewModel(
 
         if (msg.what == MESSAGE_READ) {
           val message = msg.obj as ByteArray
-          val updateWeightProduct = _mgvProduct.value!!
-//          updateWeightProduct?.weight = Formatter.formatFromUranoUseCb2Protocol(message)
-          updateWeightProduct.weight = Formatter.formatFromToledoProtocolP05(message)
-          updateWeightProduct.totalPrice =
-            updateWeightProduct.Preco.times(updateWeightProduct.weight!!)
-          loadPrice(updateWeightProduct.Preco)
-          _mgvProduct.value = updateWeightProduct
+          val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
+          val updateProduct = _mgvProduct.value!!
+          updateProduct.apply {
+          //weight = Formatter.formatFromUranoUseCb2Protocol(message)
+            weight = newWeight
+            totalPrice = Preco.times(updateProduct.weight!!)
+            loadPrice(Preco)
+          }
+          _mgvProduct.value = updateProduct
           _updateStatus.value = ProcessStatus.REALIZAR_IMPRESSAO
         }
 
@@ -126,8 +128,8 @@ class MainFragmentViewModel(
           val thread = msg.obj as ConnectedThread
           _connectedThreads.value?.add(thread)
           if (_connectedThreads.value?.size == 1) {
-            val threadIndex = 0
-            setActiveThread(threadIndex)
+            val firstDevice = 0
+            setActiveThread(firstDevice)
           }
           val scaleNumber = connectedThreads.value?.size
           _statusMessage.value = MESSAGE_SCALE_CONNECTED(scaleNumber)
