@@ -1,7 +1,5 @@
 package br.com.backupautomacao.centraldepesagem.utils
 
-import androidx.compose.ui.text.toLowerCase
-
 fun findItem(item: String): Int {
   return when (Util.removeAccents(item).lowercase()) {
     "alcatra" -> 352

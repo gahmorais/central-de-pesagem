@@ -1,17 +1,26 @@
 <resources>
     <string name="app_name">Central de pesagem V2</string>
-    <string name="placeholder_input_text">Digite o produto desejado</string>
     <string name="text_button_search">Busca produto</string>
     <string name="text_button_weighing">Pesar</string>
     <string name="text_button_print">Imprimir</string>
     <string name="text_button_listening">Ouvir</string>
-    <string name="title_select_scale">Balança selecionada:</string>
+    <string name="text_button_load_price">Carregar preço</string>
+    <string name="text_title_select_scale">Balança selecionada:</string>
     <string name="text_title_description">Descrição:</string>
-    <string name="text_title_price">Preço / Kg:</string>
+    <string name="text_title_price_per_kilo">Preço / Kg:</string>
     <string name="text_title_weight">Peso:</string>
     <string name="text_title_barcode">Código:</string>
-    <string name="text_placeholder_printer_address">Digite o IP da impressora</string>
     <string name="text_button_save">Salvar</string>
-    <string name="text_placeholder_server_address">Digite o endereço do servidor</string>
-    <string name="text_button_load_price">Carregar preço</string>
+    <string name="text_title_printer_config">Configuração impressora</string>
+    <string name="text_title_mgv_config">Configuração MGV</string>
+    <string name="placeholder_printer_address">Digite o IP da impressora</string>
+    <string name="placeholder_input_text">Digite o produto desejado</string>
+    <string name="placeholder_server_address">Endereço do servidor</string>
+    <string name="placeholder_printer_port">Digite a porta da impressora</string>
+    <string name="placeholder_password">Palavra chave</string>
+    <string name="placeholder_store_number">Número da loja</string>
+    <string name="erro_ip">IP Inválido</string>
+    <string name="erro_porta">Porta inválida</string>
+    <string name="text_automatic_print">Impressão Automática</string>
+    <string name="text_title_price">Preço:</string>
 </resources>

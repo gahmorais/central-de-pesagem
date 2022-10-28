@@ -17,6 +17,9 @@ class ConfigRepository(context: Context) {
     const val PRINTER_IP = "ip"
     const val AUTOMATIC_PRINT = "automatic_print"
     const val SERVER_ADDRESS = "server"
+    const val PRINTER_PORT = "printer_port"
+    const val PASSWORD_MGV = "password_mgv"
+    const val STORE_NUMBER = "store_number"
   }
 
   fun setTextConfig(key: String, value: String) {
@@ -35,5 +38,14 @@ class ConfigRepository(context: Context) {
 
   fun getConfig(key: String): String? {
     return preferencias.getString(key, "")
+  }
+
+  fun setIntConfig(key: String, value: Int) {
+    editor.putInt(key, value)
+    editor.commit()
+  }
+
+  fun getIntConfig(key: String): Int {
+    return preferencias.getInt(key, 0)
   }
 }

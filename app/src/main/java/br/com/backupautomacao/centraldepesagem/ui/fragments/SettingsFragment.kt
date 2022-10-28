@@ -1,6 +1,7 @@
 package br.com.backupautomacao.centraldepesagem.ui.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,15 +48,33 @@ class SettingsFragment : Fragment() {
   }
 
   private fun handleButtons() {
-    binding.buttonSaveIp.setOnClickListener {
-      val printerIp: String = binding.textInputPrinterIp.text.toString()
-      viewModel.savePrinterAddress(printerIp)
+    binding.buttonSavePrinterAddress.setOnClickListener {
+      savePrinterConfig()
     }
 
     binding.buttonSaveServerAddress.setOnClickListener {
       val serverAddress: String = binding.textInputServerAddress.text.toString()
       viewModel.saveServerAddress(serverAddress)
     }
+
+    binding.buttonSaveMgvConfig.setOnClickListener {
+      saveMgvConfig()
+    }
+  }
+
+  private fun saveMgvConfig() {
+    val password = binding.textInputMgvPassword.text.toString()
+    val store = binding.textInputMgvStoreNumber.text.toString()
+
+    viewModel.saveMgvConfig(password = password, store = store)
+    binding.textInputMgvPassword.setText("")
+
+  }
+
+  private fun savePrinterConfig() {
+    val printerIp: String = binding.textInputPrinterIp.text.toString()
+    val printerPort: String = binding.textInputPrinterPort.text.toString()
+    viewModel.savePrinterAddress(printerIp, printerPort)
   }
 
   private fun handleMessages() {
@@ -81,7 +100,15 @@ class SettingsFragment : Fragment() {
     val configRepository = ConfigRepository(requireActivity())
     val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
     val printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP)
-    binding.textInputServerAddress.setText(serverAddress)
-    binding.textInputPrinterIp.setText(printerAddress)
+    val portAddress = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
+    val store = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER)
+    val password = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)
+    Log.i("SettingsFragment", "onResume: $password")
+    binding.apply {
+      textInputServerAddress.setText(serverAddress)
+      textInputPrinterPort.setText(portAddress.toString())
+      textInputPrinterIp.setText(printerAddress)
+      textInputMgvStoreNumber.setText(store.toString())
+    }
   }
 }

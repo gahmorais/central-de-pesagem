@@ -5,9 +5,9 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.os.Handler
 import android.util.Log
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.CONNECTED_STATUS
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.CONNECTING_STATUS
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_MESSAGE
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_CONNECTED_STATUS
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_CONNECTING_STATUS
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_ERROR_MESSAGE
 
 class ConnectingThread(
   private val bluetoothAdapter: BluetoothAdapter,
@@ -23,28 +23,28 @@ class ConnectingThread(
       mBTSocket = createBluetoothSocket(device)
     } catch (e: Exception) {
       fail = true
-      handler.obtainMessage(ERROR_MESSAGE,-1,-1).sendToTarget()
+      handler.obtainMessage(CODE_ERROR_MESSAGE,-1,-1).sendToTarget()
       Log.e("ConnectingThread", "run: Falha ao criar socket", e )
     }
 
     try{
       mBTSocket?.connect()
-      handler.obtainMessage(CONNECTING_STATUS, 1, -1).sendToTarget()
+      handler.obtainMessage(CODE_CONNECTING_STATUS, 1, -1).sendToTarget()
     }catch (e: Exception){
       fail = true
-      handler.obtainMessage(ERROR_MESSAGE,-1,-1,"Falha ao realizar conexão").sendToTarget()
+      handler.obtainMessage(CODE_ERROR_MESSAGE,-1,-1,"Falha ao realizar conexão").sendToTarget()
       try{
         mBTSocket?.close()
         Log.e("ConnectingThread", "run: Falha ao realizar conexão", e )
       }catch (e: Exception){
-        handler.obtainMessage(ERROR_MESSAGE,-1,-1,"Falha ao fechar o socket").sendToTarget()
+        handler.obtainMessage(CODE_ERROR_MESSAGE,-1,-1,"Falha ao fechar o socket").sendToTarget()
       }
     }
 
     if(!fail && mBTSocket != null){
       val connectedThread = ConnectedThread(mBTSocket!!, handler)
       connectedThread.start()
-      handler.obtainMessage(CONNECTED_STATUS, 1,-1,connectedThread).sendToTarget()
+      handler.obtainMessage(CODE_CONNECTED_STATUS, 1,-1,connectedThread).sendToTarget()
       mBTSocket = null
       interrupt()
     }

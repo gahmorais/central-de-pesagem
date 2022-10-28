@@ -1,21 +1,23 @@
 package br.com.backupautomacao.centraldepesagem
 
+import android.util.Log
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.messageClientConnected
 import java.io.OutputStream
 import java.io.PrintWriter
 import java.net.Socket
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
-open class Printer(private val printerAddress: String) : Runnable {
+open class Printer(private val printerAddress: String, private val port: Int) : Runnable {
   private lateinit var dataToPrint: String
 
   override fun run() {
     val client = try {
-      Socket(printerAddress, 9100)
+      Socket(printerAddress, port)
     } catch (e: Exception) {
       throw e
     }
-    println("Cliente conectado do IP: ${client.inetAddress.hostAddress}")
+    Log.i("Printer", "run: ${messageClientConnected(client.inetAddress.hostAddress!!)}")
     val outputStream: OutputStream = client.getOutputStream()
     val pw = PrintWriter(outputStream)
     pw.write(dataToPrint)
@@ -32,7 +34,7 @@ open class Printer(private val printerAddress: String) : Runnable {
       //se ocorreu erro, lança a exceção ExecutionException
     } catch (e: ExecutionException) {
       throw e
-    }finally {
+    } finally {
       executor.shutdown()
     }
   }

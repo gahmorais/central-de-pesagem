@@ -20,7 +20,8 @@ class Label(
   private val NUTRICTION_LENGTH = "560"
   private val FULL_LENGTH = "800"
   fun createLabelBase(mgvProduct: MgvProduct): String {
-    var labelBase: String = fileController.readFile("base_etq.txt")
+//    var labelBase: String = fileController.readFile("base_etq.txt")
+    var labelBase: String = fileController.readFile("etiqueta-sato.prn")
     val label: StringBuilder = StringBuilder()
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
     val (nutrictionFacts, extraInfo) = mgvProduct

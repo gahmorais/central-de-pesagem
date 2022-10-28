@@ -4,12 +4,12 @@ import android.bluetooth.BluetoothSocket
 import android.os.Handler
 import android.os.SystemClock
 import android.util.Log
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_MESSAGE
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_READ
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_ERROR_MESSAGE
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_MESSAGE_READ
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.COMMUNICATTION_ERROR
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import java.io.IOException
 import java.nio.charset.StandardCharsets
-import java.text.Format
 
 class ConnectedThread(private val socket: BluetoothSocket, private val handler: Handler) :
   Thread() {
@@ -32,7 +32,7 @@ class ConnectedThread(private val socket: BluetoothSocket, private val handler: 
             .isNotEmpty()
           Log.i("ConnectedThread", "run: ${String(data, StandardCharsets.UTF_8)}")
           if (hasPrintableChar) {
-            handler.obtainMessage(MESSAGE_READ, -1, -1, data).sendToTarget()
+            handler.obtainMessage(CODE_MESSAGE_READ, -1, -1, data).sendToTarget()
           }
         }
       } catch (e: IOException) {
@@ -46,7 +46,7 @@ class ConnectedThread(private val socket: BluetoothSocket, private val handler: 
     try {
       mOutputStream.write(data)
     } catch (e: Exception) {
-      handler.obtainMessage(ERROR_MESSAGE, -1, -1, "Falha na comunicação")
+      handler.obtainMessage(CODE_ERROR_MESSAGE, -1, -1, COMMUNICATTION_ERROR)
       Log.e("ConnectedThread", "write: Erro", e)
     }
   }

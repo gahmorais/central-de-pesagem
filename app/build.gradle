@@ -5,6 +5,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\User\\.android\\android-key.jks')
+            storePassword 'gabu_171'
+            keyAlias 'key0'
+            keyPassword 'gabu_171'
+        }
+    }
     compileSdk 32
 
     defaultConfig {

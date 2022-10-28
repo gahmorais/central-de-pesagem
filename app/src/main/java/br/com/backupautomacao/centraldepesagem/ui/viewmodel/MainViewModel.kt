@@ -10,21 +10,25 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.CONNECTED_STATUS
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.CONNECTING_STATUS
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_GET_PRODUCT
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_MAKE_WEIGHING
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_MESSAGE
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_PRINTER_NOT_FOUND
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_PRODUCT_NOT_FOUND
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_REQUEST
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_RESPONSE_MGV
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ERROR_TO_SET_SCALE
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_CONNECTED_STATUS
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_CONNECTING_STATUS
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_ERROR_MESSAGE
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_MESSAGE_READ
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.ITEM_CODE_ERROR
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.IP_NOT_SET_ERROR
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.LISTENING_MESSAGE
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.MAKE_WEIGHING_ERROR
 import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_CONNECTING
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_ERROR_IP_NOT_SETTED
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_PRINTING_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_READ
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_SCALE_CONNECTED
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.PORT_ERROR
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.PRINTER_NOT_FOUND_ERROR
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.PRINTING_ERROR
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.PRODUCT_NOT_FOUND_ERROR
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.REQUEST_ERROR
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.SERVER_ADDRESS_ERROR
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.SET_SCALE_ERROR
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.errorGetProdut
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.errorResponseMgv
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.messageScaleConnected
 import br.com.backupautomacao.centraldepesagem.Printer
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectedThread
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
@@ -44,7 +48,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.gotev.speech.Speech
 import net.gotev.speech.SpeechDelegate
-import java.lang.IllegalArgumentException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
@@ -107,7 +110,7 @@ class MainFragmentViewModel(
       override fun handleMessage(msg: Message) {
         super.handleMessage(msg)
 
-        if (msg.what == MESSAGE_READ) {
+        if (msg.what == CODE_MESSAGE_READ) {
           val message = msg.obj as ByteArray
           val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
           val updateProduct = _mgvProduct.value!!
@@ -121,10 +124,10 @@ class MainFragmentViewModel(
           _updateStatus.value = ProcessStatus.REALIZAR_IMPRESSAO
         }
 
-        if (msg.what == CONNECTING_STATUS && msg.arg1 == 1) {
+        if (msg.what == CODE_CONNECTING_STATUS && msg.arg1 == 1) {
           _statusMessage.value = MESSAGE_CONNECTING
         }
-        if (msg.what == CONNECTED_STATUS) {
+        if (msg.what == CODE_CONNECTED_STATUS) {
           val thread = msg.obj as ConnectedThread
           _connectedThreads.value?.add(thread)
           if (_connectedThreads.value?.size == 1) {
@@ -132,9 +135,9 @@ class MainFragmentViewModel(
             setActiveThread(firstDevice)
           }
           val scaleNumber = connectedThreads.value?.size
-          _statusMessage.value = MESSAGE_SCALE_CONNECTED(scaleNumber)
+          _statusMessage.value = messageScaleConnected(scaleNumber)
         }
-        if (msg.what == ERROR_MESSAGE) {
+        if (msg.what == CODE_ERROR_MESSAGE) {
           val errorMessage = msg.obj as String
           _statusMessage.value = errorMessage
         }
@@ -144,27 +147,29 @@ class MainFragmentViewModel(
 
   fun fetchItem(codItem: String) {
     Log.i("MainFragmentViewModel", "fetchItem: Buscando item")
+    val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
+    val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
     if (codItem.isEmpty()) {
-      _statusMessage.value = "Digite o código do item"
+      _statusMessage.value = ITEM_CODE_ERROR
       return
     }
     _updateStatus.value = ProcessStatus.BUSCAR_PRODUTO
     viewModelScope.launch {
       try {
         val (ConsultaItemResult, item) = withContext(Dispatchers.Default) {
-          retrofitInstance.queryItem(item = codItem)
+          retrofitInstance.queryItem(item = codItem, palavraChave = mgvPassword, numeroLoja = storeNumber)
         }
 
         ConsultaItemResult?.let { error ->
-          _statusMessage.value = ERROR_RESPONSE_MGV(error.Msg, error.Codigo)
+          _statusMessage.value = errorResponseMgv(error.Msg, error.Codigo)
         }
         item?.also { product ->
           val responseNutritionalInfo = withContext(Dispatchers.Default) {
-            retrofitInstance.queryNutritionalInfo()
+            retrofitInstance.queryNutritionalInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
           }
 
           val responseExtraInfo = withContext(Dispatchers.Default) {
-            retrofitInstance.queryExtraInfo()
+            retrofitInstance.queryExtraInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
           }
           val (informacoesNutricionais) = responseNutritionalInfo
           val (informacoesExtra) = responseExtraInfo
@@ -184,10 +189,10 @@ class MainFragmentViewModel(
 
         }
       } catch (e: IllegalArgumentException) {
-        _statusMessage.value = "Endereço do servidor inválido"
+        _statusMessage.value = SERVER_ADDRESS_ERROR
         Log.e("MainFragmentViewModel", "fetchItem: ", e)
       } catch (e: Exception) {
-        _statusMessage.value = ERROR_REQUEST
+        _statusMessage.value = REQUEST_ERROR
         Log.e("MainFragmentViewModel", "fetchItem: ", e)
       }
     }
@@ -195,7 +200,7 @@ class MainFragmentViewModel(
 
   fun makeWeighing() {
     if (checkProductIsNullOrEmpty()) {
-      _statusMessage.value = ERROR_GET_PRODUCT("pesagem")
+      _statusMessage.value = errorGetProdut("pesagem")
       return
     }
     val command = byteArrayOf(0x05)
@@ -206,18 +211,24 @@ class MainFragmentViewModel(
 
     val printerIp: String? = configRepository.getConfig(PRINTER_IP)
     if (printerIp == "" || printerIp == null) {
-      _statusMessage.value = MESSAGE_ERROR_IP_NOT_SETTED
+      _statusMessage.value = IP_NOT_SET_ERROR
+      return
+    }
+
+    val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
+    if(printerPort == 0){
+      _statusMessage.value = PORT_ERROR
       return
     }
 
     if (checkProductIsNullOrEmpty()) {
-      _statusMessage.value = ERROR_GET_PRODUCT("impressão")
+      _statusMessage.value = errorGetProdut("impressão")
       return
     }
 
     val product = _mgvProduct.value!!
     if (product.weight == null || product.weight == 0.0) {
-      _statusMessage.value = ERROR_MAKE_WEIGHING
+      _statusMessage.value = MAKE_WEIGHING_ERROR
       return
     }
 
@@ -225,13 +236,13 @@ class MainFragmentViewModel(
       val label = Label()
       val newLabel = label.createLabelBase(product)
       Log.i("MainFragmentViewModel", "makePrint: $newLabel")
-      val printer = Printer(printerIp)
+      val printer = Printer(printerIp, printerPort)
       printer.print(newLabel)
     } catch (e: ExecutionException) {
-      _statusMessage.value = ERROR_PRINTER_NOT_FOUND
+      _statusMessage.value = PRINTER_NOT_FOUND_ERROR
       Log.e("MainFragmentViewModel", "makePrint: ${e.message}", e)
     } catch (e: Exception) {
-      _statusMessage.value = MESSAGE_PRINTING_ERROR
+      _statusMessage.value = PRINTING_ERROR
       Log.e("MainFragmentViewModel", "makePrint: ${e.message}", e)
     } finally {
       clearFields()
@@ -283,7 +294,7 @@ class MainFragmentViewModel(
   }
 
   override fun onStartOfSpeech() {
-    _statusMessage.value = "Ouvindo..."
+    _statusMessage.value = LISTENING_MESSAGE
   }
 
   override fun onSpeechRmsChanged(value: Float) {
@@ -322,11 +333,11 @@ class MainFragmentViewModel(
       Log.i("MainFragmentViewModel", "executeTask: Produto -> $product")
       Log.i("MainFragmentViewModel", "executeTask: Código -> $code")
       if (scaleNumber < 0) {
-        _statusMessage.value = ERROR_TO_SET_SCALE
+        _statusMessage.value = SET_SCALE_ERROR
         return
       }
       if (code == 0) {
-        _statusMessage.value = ERROR_PRODUCT_NOT_FOUND
+        _statusMessage.value = PRODUCT_NOT_FOUND_ERROR
         return
       }
       _scale.value = scaleNumber
