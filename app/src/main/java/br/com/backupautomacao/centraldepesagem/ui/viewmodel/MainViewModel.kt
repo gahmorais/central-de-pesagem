@@ -48,11 +48,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.gotev.speech.Speech
 import net.gotev.speech.SpeechDelegate
+import java.nio.charset.StandardCharsets
+import java.text.Format
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
 
-enum class ProcessStatus {
+enum class StatusApp {
   INICIO,
   BUSCAR_PRODUTO,
   CARREGAR_PRECO,
@@ -63,7 +65,8 @@ enum class ProcessStatus {
 
 class MainFragmentViewModel(
   private val configRepository: ConfigRepository,
-  private val bluetoothAdapter: BluetoothAdapter
+  private val bluetoothAdapter: BluetoothAdapter,
+  private val speechInstance: Speech
 ) : ViewModel(), SpeechDelegate {
 
   private val retrofitInstance by lazy {
@@ -71,7 +74,7 @@ class MainFragmentViewModel(
     MgvApi.retrofitService(serverAddress)
   }
 
-  private val speechInstance: Speech = Speech.getInstance()
+  //  private val speechInstance: Speech = Speech.getInstance()
   private val _mgvProduct: MutableLiveData<MgvProduct?> = MutableLiveData()
   val mgvProduct: LiveData<MgvProduct?> = _mgvProduct
 
@@ -85,18 +88,19 @@ class MainFragmentViewModel(
     MutableLiveData(ArrayList())
   val connectedThreads: LiveData<ArrayList<ConnectedThread>> = _connectedThreads
 
-  private val _updateStatus: MutableStateFlow<ProcessStatus> =
-    MutableStateFlow(ProcessStatus.INICIO)
+  private val _updateStatus: MutableStateFlow<StatusApp> =
+    MutableStateFlow(StatusApp.INICIO)
 
   init {
+
     viewModelScope.launch {
       _updateStatus.collectLatest { status ->
         val automaticPrint = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
         when (status) {
-          ProcessStatus.INICIO -> Log.i("MainFragmentViewModel", "Inicio: ")
-          ProcessStatus.BUSCAR_PRODUTO -> Log.i("MainFragmentViewModel", "Buscando produto")
-          ProcessStatus.REALIZAR_PESAGEM -> makeWeighing()
-          ProcessStatus.REALIZAR_IMPRESSAO -> if (automaticPrint) makePrint()
+          StatusApp.INICIO -> Log.i("MainFragmentViewModel", "Inicio: ")
+          StatusApp.BUSCAR_PRODUTO -> Log.i("MainFragmentViewModel", "Buscando produto")
+          StatusApp.REALIZAR_PESAGEM -> makeWeighing()
+          StatusApp.REALIZAR_IMPRESSAO -> if (automaticPrint) makePrint()
           else -> Log.i("MainFragmentViewModel", "Processo finalizado")
         }
       }
@@ -112,16 +116,12 @@ class MainFragmentViewModel(
 
         if (msg.what == CODE_MESSAGE_READ) {
           val message = msg.obj as ByteArray
-          val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
-          val updateProduct = _mgvProduct.value!!
-          updateProduct.apply {
-          //weight = Formatter.formatFromUranoUseCb2Protocol(message)
-            weight = newWeight
-            totalPrice = Preco.times(updateProduct.weight!!)
-            loadPrice(Preco)
+          val msgString = String(message, StandardCharsets.UTF_8)
+          if (Formatter.removeNonAlphaCharacters(msgString) == "IIIII") {
+            _statusMessage.value = "Peso instável, realize a pesagem novamente"
+          } else {
+            updateWeightProduct(message)
           }
-          _mgvProduct.value = updateProduct
-          _updateStatus.value = ProcessStatus.REALIZAR_IMPRESSAO
         }
 
         if (msg.what == CODE_CONNECTING_STATUS && msg.arg1 == 1) {
@@ -145,6 +145,19 @@ class MainFragmentViewModel(
     }
   }
 
+  private fun updateWeightProduct(message: ByteArray) {
+    val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
+    //weight = Formatter.formatFromUranoUseCb2Protocol(message)
+    val updateProduct = _mgvProduct.value!!
+    updateProduct.apply {
+      weight = newWeight
+      totalPrice = Preco.times(updateProduct.weight!!)
+      loadPrice(Preco)
+    }
+    _mgvProduct.value = updateProduct
+    _updateStatus.value = StatusApp.REALIZAR_IMPRESSAO
+  }
+
   fun fetchItem(codItem: String) {
     Log.i("MainFragmentViewModel", "fetchItem: Buscando item")
     val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
@@ -153,11 +166,15 @@ class MainFragmentViewModel(
       _statusMessage.value = ITEM_CODE_ERROR
       return
     }
-    _updateStatus.value = ProcessStatus.BUSCAR_PRODUTO
+    _updateStatus.value = StatusApp.BUSCAR_PRODUTO
     viewModelScope.launch {
       try {
         val (ConsultaItemResult, item) = withContext(Dispatchers.Default) {
-          retrofitInstance.queryItem(item = codItem, palavraChave = mgvPassword, numeroLoja = storeNumber)
+          retrofitInstance.queryItem(
+            item = codItem,
+            palavraChave = mgvPassword,
+            numeroLoja = storeNumber
+          )
         }
 
         ConsultaItemResult?.let { error ->
@@ -165,7 +182,10 @@ class MainFragmentViewModel(
         }
         item?.also { product ->
           val responseNutritionalInfo = withContext(Dispatchers.Default) {
-            retrofitInstance.queryNutritionalInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
+            retrofitInstance.queryNutritionalInfo(
+              palavraChave = mgvPassword,
+              numeroLoja = storeNumber
+            )
           }
 
           val responseExtraInfo = withContext(Dispatchers.Default) {
@@ -185,7 +205,7 @@ class MainFragmentViewModel(
           _mgvProduct.value = product
 
           Log.i("MainFragmentViewModel", "fetchItem: Realizando pesagem")
-          _updateStatus.value = ProcessStatus.REALIZAR_PESAGEM
+          _updateStatus.value = StatusApp.REALIZAR_PESAGEM
 
         }
       } catch (e: IllegalArgumentException) {
@@ -216,7 +236,7 @@ class MainFragmentViewModel(
     }
 
     val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
-    if(printerPort == 0){
+    if (printerPort == 0) {
       _statusMessage.value = PORT_ERROR
       return
     }
@@ -247,7 +267,7 @@ class MainFragmentViewModel(
     } finally {
       clearFields()
       _scale.value = null
-      _updateStatus.value = ProcessStatus.FINALIZAR
+      _updateStatus.value = StatusApp.FINALIZAR
     }
   }
 

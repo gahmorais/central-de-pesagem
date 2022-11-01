@@ -37,7 +37,7 @@ class MainFragment : Fragment() {
   private val mainViewModel: MainFragmentViewModel by activityViewModels {
     val configRepository = ConfigRepository(requireActivity())
     Speech.init(requireActivity())
-    MainViewModelFactory(configRepository, bluetoothAdapter)
+    MainViewModelFactory(configRepository, bluetoothAdapter, Speech.getInstance())
   }
 
   override fun onCreateView(
