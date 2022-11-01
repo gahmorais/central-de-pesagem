@@ -21,7 +21,7 @@ class Label(
   private val FULL_LENGTH = "800"
   fun createLabelBase(mgvProduct: MgvProduct): String {
 //    var labelBase: String = fileController.readFile("base_etq.txt")
-    var labelBase: String = fileController.readFile("etiqueta-sato.prn")
+    var labelBase: String = fileController.readFileFromDownloadFolder("etiqueta-sato.prn")
     val label: StringBuilder = StringBuilder()
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
     val (nutrictionFacts, extraInfo) = mgvProduct
@@ -63,7 +63,7 @@ class Label(
   }
 
   private fun appendExtraInfo(labelBase: StringBuilder, extraInfo: ExtraInfo) {
-    var label: String = fileController.readFile("extra_info.txt")
+    var label: String = fileController.readFileFromDownloadFolder("extra_info.txt")
     label = label
       .replace("var_info_3", extraInfo.Linha3)
       .replace("var_info_4", extraInfo.Linha4)
@@ -93,7 +93,7 @@ class Label(
     nutrictionFacts: MgvInformacoesNutricionais
   ) {
     val fileController = FileController()
-    var label: String = fileController.readFile("nutri_info.txt")
+    var label: String = fileController.readFileFromDownloadFolder("nutri_info.txt")
     val randomNumbers = (0..21).map { Util.generateRandomDouble() }
     val randomNumberInt = (0..2).map { Util.generateRandomInt() }
     nutrictionFacts.ValorEnergetico?.let {
@@ -164,7 +164,7 @@ class Label(
   }
 
   fun createLabelRdc429(mgvProduct: MgvProduct): String {
-    var label: String = fileController.readFile("etiqueta_rdc429.prn")
+    var label: String = fileController.readFileFromDownloadFolder("etiqueta_rdc429.prn")
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
     val (nutrictionFacts) = mgvProduct
     val now = System.currentTimeMillis()
@@ -260,7 +260,7 @@ class Label(
   }
 
   fun createSimpleLabel(mgvProduct: MgvProduct): String {
-    val label: String = fileController.readFile("etiqueta_modelo_simples.prn")
+    val label: String = fileController.readFileFromDownloadFolder("etiqueta_modelo_simples.prn")
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
     val now = System.currentTimeMillis()
     val currentDateFormatted = formatter.format(now)
