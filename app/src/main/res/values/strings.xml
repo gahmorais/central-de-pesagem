@@ -23,4 +23,7 @@
     <string name="erro_porta">Porta inválida</string>
     <string name="text_automatic_print">Impressão Automática</string>
     <string name="text_title_price">Preço:</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="fragmentReportTitle">Relatório</string>
 </resources>

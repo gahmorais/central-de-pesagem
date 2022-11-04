@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="br.com.backupautomacao.centraldepesagem">
 
+
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -16,6 +18,9 @@
         android:required="true" />
 
     <application
+        android:requestLegacyExternalStorage="true"
+        android:networkSecurityConfig="@xml/netword_security_config"
+        android:name=".AppApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"

@@ -32,10 +32,12 @@ import br.com.backupautomacao.centraldepesagem.Constants.Companion.messageScaleC
 import br.com.backupautomacao.centraldepesagem.Printer
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectedThread
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
+import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
-import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
-import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository.Companion.PRINTER_IP
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
+import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.Util
@@ -49,7 +51,6 @@ import kotlinx.coroutines.withContext
 import net.gotev.speech.Speech
 import net.gotev.speech.SpeechDelegate
 import java.nio.charset.StandardCharsets
-import java.text.Format
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
@@ -60,10 +61,12 @@ enum class StatusApp {
   CARREGAR_PRECO,
   REALIZAR_PESAGEM,
   REALIZAR_IMPRESSAO,
+  GRAVAR_OPERACAO,
   FINALIZAR
 }
 
 class MainFragmentViewModel(
+  private val operationRepository: OperationRepository,
   private val configRepository: ConfigRepository,
   private val bluetoothAdapter: BluetoothAdapter,
   private val speechInstance: Speech
@@ -100,11 +103,13 @@ class MainFragmentViewModel(
           StatusApp.INICIO -> Log.i("MainFragmentViewModel", "Inicio: ")
           StatusApp.BUSCAR_PRODUTO -> Log.i("MainFragmentViewModel", "Buscando produto")
           StatusApp.REALIZAR_PESAGEM -> makeWeighing()
+          StatusApp.GRAVAR_OPERACAO -> saveOperation()
           StatusApp.REALIZAR_IMPRESSAO -> if (automaticPrint) makePrint()
           else -> Log.i("MainFragmentViewModel", "Processo finalizado")
         }
       }
     }
+
   }
 
   private val _currentDeviceConnected: MutableLiveData<ConnectedThread> = MutableLiveData()
@@ -155,7 +160,7 @@ class MainFragmentViewModel(
       loadPrice(Preco)
     }
     _mgvProduct.value = updateProduct
-    _updateStatus.value = StatusApp.REALIZAR_IMPRESSAO
+    _updateStatus.value = StatusApp.GRAVAR_OPERACAO
   }
 
   fun fetchItem(codItem: String) {
@@ -311,6 +316,31 @@ class MainFragmentViewModel(
       executor.execute(newThread)
       executor.shutdown()
     }
+  }
+
+  private fun saveOperation() {
+    try {
+      val operation = _mgvProduct.value?.let { product ->
+        Operation(
+          weight = product.weight!!,
+          totalPrice = product.totalPrice!!,
+          pricePerKilogram = product.Preco,
+          username = "Gabriel",
+          description = product.Descritivo1aLinha
+        )
+      } ?: throw Exception("Erro ao salvar operação")
+
+      viewModelScope.launch {
+        operationRepository.save(operation)
+      }
+
+      _updateStatus.value = StatusApp.REALIZAR_IMPRESSAO
+
+    } catch (e: Exception) {
+      Log.e("MainFragmentViewModel", "saveOperation: Erro ao salvar operação", e)
+      _statusMessage.value = e.message
+    }
+
   }
 
   override fun onStartOfSpeech() {

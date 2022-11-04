@@ -1,6 +1,7 @@
 package br.com.backupautomacao.centraldepesagem.utils
 
 import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
 
@@ -56,6 +57,11 @@ class Formatter {
         return String.format(Locale.ENGLISH, "%d g", value)
       }
       return String.format(Locale.ENGLISH, "%.1f g", value).replace(".", ",")
+    }
+
+    fun formatDate(timestamp: Long): String {
+      val formatter = SimpleDateFormat("dd-MM-yyyy | HH:mm", Locale.ENGLISH)
+      return formatter.format(timestamp)
     }
 
     fun removeNonAlphaCharacters(s: String): String {

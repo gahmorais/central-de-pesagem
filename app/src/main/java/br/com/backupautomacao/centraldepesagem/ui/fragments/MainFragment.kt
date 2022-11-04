@@ -17,8 +17,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import br.com.backupautomacao.centraldepesagem.AppApplication
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentMainBinding
-import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainFragmentViewModel
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.factory.MainViewModelFactory
 import kotlinx.coroutines.flow.collectLatest
@@ -35,9 +37,15 @@ class MainFragment : Fragment() {
   }
 
   private val mainViewModel: MainFragmentViewModel by activityViewModels {
+    val operationRepository = (requireActivity().application as AppApplication).operationRepository
     val configRepository = ConfigRepository(requireActivity())
     Speech.init(requireActivity())
-    MainViewModelFactory(configRepository, bluetoothAdapter, Speech.getInstance())
+    MainViewModelFactory(
+      operationRepository,
+      configRepository,
+      bluetoothAdapter,
+      Speech.getInstance()
+    )
   }
 
   override fun onCreateView(

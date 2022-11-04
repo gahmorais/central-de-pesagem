@@ -3,7 +3,7 @@ package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import br.com.backupautomacao.centraldepesagem.Constants
-import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.utils.Validate
 
 class SettingsViewModel(private val configRepository: ConfigRepository) : ViewModel() {

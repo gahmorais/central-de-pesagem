@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentSettingsBinding
-import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.factory.SettingsViewModelFactory
 import br.com.backupautomacao.centraldepesagem.utils.EventMask
