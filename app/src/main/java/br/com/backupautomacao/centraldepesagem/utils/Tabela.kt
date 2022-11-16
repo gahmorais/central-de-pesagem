@@ -2,6 +2,8 @@ package br.com.backupautomacao.centraldepesagem.utils
 
 fun findItem(item: String): Int {
   return when (Util.removeAccents(item).lowercase()) {
+    "banana nanica" -> 2220
+    "alho" -> 5704
     "alcatra" -> 352
     "bacon manta rio sul" -> 1
     "carne seca friboi" -> 29

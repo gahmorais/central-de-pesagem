@@ -27,7 +27,7 @@ class ReportFragment : Fragment() {
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentReportBinding.inflate(inflater)
     return binding.root
   }
@@ -47,7 +47,5 @@ class ReportFragment : Fragment() {
     binding.reportRecyclerview.setOnLongClickListener {
       it.isClickable
     }
-
   }
-
 }
