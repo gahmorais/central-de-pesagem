@@ -25,7 +25,6 @@ import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainFragmentViewMode
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest
 
-
 class MainFragment : Fragment() {
 
   private var _binding: FragmentMainBinding? = null
@@ -161,7 +160,7 @@ class MainFragment : Fragment() {
       }
   }
 
-  private fun listening(){
+  private fun listening() {
     permissionManager
       .request(Permission.Record)
       .rationale(getString(R.string.message_to_access_microphone))
@@ -218,10 +217,9 @@ class MainFragment : Fragment() {
           }
           WorkInfo.State.RUNNING -> {
             Log.i("MainFragment", "monitoringPrint: Rodando tarefa")
-            startLoading("Imprimindo")
           }
           WorkInfo.State.ENQUEUED -> {
-            Log.i("MainFragment", "monitoringPrint: Impressão na fila")
+            startLoading(getString(R.string.printing))
           }
           else -> stopLoading()
         }

@@ -40,13 +40,13 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
     val label = inputData.getString(PRINT_LABEL)
     val printerPort = inputData.getInt(PRINTER_PORT, 9100)
     val printerAddress = inputData.getString(PRINTER_ADDRESS) ?: return Result.failure(
-      createDataMessage("IP da impressora não encontrado")
+      createDataMessage(applicationContext.getString(R.string.printer_ip_not_found))
     )
 
     val socket = try {
       Socket(printerAddress, printerPort)
     } catch (e: Exception) {
-      return Result.failure(createDataMessage("Falha ao buscar impressora"))
+      return Result.failure(createDataMessage(applicationContext.getString(R.string.printer_not_found)))
     }
 
     label?.apply {
@@ -55,9 +55,9 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
       pw.write(this)
       pw.close()
       socket.close()
-      return Result.success(createDataMessage("Impressão realizada"))
+      return Result.success(createDataMessage(applicationContext.getString(R.string.printing_done)))
     }
-    return Result.failure(createDataMessage("Falha ao realizar a impressão"))
+    return Result.failure(createDataMessage(applicationContext.getString(R.string.printing_error)))
   }
 
   private fun createDataMessage(message: String): Data {
@@ -68,6 +68,4 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
     super.onStopped()
     Log.i("PrintWorker", "onStopped: Trabalho encerrado")
   }
-
-
 }

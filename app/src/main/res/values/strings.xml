@@ -61,4 +61,7 @@
     <string name="printing_error">Falha ao realizar impressão</string>
     <string name="printing_cancelled">Impressão cancelada</string>
     <string name="cancel">Cancelar</string>
+    <string name="printer_not_found">Falha ao buscar impressora</string>
+    <string name="printing">Imprimindo</string>
+    <string name="printer_ip_not_found">IP da impressora não encontrado</string>
 </resources>

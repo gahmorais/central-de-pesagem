@@ -289,7 +289,7 @@ class MainFragmentViewModel(application: Application) :
     }
   }
 
-  fun showMessage(message: String) {
+  fun showMessage(message: String = "") {
     _statusMessage.value = message
   }
 
