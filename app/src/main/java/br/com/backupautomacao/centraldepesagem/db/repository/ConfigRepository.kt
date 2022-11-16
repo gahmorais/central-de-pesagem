@@ -1,4 +1,4 @@
-package br.com.backupautomacao.centraldepesagem.repository
+package br.com.backupautomacao.centraldepesagem.db.repository
 
 import android.content.Context
 import android.content.SharedPreferences

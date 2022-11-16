@@ -7,21 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentSettingsBinding
-import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
-import br.com.backupautomacao.centraldepesagem.ui.viewmodel.factory.SettingsViewModelFactory
 import br.com.backupautomacao.centraldepesagem.utils.EventMask
 
 class SettingsFragment : Fragment() {
   private var _binding: FragmentSettingsBinding? = null
   private val binding get() = _binding!!
-  private val viewModel: SettingsViewModel by lazy {
-    val configRepository = ConfigRepository(requireActivity())
-    val factory = SettingsViewModelFactory(configRepository)
-    ViewModelProvider(this, factory)[SettingsViewModel::class.java]
-  }
+  private val viewModel: SettingsViewModel by viewModels()
 
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,

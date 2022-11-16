@@ -1,41 +1,31 @@
 package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 
-import android.bluetooth.BluetoothAdapter
+import android.app.Application
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.ExistingWorkPolicy
+import br.com.backupautomacao.centraldepesagem.AppApplication
 import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_CONNECTED_STATUS
 import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_CONNECTING_STATUS
 import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_ERROR_MESSAGE
 import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_MESSAGE_READ
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.ITEM_CODE_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.IP_NOT_SET_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.LISTENING_MESSAGE
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.MAKE_WEIGHING_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.MESSAGE_CONNECTING
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.PORT_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.PRINTER_NOT_FOUND_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.PRINTING_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.PRODUCT_NOT_FOUND_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.REQUEST_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.SERVER_ADDRESS_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.SET_SCALE_ERROR
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.errorGetProdut
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.errorResponseMgv
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.messageScaleConnected
-import br.com.backupautomacao.centraldepesagem.Printer
+import br.com.backupautomacao.centraldepesagem.PrintWorker
+import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectedThread
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
+import br.com.backupautomacao.centraldepesagem.db.model.Operation
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
-import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository
-import br.com.backupautomacao.centraldepesagem.repository.ConfigRepository.Companion.PRINTER_IP
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.Util
@@ -49,8 +39,6 @@ import kotlinx.coroutines.withContext
 import net.gotev.speech.Speech
 import net.gotev.speech.SpeechDelegate
 import java.nio.charset.StandardCharsets
-import java.text.Format
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
 
@@ -60,26 +48,36 @@ enum class StatusApp {
   CARREGAR_PRECO,
   REALIZAR_PESAGEM,
   REALIZAR_IMPRESSAO,
+  GRAVAR_OPERACAO,
   FINALIZAR
 }
 
-class MainFragmentViewModel(
-  private val configRepository: ConfigRepository,
-  private val bluetoothAdapter: BluetoothAdapter,
-  private val speechInstance: Speech
-) : ViewModel(), SpeechDelegate {
+class MainFragmentViewModel(application: Application) :
+  AndroidViewModel(application),
+  SpeechDelegate {
+
+  private val speechInstance by lazy { Speech.getInstance() }
+  private val configRepository by lazy { getApplication<AppApplication>().configRepository }
+  private val operationRepository by lazy { getApplication<AppApplication>().operationRepository }
+  private val workManager by lazy { getApplication<AppApplication>().workManager }
+
+  private val bluetoothAdapter by lazy {
+    val bm = getApplication<AppApplication>().getSystemService(BluetoothManager::class.java)
+    bm.adapter
+  }
 
   private val retrofitInstance by lazy {
     val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
     MgvApi.retrofitService(serverAddress)
   }
 
-  //  private val speechInstance: Speech = Speech.getInstance()
   private val _mgvProduct: MutableLiveData<MgvProduct?> = MutableLiveData()
   val mgvProduct: LiveData<MgvProduct?> = _mgvProduct
 
   private val _statusMessage: MutableLiveData<String> = MutableLiveData()
   val statusMessage: LiveData<String> = _statusMessage
+
+  fun printStatus() = workManager.getWorkInfosForUniqueWorkLiveData(PrintWorker.PRINT_TASK)
 
   private val _scale: MutableStateFlow<Int?> = MutableStateFlow(null)
   val scale: StateFlow<Int?> = _scale
@@ -88,11 +86,9 @@ class MainFragmentViewModel(
     MutableLiveData(ArrayList())
   val connectedThreads: LiveData<ArrayList<ConnectedThread>> = _connectedThreads
 
-  private val _updateStatus: MutableStateFlow<StatusApp> =
-    MutableStateFlow(StatusApp.INICIO)
+  private val _updateStatus: MutableStateFlow<StatusApp> = MutableStateFlow(StatusApp.INICIO)
 
   init {
-
     viewModelScope.launch {
       _updateStatus.collectLatest { status ->
         val automaticPrint = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
@@ -100,6 +96,7 @@ class MainFragmentViewModel(
           StatusApp.INICIO -> Log.i("MainFragmentViewModel", "Inicio: ")
           StatusApp.BUSCAR_PRODUTO -> Log.i("MainFragmentViewModel", "Buscando produto")
           StatusApp.REALIZAR_PESAGEM -> makeWeighing()
+          StatusApp.GRAVAR_OPERACAO -> saveOperation()
           StatusApp.REALIZAR_IMPRESSAO -> if (automaticPrint) makePrint()
           else -> Log.i("MainFragmentViewModel", "Processo finalizado")
         }
@@ -118,14 +115,14 @@ class MainFragmentViewModel(
           val message = msg.obj as ByteArray
           val msgString = String(message, StandardCharsets.UTF_8)
           if (Formatter.removeNonAlphaCharacters(msgString) == "IIIII") {
-            _statusMessage.value = "Peso instável, realize a pesagem novamente"
+            showMessage(getString(R.string.unstable_weight))
           } else {
             updateWeightProduct(message)
           }
         }
 
         if (msg.what == CODE_CONNECTING_STATUS && msg.arg1 == 1) {
-          _statusMessage.value = MESSAGE_CONNECTING
+          showMessage(getString(R.string.connecting))
         }
         if (msg.what == CODE_CONNECTED_STATUS) {
           val thread = msg.obj as ConnectedThread
@@ -135,17 +132,18 @@ class MainFragmentViewModel(
             setActiveThread(firstDevice)
           }
           val scaleNumber = connectedThreads.value?.size
-          _statusMessage.value = messageScaleConnected(scaleNumber)
+          showMessage(getApplication<AppApplication>().getString(R.string.message_scale_connected, scaleNumber))
         }
         if (msg.what == CODE_ERROR_MESSAGE) {
           val errorMessage = msg.obj as String
-          _statusMessage.value = errorMessage
+          showMessage(errorMessage)
         }
       }
     }
   }
 
   private fun updateWeightProduct(message: ByteArray) {
+
     val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
     //weight = Formatter.formatFromUranoUseCb2Protocol(message)
     val updateProduct = _mgvProduct.value!!
@@ -155,7 +153,7 @@ class MainFragmentViewModel(
       loadPrice(Preco)
     }
     _mgvProduct.value = updateProduct
-    _updateStatus.value = StatusApp.REALIZAR_IMPRESSAO
+    _updateStatus.value = StatusApp.GRAVAR_OPERACAO
   }
 
   fun fetchItem(codItem: String) {
@@ -163,7 +161,7 @@ class MainFragmentViewModel(
     val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
     val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
     if (codItem.isEmpty()) {
-      _statusMessage.value = ITEM_CODE_ERROR
+      showMessage(getApplication<AppApplication>().getString(R.string.barcode_error))
       return
     }
     _updateStatus.value = StatusApp.BUSCAR_PRODUTO
@@ -178,7 +176,7 @@ class MainFragmentViewModel(
         }
 
         ConsultaItemResult?.let { error ->
-          _statusMessage.value = errorResponseMgv(error.Msg, error.Codigo)
+          showMessage(getString(R.string.error_responde_mgv, error.Msg, error.Codigo))
         }
         item?.also { product ->
           val responseNutritionalInfo = withContext(Dispatchers.Default) {
@@ -209,10 +207,10 @@ class MainFragmentViewModel(
 
         }
       } catch (e: IllegalArgumentException) {
-        _statusMessage.value = SERVER_ADDRESS_ERROR
+        showMessage(getString(R.string.invalid_address_server))
         Log.e("MainFragmentViewModel", "fetchItem: ", e)
       } catch (e: Exception) {
-        _statusMessage.value = REQUEST_ERROR
+        showMessage(getString(R.string.request_error))
         Log.e("MainFragmentViewModel", "fetchItem: ", e)
       }
     }
@@ -220,7 +218,7 @@ class MainFragmentViewModel(
 
   fun makeWeighing() {
     if (checkProductIsNullOrEmpty()) {
-      _statusMessage.value = errorGetProdut("pesagem")
+      showMessage(getString(R.string.error_get_product))
       return
     }
     val command = byteArrayOf(0x05)
@@ -231,45 +229,42 @@ class MainFragmentViewModel(
 
     val printerIp: String? = configRepository.getConfig(PRINTER_IP)
     if (printerIp == "" || printerIp == null) {
-      _statusMessage.value = IP_NOT_SET_ERROR
+      showMessage(getString(R.string.ip_not_setted))
       return
     }
 
     val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
     if (printerPort == 0) {
-      _statusMessage.value = PORT_ERROR
+      showMessage(getString(R.string.invalid_port))
       return
     }
 
     if (checkProductIsNullOrEmpty()) {
-      _statusMessage.value = errorGetProdut("impressão")
+      showMessage(getString(R.string.error_to_get_product))
       return
     }
 
     val product = _mgvProduct.value!!
     if (product.weight == null || product.weight == 0.0) {
-      _statusMessage.value = MAKE_WEIGHING_ERROR
+      showMessage(getString(R.string.make_weighing))
       return
     }
 
-    try {
-      val label = Label()
-      val newLabel = label.createLabelBase(product)
-      Log.i("MainFragmentViewModel", "makePrint: $newLabel")
-      val printer = Printer(printerIp, printerPort)
-      printer.print(newLabel)
-    } catch (e: ExecutionException) {
-      _statusMessage.value = PRINTER_NOT_FOUND_ERROR
-      Log.e("MainFragmentViewModel", "makePrint: ${e.message}", e)
-    } catch (e: Exception) {
-      _statusMessage.value = PRINTING_ERROR
-      Log.e("MainFragmentViewModel", "makePrint: ${e.message}", e)
-    } finally {
-      clearFields()
-      _scale.value = null
-      _updateStatus.value = StatusApp.FINALIZAR
-    }
+    val label = Label()
+    val newLabel = label.createLabelBase(product)
+    val printTask = PrintWorker.createUniquePrintTask(
+      printerAddress = printerIp,
+      printerPort = printerPort,
+      label = newLabel
+    )
+
+    workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
+    _scale.value = null
+    _updateStatus.value = StatusApp.FINALIZAR
+    clearFields()
+
   }
+
 
   private fun checkProductIsNullOrEmpty(): Boolean {
     return _mgvProduct.value?.run {
@@ -279,7 +274,6 @@ class MainFragmentViewModel(
 
   @Throws(SecurityException::class)
   fun getAvailableDevices(): LiveData<List<BluetoothDevice>> {
-
     val devices = bluetoothAdapter.bondedDevices
       .filter { it.name.contains("BT_URA") }
       .sortedByDescending { it.address }
@@ -295,7 +289,11 @@ class MainFragmentViewModel(
     }
   }
 
-  fun loadPrice(value: Double) {
+  fun showMessage(message: String = "") {
+    _statusMessage.value = message
+  }
+
+  private fun loadPrice(value: Double) {
     val priceByteArray = Formatter.formatDataToLoadPriceToledo(value)
     _currentDeviceConnected.value?.write(priceByteArray)
   }
@@ -313,8 +311,33 @@ class MainFragmentViewModel(
     }
   }
 
+  private fun saveOperation() {
+    try {
+      val operation = _mgvProduct.value?.let { product ->
+        Operation(
+          weight = product.weight!!,
+          totalPrice = product.totalPrice!!,
+          pricePerKilogram = product.Preco,
+          username = "Gabriel",
+          description = product.Descritivo1aLinha
+        )
+      } ?: throw Exception("Erro ao salvar operação")
+
+      viewModelScope.launch {
+        operationRepository.save(operation)
+      }
+
+      _updateStatus.value = StatusApp.REALIZAR_IMPRESSAO
+
+    } catch (e: Exception) {
+      Log.e("MainFragmentViewModel", "saveOperation: Erro ao salvar operação", e)
+      showMessage(e.message!!)
+    }
+
+  }
+
   override fun onStartOfSpeech() {
-    _statusMessage.value = LISTENING_MESSAGE
+    showMessage(getString(R.string.listening))
   }
 
   override fun onSpeechRmsChanged(value: Float) {
@@ -336,7 +359,7 @@ class MainFragmentViewModel(
   }
 
   fun listening() {
-    speechInstance.startListening(this)
+    //speechInstance.startListening(this)
   }
 
   private fun executeTask(wordsArray: List<String>) {
@@ -353,11 +376,11 @@ class MainFragmentViewModel(
       Log.i("MainFragmentViewModel", "executeTask: Produto -> $product")
       Log.i("MainFragmentViewModel", "executeTask: Código -> $code")
       if (scaleNumber < 0) {
-        _statusMessage.value = SET_SCALE_ERROR
+        showMessage(getString(R.string.error_to_set_scale))
         return
       }
       if (code == 0) {
-        _statusMessage.value = PRODUCT_NOT_FOUND_ERROR
+        showMessage(getString(R.string.product_not_found))
         return
       }
       _scale.value = scaleNumber
@@ -368,6 +391,11 @@ class MainFragmentViewModel(
     }
   }
 
+  private fun getString(stringRes: Int, vararg inputs: Any): String {
+
+    return getApplication<AppApplication>().getString(stringRes, inputs)
+  }
+
   override fun onCleared() {
     super.onCleared()
     Speech.getInstance().shutdown()
@@ -376,3 +404,4 @@ class MainFragmentViewModel(
     }
   }
 }
+
