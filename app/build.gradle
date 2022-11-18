@@ -67,8 +67,8 @@ dependencies {
     kapt "androidx.room:room-compiler:$roomVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
 
-    def work_version = "2.7.1"
     //WorkManager
+    def work_version = "2.7.1"
     implementation("androidx.work:work-runtime-ktx:$work_version")
 
     //Lifecycle
@@ -85,7 +85,7 @@ dependencies {
     implementation 'net.gotev:speech:1.6.2'
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
 
