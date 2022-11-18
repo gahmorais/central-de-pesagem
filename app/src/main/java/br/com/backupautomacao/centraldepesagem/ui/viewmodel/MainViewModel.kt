@@ -24,7 +24,9 @@ import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
 import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
+import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
+import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import br.com.backupautomacao.centraldepesagem.utils.Label
@@ -95,9 +97,9 @@ class MainFragmentViewModel(application: Application) :
         when (status) {
           StatusApp.INICIO -> Log.i("MainFragmentViewModel", "Inicio: ")
           StatusApp.BUSCAR_PRODUTO -> Log.i("MainFragmentViewModel", "Buscando produto")
-          StatusApp.REALIZAR_PESAGEM -> makeWeighing()
+          StatusApp.REALIZAR_PESAGEM -> weighing()
           StatusApp.GRAVAR_OPERACAO -> saveOperation()
-          StatusApp.REALIZAR_IMPRESSAO -> if (automaticPrint) makePrint()
+          StatusApp.REALIZAR_IMPRESSAO -> if (automaticPrint) print()
           else -> Log.i("MainFragmentViewModel", "Processo finalizado")
         }
       }
@@ -132,7 +134,12 @@ class MainFragmentViewModel(application: Application) :
             setActiveThread(firstDevice)
           }
           val scaleNumber = connectedThreads.value?.size
-          showMessage(getApplication<AppApplication>().getString(R.string.message_scale_connected, scaleNumber))
+          showMessage(
+            getApplication<AppApplication>().getString(
+              R.string.message_scale_connected,
+              scaleNumber
+            )
+          )
         }
         if (msg.what == CODE_ERROR_MESSAGE) {
           val errorMessage = msg.obj as String
@@ -179,32 +186,14 @@ class MainFragmentViewModel(application: Application) :
           showMessage(getString(R.string.error_responde_mgv, error.Msg, error.Codigo))
         }
         item?.also { product ->
-          val responseNutritionalInfo = withContext(Dispatchers.Default) {
-            retrofitInstance.queryNutritionalInfo(
-              palavraChave = mgvPassword,
-              numeroLoja = storeNumber
-            )
+          product.extraInfo = item.CodInfoExtra?.let { code ->
+            getExtraInfo(mgvPassword, storeNumber, code)
           }
-
-          val responseExtraInfo = withContext(Dispatchers.Default) {
-            retrofitInstance.queryExtraInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
+          product.nutrictionFacts = item.CodInfoNutricional?.let { code ->
+            getNutriction(mgvPassword, storeNumber, code)
           }
-          val (informacoesNutricionais) = responseNutritionalInfo
-          val (informacoesExtra) = responseExtraInfo
-          val nutrictionFact = informacoesNutricionais?.find {
-            it.Codigo == product.CodInfoNutricional.toString()
-          }
-
-          val extraInfo = informacoesExtra?.find {
-            it.Codigo == product.CodInfoExtra.toString()
-          }
-          product.extraInfo = extraInfo
-          product.nutrictionFacts = nutrictionFact
           _mgvProduct.value = product
-
-          Log.i("MainFragmentViewModel", "fetchItem: Realizando pesagem")
           _updateStatus.value = StatusApp.REALIZAR_PESAGEM
-
         }
       } catch (e: IllegalArgumentException) {
         showMessage(getString(R.string.invalid_address_server))
@@ -216,7 +205,38 @@ class MainFragmentViewModel(application: Application) :
     }
   }
 
-  fun makeWeighing() {
+  private suspend fun getNutriction(
+    mgvPassword: String,
+    storeNumber: String,
+    codItem: Int
+  ): MgvInformacoesNutricionais? {
+    val responseNutritionalInfo = withContext(Dispatchers.Default) {
+      retrofitInstance.queryNutritionalInfo(
+        palavraChave = mgvPassword,
+        numeroLoja = storeNumber
+      )
+    }
+    return responseNutritionalInfo.informacoesNutricionais?.find {
+      it.Codigo == codItem.toString()
+    }
+  }
+
+  private suspend fun getExtraInfo(
+    mgvPassword: String,
+    storeNumber: String,
+    codItem: Int
+  ): ExtraInfo? {
+
+    val responseExtraInfo = withContext(Dispatchers.Default) {
+      retrofitInstance.queryExtraInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
+    }
+
+    return responseExtraInfo.informacoesExtras?.find {
+      it.Codigo == codItem.toString()
+    }
+  }
+
+  fun weighing() {
     if (checkProductIsNullOrEmpty()) {
       showMessage(getString(R.string.error_get_product))
       return
@@ -225,7 +245,7 @@ class MainFragmentViewModel(application: Application) :
     _currentDeviceConnected.value?.write(command)
   }
 
-  fun makePrint() {
+  fun print() {
 
     val printerIp: String? = configRepository.getConfig(PRINTER_IP)
     if (printerIp == "" || printerIp == null) {

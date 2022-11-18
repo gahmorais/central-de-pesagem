@@ -152,7 +152,7 @@ class MainFragment : Fragment() {
       .rationale(getString(R.string.message_to_access_storage))
       .checkPermission { granted ->
         if (granted) {
-          binding.viewModel!!.makePrint()
+          binding.viewModel!!.print()
           monitoringPrint()
         } else {
           error(getString(R.string.fail_to_access_storage))
@@ -184,7 +184,7 @@ class MainFragment : Fragment() {
       }
 
       buttonWeighing.setOnClickListener {
-        viewModel!!.makeWeighing()
+        viewModel!!.weighing()
       }
 
       buttonRecord.setOnClickListener {
