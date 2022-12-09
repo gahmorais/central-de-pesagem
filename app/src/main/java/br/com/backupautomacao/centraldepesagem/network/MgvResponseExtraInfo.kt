@@ -13,43 +13,43 @@ data class ExtraInfo(
   @SerializedName("Codigo")
   val code: String,
   @SerializedName("Linha1")
-  val Linha1: String,
+  val line1: String,
   @SerializedName("Linha2")
-  val Linha2: String,
+  val line2: String,
   @SerializedName("Linha3")
-  val Linha3: String,
+  val line3: String,
   @SerializedName("Linha4")
-  val Linha4: String,
+  val line4: String,
   @SerializedName("Linha5")
-  val Linha5: String,
+  val line5: String,
   @SerializedName("Linha6")
-  val Linha6: String,
+  val line6: String,
   @SerializedName("Linha7")
-  val Linha7: String,
+  val line7: String,
   @SerializedName("Linha8")
-  val Linha8: String,
+  val line8: String,
   @SerializedName("Linha9")
-  val Linha9: String,
+  val line9: String,
   @SerializedName("Linha10")
-  val Linha10: String,
+  val line10: String,
   @SerializedName("Linha11")
-  val Linha11: String,
+  val line11: String,
   @SerializedName("Linha12")
-  val Linha12: String,
+  val line12: String,
   @SerializedName("Linha13")
-  val Linha13: String,
+  val line13: String,
   @SerializedName("Linha14")
-  val Linha14: String,
+  val line14: String,
   @SerializedName("Linha15")
-  val Linha15: String,
+  val line15: String,
   @SerializedName("Linha16")
-  val Linha16: String,
+  val line16: String,
   @SerializedName("Linha17")
-  val Linha17: String,
+  val line17: String,
   @SerializedName("Linha18")
-  val Linha18: String,
+  val line18: String,
   @SerializedName("Linha19")
-  val Linha19: String,
+  val line19: String,
   @SerializedName("Linha20")
-  val Linha20: String,
+  val line20: String,
 )
