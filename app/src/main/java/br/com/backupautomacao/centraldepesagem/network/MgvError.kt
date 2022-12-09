@@ -1,3 +1,12 @@
 package br.com.backupautomacao.centraldepesagem.network
 
-data class MgvError(val Codigo: String, val CodigoDaLoja: Int, val Msg: String)
+import com.google.gson.annotations.SerializedName
+
+data class MgvError(
+  @SerializedName("Codigo")
+  val code: String,
+  @SerializedName("CodigoDaLoja")
+  val branchNumber: Int,
+  @SerializedName("Msg")
+  val message: String
+)

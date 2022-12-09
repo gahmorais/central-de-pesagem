@@ -184,7 +184,7 @@ class MainFragmentViewModel(application: Application) :
         }
 
         ConsultaItemResult?.let { error ->
-          showMessage(getString(R.string.error_responde_mgv, error.Msg, error.Codigo))
+          showMessage(getString(R.string.error_responde_mgv, error.message, error.code))
         }
         item?.also { product ->
           product.extraInfo = item.codExtraInfo?.let { code ->
