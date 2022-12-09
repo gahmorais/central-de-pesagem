@@ -232,8 +232,8 @@ class MainFragmentViewModel(application: Application) :
       retrofitInstance.queryExtraInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
     }
 
-    return responseExtraInfo.informacoesExtras?.find {
-      it.Codigo == codItem.toString()
+    return responseExtraInfo.extraInfos?.find {
+      it.code == codItem.toString()
     }
   }
 
