@@ -59,6 +59,7 @@
     <string name="error_get_product">Busque o produto antes de fazer a pesagem</string>
     <string name="printing_done">Impressão realizada</string>
     <string name="printing_error">Falha ao realizar impressão</string>
+    <string name="file_not_found_error">Arquivo não encontrado / Permissão negada</string>
     <string name="printing_cancelled">Impressão cancelada</string>
     <string name="cancel">Cancelar</string>
     <string name="printer_not_found">Falha ao buscar impressora</string>

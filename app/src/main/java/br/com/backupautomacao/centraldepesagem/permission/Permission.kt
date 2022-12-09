@@ -12,6 +12,7 @@ sealed class Permission(vararg val permissions: String) {
   object BluetoothAndroidS : Permission(BLUETOOTH, BLUETOOTH_ADMIN, BLUETOOTH_CONNECT)
   object Bluetooth : Permission(BLUETOOTH, BLUETOOTH_ADMIN)
   object Record : Permission(RECORD_AUDIO)
+  @RequiresApi(Build.VERSION_CODES.R)
   object Storage : Permission(WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE)
 
   companion object {

@@ -1,5 +1,7 @@
 package br.com.backupautomacao.centraldepesagem.utils
 
+import android.content.Context
+import android.os.Build
 import br.com.backupautomacao.centraldepesagem.FileController
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
@@ -8,20 +10,23 @@ import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatB
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatNutriction
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatPrice
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatWeight
+import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.*
 
 private const val ONE_DAY_MILLIS = 60 * 60 * 24 * 1000
 
-class Label(
-  private val fileController: FileController = FileController()
-) {
+class Label(private val fileController: FileController = FileController()) {
   private val BASE_LENGTH = "200"
   private val NUTRICTION_LENGTH = "560"
   private val FULL_LENGTH = "800"
   fun createLabelBase(mgvProduct: MgvProduct): String {
-//    var labelBase: String = fileController.readFile("base_etq.txt")
-    var labelBase: String = fileController.readFileFromDownloadFolder("etiqueta-sato.prn")
+
+    var labelBase: String = try {
+      fileController.readFileFromDownloadFolder("etiqueta-sato.prn")
+    } catch (e: FileNotFoundException) {
+      throw e
+    }
     val label: StringBuilder = StringBuilder()
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
     val (nutrictionFacts, extraInfo) = mgvProduct

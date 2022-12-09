@@ -3,6 +3,7 @@ package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -40,6 +41,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.gotev.speech.Speech
 import net.gotev.speech.SpeechDelegate
+import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.Executors
 
@@ -271,7 +273,16 @@ class MainFragmentViewModel(application: Application) :
     }
 
     val label = Label()
-    val newLabel = label.createLabelBase(product)
+    val newLabel: String = try {
+      label.createLabelBase(product)
+    } catch (e: FileNotFoundException) {
+      _statusMessage.value = getString(R.string.file_not_found_error)
+      return
+    } catch (e: Exception) {
+      e.printStackTrace()
+      return
+    }
+
     val printTask = PrintWorker.createUniquePrintTask(
       printerAddress = printerIp,
       printerPort = printerPort,
