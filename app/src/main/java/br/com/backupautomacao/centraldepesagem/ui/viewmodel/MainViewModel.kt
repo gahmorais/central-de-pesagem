@@ -3,7 +3,6 @@ package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -158,8 +157,8 @@ class MainFragmentViewModel(application: Application) :
     val updateProduct = _mgvProduct.value!!
     updateProduct.apply {
       weight = newWeight
-      totalPrice = Preco.times(updateProduct.weight!!)
-      loadPrice(Preco)
+      totalPrice = price.times(updateProduct.weight!!)
+      loadPrice(price)
     }
     _mgvProduct.value = updateProduct
     _updateStatus.value = StatusApp.GRAVAR_OPERACAO
@@ -188,10 +187,10 @@ class MainFragmentViewModel(application: Application) :
           showMessage(getString(R.string.error_responde_mgv, error.Msg, error.Codigo))
         }
         item?.also { product ->
-          product.extraInfo = item.CodInfoExtra?.let { code ->
+          product.extraInfo = item.codExtraInfo?.let { code ->
             getExtraInfo(mgvPassword, storeNumber, code)
           }
-          product.nutrictionFacts = item.CodInfoNutricional?.let { code ->
+          product.nutrictionFacts = item.codNutrictionFacts?.let { code ->
             getNutriction(mgvPassword, storeNumber, code)
           }
           _mgvProduct.value = product
@@ -299,7 +298,7 @@ class MainFragmentViewModel(application: Application) :
 
   private fun checkProductIsNullOrEmpty(): Boolean {
     return _mgvProduct.value?.run {
-      Codigo.isEmpty()
+      code.isEmpty()
     } ?: true
   }
 
@@ -348,9 +347,9 @@ class MainFragmentViewModel(application: Application) :
         Operation(
           weight = product.weight!!,
           totalPrice = product.totalPrice!!,
-          pricePerKilogram = product.Preco,
+          pricePerKilogram = product.price,
           username = "Gabriel",
-          description = product.Descritivo1aLinha
+          description = product.description
         )
       } ?: throw Exception("Erro ao salvar operação")
 
