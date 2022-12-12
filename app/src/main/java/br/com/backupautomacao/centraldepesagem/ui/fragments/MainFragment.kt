@@ -68,11 +68,28 @@ class MainFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
+    bluetoothPermission()
     handleMessages()
     handleButtons()
     configureSpinner()
     configureObservers()
 
+  }
+
+  private fun bluetoothPermission() {
+    val blutoothPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+      Permission.BluetoothAndroidS
+    } else {
+      Permission.Bluetooth
+    }
+    permissionManager
+      .request(blutoothPermission)
+      .rationale(getString(R.string.message_to_access_bluetooth))
+      .checkPermission { granted ->
+        if (!granted) {
+          error(getString(R.string.error_to_access_bluetooth))
+        }
+      }
   }
 
   private fun configureObservers() {
@@ -128,22 +145,8 @@ class MainFragment : Fragment() {
   }
 
   private fun getProduct() {
-    val blutoothPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-      Permission.BluetoothAndroidS
-    } else {
-      Permission.Bluetooth
-    }
-    permissionManager
-      .request(blutoothPermission)
-      .rationale(getString(R.string.message_to_access_bluetooth))
-      .checkPermission { granted ->
-        if (granted) {
-          val code = binding.inputProductCode.text.toString()
-          binding.viewModel!!.fetchItem(code)
-        } else {
-          error(getString(R.string.error_to_access_bluetooth))
-        }
-      }
+    val code = binding.inputProductCode.text.toString()
+    binding.viewModel!!.fetchItem(code)
   }
 
   private fun print() {

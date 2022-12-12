@@ -135,12 +135,14 @@ class MainFragmentViewModel(application: Application) :
             setActiveThread(firstDevice)
           }
           val scaleNumber = connectedThreads.value?.size
+
           showMessage(
             getApplication<AppApplication>().getString(
               R.string.message_scale_connected,
               scaleNumber
             )
           )
+
         }
         if (msg.what == CODE_ERROR_MESSAGE) {
           val errorMessage = msg.obj as String
@@ -175,7 +177,7 @@ class MainFragmentViewModel(application: Application) :
     _updateStatus.value = StatusApp.BUSCAR_PRODUTO
     viewModelScope.launch {
       try {
-        val (ConsultaItemResult, item) = withContext(Dispatchers.Default) {
+        val (mgvError, item) = withContext(Dispatchers.Default) {
           retrofitInstance.queryItem(
             item = codItem,
             palavraChave = mgvPassword,
@@ -183,9 +185,11 @@ class MainFragmentViewModel(application: Application) :
           )
         }
 
-        ConsultaItemResult?.let { error ->
+        mgvError?.let { error ->
+          Log.i("MainFragmentViewModel", "fetchItem: $error")
           showMessage(getString(R.string.error_responde_mgv, error.message, error.code))
         }
+
         item?.also { product ->
           product.extraInfo = item.codExtraInfo?.let { code ->
             getExtraInfo(mgvPassword, storeNumber, code)
@@ -217,7 +221,7 @@ class MainFragmentViewModel(application: Application) :
         numeroLoja = storeNumber
       )
     }
-    return responseNutritionalInfo.informacoesNutricionais?.find {
+    return responseNutritionalInfo.nutrictionFacts?.find {
       it.Codigo == codItem.toString()
     }
   }
@@ -227,6 +231,7 @@ class MainFragmentViewModel(application: Application) :
     storeNumber: String,
     codItem: Int
   ): ExtraInfo? {
+
 
     val responseExtraInfo = withContext(Dispatchers.Default) {
       retrofitInstance.queryExtraInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
@@ -305,7 +310,7 @@ class MainFragmentViewModel(application: Application) :
   @Throws(SecurityException::class)
   fun getAvailableDevices(): LiveData<List<BluetoothDevice>> {
     val devices = bluetoothAdapter.bondedDevices
-      .filter { it.name.contains("BT_URA") }
+      .filter { it.name.contains("BT_URA") || it.name.contains("BKP") }
       .sortedByDescending { it.address }
 
     return MutableLiveData(devices)
@@ -351,7 +356,7 @@ class MainFragmentViewModel(application: Application) :
           username = "Gabriel",
           description = product.description
         )
-      } ?: throw Exception("Erro ao salvar operação")
+      } ?: throw Exception(getString(R.string.save_operation_error))
 
       viewModelScope.launch {
         operationRepository.save(operation)
@@ -401,7 +406,7 @@ class MainFragmentViewModel(application: Application) :
         .replace(",", "")
       val scaleNumber = Util.transformStringToNumber(index) - 1
       val code = findItem(product)
-      Log.i("MainFragmentViewModel", "executeTask: scale: $scaleNumber")
+      Log.i("MainFragmentViewModel", "executeTask: Balança: $scaleNumber")
       Log.i("MainFragmentViewModel", "executeTask: Número Balança -> $index")
       Log.i("MainFragmentViewModel", "executeTask: Produto -> $product")
       Log.i("MainFragmentViewModel", "executeTask: Código -> $code")

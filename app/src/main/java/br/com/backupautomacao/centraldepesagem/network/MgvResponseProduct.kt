@@ -3,7 +3,8 @@ package br.com.backupautomacao.centraldepesagem.network
 import com.google.gson.annotations.SerializedName
 
 data class MgvResponseProduct(
-  val ConsultaItemResult: MgvError?,
+  @SerializedName("ConsultaItemResult")
+  val mgvError: MgvError?,
   val item: MgvProduct?
 )
 

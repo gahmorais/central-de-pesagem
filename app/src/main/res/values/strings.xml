@@ -54,8 +54,8 @@
     <string name="error_to_set_scale">Não foi possíve definir a balança</string>
     <string name="connecting">Conectando…</string>
     <string name="barcode_error">Por favor, digite o código do item</string>
-    <string name="error_responde_mgv">%s Código: %s</string>
-    <string name="message_scale_connected">"Balança %d conectada"</string>
+    <string name="error_responde_mgv">%1$s Código: %2$d</string>
+    <string name="message_scale_connected">"Balança %1$d conectada"</string>
     <string name="error_get_product">Busque o produto antes de fazer a pesagem</string>
     <string name="printing_done">Impressão realizada</string>
     <string name="printing_error">Falha ao realizar impressão</string>
@@ -65,4 +65,5 @@
     <string name="printer_not_found">Falha ao buscar impressora</string>
     <string name="printing">Imprimindo</string>
     <string name="printer_ip_not_found">IP da impressora não encontrado</string>
+    <string name="save_operation_error">Erro ao salvar operação</string>
 </resources>

@@ -6,7 +6,7 @@ data class MgvResponseExtraInfo(
   @SerializedName("informacoesExtras")
   val extraInfos: List<ExtraInfo>?,
   @SerializedName("ExportaInformacaoExtraResult")
-  val extraInfoError: MgvError?
+  val mgvError: MgvError?
 )
 
 data class ExtraInfo(
