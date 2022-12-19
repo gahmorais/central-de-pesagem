@@ -66,4 +66,5 @@
     <string name="printing">Imprimindo</string>
     <string name="printer_ip_not_found">IP da impressora não encontrado</string>
     <string name="save_operation_error">Erro ao salvar operação</string>
+    <string name="text_description_img_close">Botão para fechar a aplicação</string>
 </resources>

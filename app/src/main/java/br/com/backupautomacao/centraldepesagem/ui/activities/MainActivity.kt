@@ -1,5 +1,7 @@
 package br.com.backupautomacao.centraldepesagem.ui.activities
 
+import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import br.com.backupautomacao.centraldepesagem.databinding.ActivityMainBinding
@@ -14,6 +16,18 @@ class MainActivity : AppCompatActivity() {
     setContentView(binding.root)
     val pagerAdapter = ScreenSlidePagerAdapter(this)
     binding.viewPager.adapter = pagerAdapter
+    binding.toolbar.apply {
+      title = "Central de pesagem"
+      setTitleTextColor(Color.WHITE)
+      setSupportActionBar(this)
+    }
+    binding.imgClose.setOnClickListener {
+      closeApplication()
+    }
+  }
+
+  private fun closeApplication() {
+    finish()
   }
 
   override fun onBackPressed() {
