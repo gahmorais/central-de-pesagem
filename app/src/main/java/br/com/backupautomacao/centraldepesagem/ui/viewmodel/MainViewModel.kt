@@ -143,7 +143,7 @@ class MainFragmentViewModel(application: Application) :
 
         mgvError?.let { error ->
           Log.i("MainFragmentViewModel", "fetchItem: $error")
-          showMessage(getString(R.string.error_responde_mgv, error.message, error.code))
+          showMessage(getApplication<AppApplication>().getString(R.string.error_responde_mgv, error.message, error.code))
         }
 
         item?.also { product ->

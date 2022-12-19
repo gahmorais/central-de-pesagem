@@ -54,7 +54,7 @@
     <string name="error_to_set_scale">Não foi possíve definir a balança</string>
     <string name="connecting">Conectando…</string>
     <string name="barcode_error">Por favor, digite o código do item</string>
-    <string name="error_responde_mgv">%1$s Código: %2$d</string>
+    <string name="error_responde_mgv">%1$s Código: %2$s</string>
     <string name="message_scale_connected">"Balança %1$d conectada"</string>
     <string name="error_get_product">Busque o produto antes de fazer a pesagem</string>
     <string name="printing_done">Impressão realizada</string>
