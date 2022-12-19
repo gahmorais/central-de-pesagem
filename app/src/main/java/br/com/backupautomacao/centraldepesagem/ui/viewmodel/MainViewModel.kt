@@ -3,6 +3,7 @@ package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -311,7 +312,7 @@ class MainFragmentViewModel(application: Application) :
           weight = product.weight!!,
           totalPrice = product.totalPrice!!,
           pricePerKilogram = product.price,
-          username = "Gabriel",
+          username = Build.ID,
           description = product.description
         )
       } ?: throw Exception(getString(R.string.save_operation_error))
