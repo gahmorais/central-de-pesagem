@@ -97,8 +97,6 @@ class SettingsFragment : Fragment() {
     val printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP)
     val portAddress = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
     val store = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER)
-    val password = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)
-    Log.i("SettingsFragment", "onResume: $password")
     binding.apply {
       textInputServerAddress.setText(serverAddress)
       textInputPrinterPort.setText(portAddress.toString())

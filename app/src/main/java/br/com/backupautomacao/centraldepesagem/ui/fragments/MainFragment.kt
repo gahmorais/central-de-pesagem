@@ -23,7 +23,9 @@ import br.com.backupautomacao.centraldepesagem.permission.Permission
 import br.com.backupautomacao.centraldepesagem.permission.PermissionManager
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainFragmentViewModel
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
 
@@ -72,7 +74,6 @@ class MainFragment : Fragment() {
     handleMessages()
     handleButtons()
     configureSpinner()
-    configureObservers()
 
   }
 
@@ -86,7 +87,9 @@ class MainFragment : Fragment() {
       .request(blutoothPermission)
       .rationale(getString(R.string.message_to_access_bluetooth))
       .checkPermission { granted ->
-        if (!granted) {
+        if (granted) {
+          configureObservers()
+        } else {
           error(getString(R.string.error_to_access_bluetooth))
         }
       }

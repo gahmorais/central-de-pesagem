@@ -1,4 +1,4 @@
-package br.com.backupautomacao.centraldepesagem
+package br.com.backupautomacao.centraldepesagem.ui
 
 import android.widget.TextView
 import androidx.databinding.BindingAdapter

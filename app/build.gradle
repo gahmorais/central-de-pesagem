@@ -86,6 +86,13 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
+    //Dependecies Injection
+    def koin_version = "3.2.2"
+    def koin_android_version= "3.3.0"
+    implementation "io.insert-koin:koin-android:$koin_android_version"
+    implementation "io.insert-koin:koin-core:$koin_version"
+    testImplementation "io.insert-koin:koin-test:$koin_version"
+
     //Speech Recognizer
     implementation 'net.gotev:speech:1.6.2'
 

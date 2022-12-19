@@ -3,9 +3,6 @@ package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -13,12 +10,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import br.com.backupautomacao.centraldepesagem.AppApplication
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_CONNECTED_STATUS
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_CONNECTING_STATUS
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_ERROR_MESSAGE
-import br.com.backupautomacao.centraldepesagem.Constants.Companion.CODE_MESSAGE_READ
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.R
+import br.com.backupautomacao.centraldepesagem.bluetooth.BluetoothListener
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectedThread
 import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
 import br.com.backupautomacao.centraldepesagem.db.model.Operation
@@ -28,6 +22,7 @@ import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
+import br.com.backupautomacao.centraldepesagem.ui.UiHandler
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.Util
@@ -57,9 +52,8 @@ enum class StatusApp {
 
 class MainFragmentViewModel(application: Application) :
   AndroidViewModel(application),
-  SpeechDelegate {
+  SpeechDelegate, BluetoothListener {
 
-  private val speechInstance by lazy { Speech.getInstance() }
   private val configRepository by lazy { getApplication<AppApplication>().configRepository }
   private val operationRepository by lazy { getApplication<AppApplication>().operationRepository }
   private val workManager by lazy { getApplication<AppApplication>().workManager }
@@ -92,6 +86,10 @@ class MainFragmentViewModel(application: Application) :
   private val _updateStatus: MutableStateFlow<StatusApp> = MutableStateFlow(StatusApp.INICIO)
 
   init {
+    applicationMonitor()
+  }
+
+  private fun applicationMonitor() {
     viewModelScope.launch {
       _updateStatus.collectLatest { status ->
         val automaticPrint = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
@@ -109,52 +107,10 @@ class MainFragmentViewModel(application: Application) :
 
   private val _currentDeviceConnected: MutableLiveData<ConnectedThread> = MutableLiveData()
 
-  private val mHandler: Handler by lazy {
-    object : Handler(Looper.getMainLooper()) {
-      override fun handleMessage(msg: Message) {
-        super.handleMessage(msg)
-
-        if (msg.what == CODE_MESSAGE_READ) {
-          val message = msg.obj as ByteArray
-          val msgString = String(message, StandardCharsets.UTF_8)
-          if (Formatter.removeNonAlphaCharacters(msgString) == "IIIII") {
-            showMessage(getString(R.string.unstable_weight))
-          } else {
-            updateWeightProduct(message)
-          }
-        }
-
-        if (msg.what == CODE_CONNECTING_STATUS && msg.arg1 == 1) {
-          showMessage(getString(R.string.connecting))
-        }
-        if (msg.what == CODE_CONNECTED_STATUS) {
-          val thread = msg.obj as ConnectedThread
-          _connectedThreads.value?.add(thread)
-          if (_connectedThreads.value?.size == 1) {
-            val firstDevice = 0
-            setActiveThread(firstDevice)
-          }
-          val scaleNumber = connectedThreads.value?.size
-
-          showMessage(
-            getApplication<AppApplication>().getString(
-              R.string.message_scale_connected,
-              scaleNumber
-            )
-          )
-
-        }
-        if (msg.what == CODE_ERROR_MESSAGE) {
-          val errorMessage = msg.obj as String
-          showMessage(errorMessage)
-        }
-      }
-    }
-  }
-
   private fun updateWeightProduct(message: ByteArray) {
 
     val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
+
     //weight = Formatter.formatFromUranoUseCb2Protocol(message)
     val updateProduct = _mgvProduct.value!!
     updateProduct.apply {
@@ -277,12 +233,14 @@ class MainFragmentViewModel(application: Application) :
     }
 
     val label = Label()
+
     val newLabel: String = try {
       label.createLabelBase(product)
     } catch (e: FileNotFoundException) {
       _statusMessage.value = getString(R.string.file_not_found_error)
       return
     } catch (e: Exception) {
+      Log.e("MainFragmentViewModel", "print: ${e.message}", e)
       e.printStackTrace()
       return
     }
@@ -299,7 +257,6 @@ class MainFragmentViewModel(application: Application) :
     clearFields()
 
   }
-
 
   private fun checkProductIsNullOrEmpty(): Boolean {
     return _mgvProduct.value?.run {
@@ -338,9 +295,10 @@ class MainFragmentViewModel(application: Application) :
   }
 
   fun connectToDevices(devices: List<BluetoothDevice>) {
+    val uiHandler = UiHandler(this)
     devices.forEach { device ->
       val executor = Executors.newSingleThreadExecutor()
-      val newThread = ConnectingThread(bluetoothAdapter, device.address, mHandler)
+      val newThread = ConnectingThread(bluetoothAdapter, device.address, uiHandler)
       executor.execute(newThread)
       executor.shutdown()
     }
@@ -437,6 +395,39 @@ class MainFragmentViewModel(application: Application) :
     _connectedThreads.value?.run {
       forEach { it.cancel() }
     }
+  }
+
+  override fun onBluetoothRead(data: ByteArray) {
+    val msgString = String(data, StandardCharsets.UTF_8)
+    if (Formatter.removeNonAlphaCharacters(msgString) == "IIIII") {
+      showMessage(getString(R.string.unstable_weight))
+    } else {
+      updateWeightProduct(data)
+    }
+  }
+
+  override fun onBluetoothConnecting() {
+    showMessage(getString(R.string.connecting))
+  }
+
+  override fun onBluetoothConnected(device: ConnectedThread) {
+    _connectedThreads.value?.add(device)
+    if (_connectedThreads.value?.size == 1) {
+      val firstDevice = 0
+      setActiveThread(firstDevice)
+    }
+    val scaleNumber = connectedThreads.value?.size
+
+    showMessage(
+      getApplication<AppApplication>().getString(
+        R.string.message_scale_connected,
+        scaleNumber
+      )
+    )
+  }
+
+  override fun onBluetoothError(message: String) {
+    showMessage(message)
   }
 }
 

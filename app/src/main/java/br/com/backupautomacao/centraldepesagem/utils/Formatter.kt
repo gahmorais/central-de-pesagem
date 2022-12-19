@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.round
 
-class Formatter {
+class Formatter private constructor() {
   companion object {
     fun formatPrice(value: Double): String {
       return String.format(

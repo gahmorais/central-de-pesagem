@@ -57,6 +57,7 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
       socket.close()
       return Result.success(createDataMessage(applicationContext.getString(R.string.printing_done)))
     }
+
     return Result.failure(createDataMessage(applicationContext.getString(R.string.printing_error)))
   }
 

@@ -1,6 +1,7 @@
 package br.com.backupautomacao.centraldepesagem.utils
 
 import br.com.backupautomacao.centraldepesagem.FileController
+import br.com.backupautomacao.centraldepesagem.db.repository.LabelRepository
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
@@ -21,7 +22,7 @@ class Label(private val fileController: FileController = FileController()) {
   fun createLabelBase(mgvProduct: MgvProduct): String {
 
     var labelBase: String = try {
-      fileController.readFileFromDownloadFolder("etiqueta-sato.prn")
+      fileController.readFileFromDownloadFolder("etiqueta_base.prn")
     } catch (e: FileNotFoundException) {
       throw e
     }

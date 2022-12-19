@@ -7,12 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.centraldepesagem.AppApplication
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentReportBinding
 import br.com.backupautomacao.centraldepesagem.ui.OperationListAdapter
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.ReportViewModel
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.factory.ReportViewModelFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ReportFragment : Fragment() {
 
@@ -40,9 +43,14 @@ class ReportFragment : Fragment() {
   private fun configureRecyclerview() {
     val adapter = OperationListAdapter()
     binding.reportRecyclerview.adapter = adapter
-    reportViewModel.allOperations.observe(viewLifecycleOwner) { operations ->
-      adapter.submitList(operations)
+    lifecycleScope.launch{
+      reportViewModel.allOperations.collect{ operations ->
+
+        adapter.submitList(operations)
+      }
     }
+//    reportViewModel.allOperations.observe(viewLifecycleOwner) {  ->
+//    }
 
     binding.reportRecyclerview.setOnLongClickListener {
       it.isClickable

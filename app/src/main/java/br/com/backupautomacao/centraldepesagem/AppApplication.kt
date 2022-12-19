@@ -1,10 +1,10 @@
 package br.com.backupautomacao.centraldepesagem
 
 import android.app.Application
-import androidx.work.Configuration
 import androidx.work.WorkManager
 import br.com.backupautomacao.centraldepesagem.db.AppDatabase
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.db.repository.LabelRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 
 class AppApplication : Application() {

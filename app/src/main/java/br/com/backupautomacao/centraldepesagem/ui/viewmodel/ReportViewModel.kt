@@ -8,7 +8,8 @@ import androidx.lifecycle.asLiveData
 import br.com.backupautomacao.centraldepesagem.AppApplication
 import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
+import kotlinx.coroutines.flow.Flow
 
 class ReportViewModel(operationRepository: OperationRepository) : ViewModel() {
-  val allOperations: LiveData<List<Operation>> = operationRepository.allOperations.asLiveData()
+  val allOperations: Flow<List<Operation>> = operationRepository.allOperations
 }
