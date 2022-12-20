@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import br.com.backupautomacao.centraldepesagem.AppApplication
+import br.com.backupautomacao.centraldepesagem.FileController
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.bluetooth.BluetoothListener
@@ -144,7 +145,13 @@ class MainFragmentViewModel(application: Application) :
 
         mgvError?.let { error ->
           Log.i("MainFragmentViewModel", "fetchItem: $error")
-          showMessage(getApplication<AppApplication>().getString(R.string.error_responde_mgv, error.message, error.code))
+          showMessage(
+            getApplication<AppApplication>().getString(
+              R.string.error_responde_mgv,
+              error.message,
+              error.code
+            )
+          )
         }
 
         item?.also { product ->
@@ -233,11 +240,12 @@ class MainFragmentViewModel(application: Application) :
       return
     }
 
-    val label = Label()
+    val label = Label(FileController(getApplication()))
 
     val newLabel: String = try {
       label.createLabelBase(product)
     } catch (e: FileNotFoundException) {
+      println("Erro: ${e.message}")
       _statusMessage.value = getString(R.string.file_not_found_error)
       return
     } catch (e: Exception) {

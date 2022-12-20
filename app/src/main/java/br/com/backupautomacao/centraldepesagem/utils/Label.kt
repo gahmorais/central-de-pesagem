@@ -15,7 +15,7 @@ import java.util.*
 
 private const val ONE_DAY_MILLIS = 60 * 60 * 24 * 1000
 
-class Label(private val fileController: FileController = FileController()) {
+class Label(private val fileController: FileController) {
   private val BASE_LENGTH = "200"
   private val NUTRICTION_LENGTH = "560"
   private val FULL_LENGTH = "800"
@@ -96,7 +96,7 @@ class Label(private val fileController: FileController = FileController()) {
     labelBase: StringBuilder,
     nutrictionFacts: MgvInformacoesNutricionais
   ) {
-    val fileController = FileController()
+
     var label: String = fileController.readFileFromDownloadFolder("nutri_info.txt")
     val randomNumbers = (0..21).map { Util.generateRandomDouble() }
     val randomNumberInt = (0..2).map { Util.generateRandomInt() }
