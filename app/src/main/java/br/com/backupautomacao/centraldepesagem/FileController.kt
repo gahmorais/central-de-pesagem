@@ -9,7 +9,7 @@ import java.util.*
 class FileController(private val context: Context) {
 
   @Throws(IOException::class)
-  fun readFileFromDownloadFolder(filename: String): String {
+  fun readFileFromAssets(filename: String): String {
 
     try {
       val file = context.assets.open(filename)
