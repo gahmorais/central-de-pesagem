@@ -150,6 +150,7 @@ class MainFragment : Fragment() {
   private fun getProduct() {
     val code = binding.inputProductCode.text.toString()
     binding.viewModel!!.fetchItem(code)
+    binding.inputProductCode.setText("")
   }
 
   private fun print() {
