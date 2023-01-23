@@ -159,9 +159,8 @@
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_marginStart="@dimen/big_margin"
-                android:layout_marginEnd="@dimen/big_margin"
-                app:layout_constraintEnd_toStartOf="@+id/buttonFetchProduct"
-                app:layout_constraintHorizontal_bias="1.0"
+                android:layout_marginEnd="@dimen/extra_big_margin"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -172,14 +171,6 @@
                     android:hint="@string/placeholder_input_text"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
-
-            <Button
-                android:id="@+id/buttonFetchProduct"
-                style="@style/BlueButton"
-                android:layout_marginEnd="@dimen/extra_big_margin"
-                android:text="@string/text_button_search"
-                app:layout_constraintBaseline_toBaselineOf="@+id/textInputLayout"
-                app:layout_constraintEnd_toEndOf="parent" />
 
             <Spinner
                 android:id="@+id/spinnerScale"

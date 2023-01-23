@@ -207,6 +207,7 @@ class MainFragmentViewModel(application: Application) :
   }
 
   fun weighing() {
+    Log.i("MainFragmentViewModel", "weighing: Realizando pesagem")
     if (checkProductIsNullOrEmpty()) {
       showMessage(getString(R.string.error_get_product))
       return
@@ -408,6 +409,7 @@ class MainFragmentViewModel(application: Application) :
 
   override fun onBluetoothRead(data: ByteArray) {
     val msgString = String(data, StandardCharsets.UTF_8)
+    Log.i("MainFragmentViewModel", "onBluetoothRead: Recebendo peso")
     if (Formatter.removeNonAlphaCharacters(msgString) == "IIIII") {
       showMessage(getString(R.string.unstable_weight))
     } else {

@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -182,12 +183,22 @@ class MainFragment : Fragment() {
 
   private fun handleButtons() {
     binding.apply {
-      buttonFetchProduct.setOnClickListener {
-        getProduct()
-      }
+//      buttonFetchProduct.setOnClickListener {
+//        getProduct()
+//      }
 
       buttonPrint.setOnClickListener {
         print()
+      }
+
+      inputProductCode.setOnKeyListener { _, keycode, event ->
+        if (event.action == KeyEvent.ACTION_DOWN) {
+          if (keycode == KeyEvent.KEYCODE_DPAD_CENTER || keycode == KeyEvent.KEYCODE_ENTER) {
+            getProduct()
+            return@setOnKeyListener true
+          }
+        }
+        false
       }
 
       buttonWeighing.setOnClickListener {
