@@ -13,7 +13,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file('C:\\Users\\User\\.android\\android-key.jks')
+            storeFile = file('/home/gabrielmorais/android')
             storePassword = 'gabu_171'
             keyAlias = 'key0'
             keyPassword = 'gabu_171'
