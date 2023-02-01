@@ -16,11 +16,13 @@ class MainActivity : AppCompatActivity() {
     setContentView(binding.root)
     val pagerAdapter = ScreenSlidePagerAdapter(this)
     binding.viewPager.adapter = pagerAdapter
+
     binding.toolbar.apply {
       title = "Central de pesagem"
       setTitleTextColor(Color.WHITE)
       setSupportActionBar(this)
     }
+
     binding.imgClose.setOnClickListener {
       closeApplication()
     }

@@ -4,6 +4,7 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 
+@Suppress("unused")
 @BindingAdapter("productPrice")
 fun bindProductPrice(textView: TextView, price: Double) {
   if (price > 0.0) {
@@ -13,6 +14,7 @@ fun bindProductPrice(textView: TextView, price: Double) {
   }
 }
 
+@Suppress("unused")
 @BindingAdapter("productWeight")
 fun bindProductWeight(textView: TextView, value: Double) {
   if (value > 0.0) {

@@ -4,10 +4,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import br.com.backupautomacao.centraldepesagem.ui.fragments.MainFragment
+import br.com.backupautomacao.centraldepesagem.ui.fragments.MassProductionFragment
 import br.com.backupautomacao.centraldepesagem.ui.fragments.ReportFragment
 import br.com.backupautomacao.centraldepesagem.ui.fragments.SettingsFragment
 
-private const val NUM_PAGES = 3
+private const val NUM_PAGES = 4
 
 class ScreenSlidePagerAdapter(fragmentActivity: FragmentActivity) :
   FragmentStateAdapter(fragmentActivity) {
@@ -15,11 +16,11 @@ class ScreenSlidePagerAdapter(fragmentActivity: FragmentActivity) :
   override fun getItemCount(): Int = NUM_PAGES
 
   override fun createFragment(position: Int): Fragment {
-    if (position == 0) {
-      return MainFragment()
-    } else if (position == 1) {
-      return SettingsFragment()
+    return when (position) {
+      0 -> MainFragment()
+      1 -> MassProductionFragment()
+      2 -> SettingsFragment()
+      else -> ReportFragment()
     }
-    return ReportFragment()
   }
 }
