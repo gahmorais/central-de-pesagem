@@ -1,5 +1,6 @@
 package br.com.backupautomacao.centraldepesagem.utils
 
+import android.content.Context
 import br.com.backupautomacao.centraldepesagem.FileController
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
@@ -14,14 +15,16 @@ import java.util.*
 
 private const val ONE_DAY_MILLIS = 60 * 60 * 24 * 1000
 
-class Label(private val fileController: FileController) {
+class Label(context: Context) {
+
+  private val fileController = FileController(context)
   private val BASE_LENGTH = "200"
   private val NUTRICTION_LENGTH = "560"
   private val FULL_LENGTH = "800"
-  fun createLabelBase(mgvProduct: MgvProduct): String {
+  fun createLabelBase(mgvProduct: MgvProduct, labelName: String?): String {
 
     var labelBase: String = try {
-      fileController.readFileFromAssets("etiqueta_base.prn")
+      fileController.readFileFromAssets(labelName ?: "etiqueta_base.prn")
     } catch (e: FileNotFoundException) {
       throw e
     }
@@ -38,6 +41,7 @@ class Label(private val fileController: FileController) {
     val totalPrice = mgvProduct.price.times(mgvProduct.weight!!)
     val totalPriceFormatted = formatPrice(totalPrice)
     val pricePerKilogramFormatted = formatPrice(mgvProduct.price)
+
     labelBase = labelBase
       .replace("var_descricao", mgvProduct.description)
       .replace("var_codigo", formatBarcode(mgvProduct.code, totalPrice))
@@ -175,5 +179,11 @@ class Label(private val fileController: FileController) {
       .replace("ac_add_vd", formatNutriction(randomNumbers[21]))
 
     labelBase.append(label)
+  }
+
+  fun generateLabelWithQuantity(mgvProduct: MgvProduct, quantity: Int): String {
+    return createLabelBase(mgvProduct, "etiqueta_base_com_quantidade.prn")
+      .replace("var_quantidade", quantity.toString())
+
   }
 }

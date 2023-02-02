@@ -11,7 +11,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import br.com.backupautomacao.centraldepesagem.AppApplication
-import br.com.backupautomacao.centraldepesagem.FileController
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.bluetooth.BluetoothListener
@@ -39,6 +38,7 @@ import net.gotev.speech.Speech
 import net.gotev.speech.SpeechDelegate
 import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
+import java.security.InvalidParameterException
 import java.util.concurrent.Executors
 
 
@@ -218,54 +218,37 @@ class MainFragmentViewModel(application: Application) :
 
   fun print() {
 
-    val printerIp: String? = configRepository.getConfig(PRINTER_IP)
-    if (printerIp == "" || printerIp == null) {
-      showMessage(getString(R.string.ip_not_setted))
-      return
-    }
-
-    val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
-    if (printerPort == 0) {
-      showMessage(getString(R.string.invalid_port))
-      return
-    }
-
     if (checkProductIsNullOrEmpty()) {
       showMessage(getString(R.string.error_to_get_product))
       return
     }
+    try {
+      val printerIp: String? = configRepository.getConfig(PRINTER_IP)
+      val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
+      val product = _mgvProduct.value!!
+      if (product.weight == null || product.weight == 0.0) {
+        showMessage(getString(R.string.make_weighing))
+        return
+      }
+      val label = Label(getApplication())
+      val newLabel = label.createLabelBase(product, null)
+      val printTask = PrintWorker.createUniquePrintTask(
+        printerAddress = printerIp,
+        printerPort = printerPort,
+        label = newLabel
+      )
 
-    val product = _mgvProduct.value!!
-    if (product.weight == null || product.weight == 0.0) {
-      showMessage(getString(R.string.make_weighing))
-      return
-    }
-
-    val label = Label(FileController(getApplication()))
-
-    val newLabel: String = try {
-      label.createLabelBase(product)
+      workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
+      _scale.value = null
+      _updateStatus.value = StatusApp.FINALIZAR
+      clearFields()
     } catch (e: FileNotFoundException) {
-      println("Erro: ${e.message}")
-      _statusMessage.value = getString(R.string.file_not_found_error)
-      return
+      showMessage(getString(R.string.file_not_found_error))
+    } catch (e: InvalidParameterException) {
+      showMessage("Porta ou endereço ip inválidos")
     } catch (e: Exception) {
-      Log.e("MainFragmentViewModel", "print: ${e.message}", e)
-      e.printStackTrace()
-      return
+      showMessage("Erro não esperado")
     }
-
-    val printTask = PrintWorker.createUniquePrintTask(
-      printerAddress = printerIp,
-      printerPort = printerPort,
-      label = newLabel
-    )
-
-    workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
-    _scale.value = null
-    _updateStatus.value = StatusApp.FINALIZAR
-    clearFields()
-
   }
 
   private fun checkProductIsNullOrEmpty(): Boolean {

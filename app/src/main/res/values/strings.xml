@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Central de pesagem V2</string>
+    <string name="app_name">Pesagem Modular</string>
     <string name="text_button_search">Busca produto</string>
     <string name="text_button_weighing">Pesar</string>
     <string name="text_button_print">Imprimir</string>
@@ -23,8 +23,6 @@
     <string name="invalid_port">Porta inválida</string>
     <string name="text_automatic_print">Impressão Automática</string>
     <string name="text_title_price">Preço:</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="fragment_report_title">Relatório</string>
     <string name="dialog_permission_title">Permissão necessária</string>
     <string name="dialog_permission_default_message">Mensagem padrão</string>

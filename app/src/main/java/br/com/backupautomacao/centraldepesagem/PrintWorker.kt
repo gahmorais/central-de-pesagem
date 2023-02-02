@@ -6,6 +6,7 @@ import androidx.work.*
 import kotlinx.coroutines.withTimeout
 import java.io.PrintWriter
 import java.net.Socket
+import java.security.InvalidParameterException
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -19,10 +20,19 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
     const val PRINT_TASK = "print_task"
 
     fun createUniquePrintTask(
-      printerAddress: String,
+      printerAddress: String?,
       printerPort: Int,
       label: String
     ) : OneTimeWorkRequest {
+
+      if(printerAddress.isNullOrEmpty()){
+        throw InvalidParameterException("Endereço IP inválido")
+      }
+
+      if(printerPort == 0){
+        throw InvalidParameterException("Porta Inválida")
+      }
+
       val data = Data.Builder().apply {
         putString(PRINT_LABEL, label)
         putString(PRINTER_ADDRESS, printerAddress)
