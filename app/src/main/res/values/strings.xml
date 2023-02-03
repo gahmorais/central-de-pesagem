@@ -14,7 +14,7 @@
     <string name="text_title_printer_config">Configuração impressora</string>
     <string name="text_title_mgv_config">Configuração MGV</string>
     <string name="placeholder_printer_address">Digite o IP da impressora</string>
-    <string name="placeholder_input_text">Digite o produto desejado</string>
+    <string name="placeholder_input_text">Digite o código do produto</string>
     <string name="placeholder_server_address">Endereço do servidor</string>
     <string name="placeholder_printer_port">Digite a porta da impressora</string>
     <string name="placeholder_password">Palavra chave</string>
@@ -65,4 +65,6 @@
     <string name="printer_ip_not_found">IP da impressora não encontrado</string>
     <string name="save_operation_error">Erro ao salvar operação</string>
     <string name="text_description_img_close">Botão para fechar a aplicação</string>
+    <string name="insert_label_quantity">Insira a quantidade de etiquetas</string>
+    <string name="insert_label_weight">Insira o peso do produto</string>
 </resources>

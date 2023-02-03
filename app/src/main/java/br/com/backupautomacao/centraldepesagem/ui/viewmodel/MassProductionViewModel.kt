@@ -64,11 +64,16 @@ class MassProductionViewModel(application: Application) : AndroidViewModel(appli
 
   }
 
+  fun updateWeight(weight: Double) {
+    _mgvProduct.value?.weight = weight
+  }
+
   fun print(quantity: String) {
     try {
       val product: MgvProduct = mgvProduct.value ?: MgvProduct()
       val label = Label(getApplication())
-      val newLabel = label.generateLabelWithQuantity(product, quantity.toInt())
+      val newLabel =
+        label.generateLabelWithQuantity(product, "etiqueta_modelo_grande.prn", quantity.toInt())
       val printerIp: String? = configRepository.getConfig(ConfigRepository.PRINTER_IP)
       val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
       val printTask = PrintWorker.createUniquePrintTask(

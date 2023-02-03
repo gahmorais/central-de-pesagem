@@ -231,7 +231,7 @@ class MainFragmentViewModel(application: Application) :
         return
       }
       val label = Label(getApplication())
-      val newLabel = label.createLabelBase(product, null)
+      val newLabel = label.generateLabelBase(product, null)
       val printTask = PrintWorker.createUniquePrintTask(
         printerAddress = printerIp,
         printerPort = printerPort,

@@ -20,19 +20,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/big_margin"
-            android:layout_marginTop="110dp"
+            android:layout_marginTop="130dp"
             app:layout_constraintEnd_toStartOf="@+id/guideline3"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etProductCode"
-                android:background="@drawable/custom_layout_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
-                android:hint="Digite o código do produto"
                 android:imeOptions="actionDone"
+                android:background="@drawable/custom_layout_spinner"
+                android:hint="@string/placeholder_input_text"
                 android:inputType="numberDecimal"
                 android:textSize="20sp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -42,17 +41,39 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/big_margin"
-            android:layout_marginTop="@dimen/big_margin"
+            android:layout_marginTop="@dimen/default_margin"
             app:layout_constraintEnd_toStartOf="@+id/guideline3"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout2">
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayout5">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etLabelQuantity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/custom_layout_spinner"
-                android:hint="Insira a quantidade de etiquetas"
+                android:hint="@string/insert_label_quantity"
+                android:inputType="numberDecimal"
+                android:textSize="20sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayout5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/big_margin"
+            android:layout_marginTop="@dimen/default_margin"
+            app:layout_constraintEnd_toStartOf="@+id/guideline3"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textInputLayout2">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etWeight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/custom_layout_spinner"
+                android:imeOptions="actionDone"
+                android:digits="0123456789.,"
+                android:hint="@string/insert_label_weight"
                 android:inputType="numberDecimal"
                 android:textSize="20sp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -129,7 +150,7 @@
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_marginHorizontal="@dimen/big_margin"
-            android:layout_marginTop="@dimen/big_margin"
+            android:layout_marginTop="@dimen/default_margin"
             android:text="@string/text_button_print"
             android:textSize="@dimen/big_font"
             app:layout_constraintEnd_toStartOf="@+id/guideline3"

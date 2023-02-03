@@ -21,7 +21,7 @@ class Label(context: Context) {
   private val BASE_LENGTH = "200"
   private val NUTRICTION_LENGTH = "560"
   private val FULL_LENGTH = "800"
-  fun createLabelBase(mgvProduct: MgvProduct, labelName: String?): String {
+  fun generateLabelBase(mgvProduct: MgvProduct, labelName: String?): String {
 
     var labelBase: String = try {
       fileController.readFileFromAssets(labelName ?: "etiqueta_base.prn")
@@ -181,8 +181,8 @@ class Label(context: Context) {
     labelBase.append(label)
   }
 
-  fun generateLabelWithQuantity(mgvProduct: MgvProduct, quantity: Int): String {
-    return createLabelBase(mgvProduct, "etiqueta_base_com_quantidade.prn")
+  fun generateLabelWithQuantity(mgvProduct: MgvProduct, labelName: String?, quantity: Int): String {
+    return generateLabelBase(mgvProduct, labelName)
       .replace("var_quantidade", quantity.toString())
 
   }
