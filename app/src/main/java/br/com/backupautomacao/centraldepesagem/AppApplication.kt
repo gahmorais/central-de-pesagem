@@ -10,6 +10,6 @@ import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 class AppApplication : Application() {
   private val database by lazy { AppDatabase.getDatabase(this) }
   val operationRepository by lazy { OperationRepository(database.operationDao()) }
-  val workManager by lazy { WorkManager.getInstance(this) }
   val configRepository by lazy { ConfigRepository(this) }
+  val workManager by lazy { WorkManager.getInstance(this) }
 }

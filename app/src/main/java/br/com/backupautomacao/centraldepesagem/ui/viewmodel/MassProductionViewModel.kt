@@ -82,6 +82,7 @@ class MassProductionViewModel(application: Application) : AndroidViewModel(appli
         label = newLabel
       )
       workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
+      _mgvProduct.value = MgvProduct()
     } catch (e: InvalidParameterException) {
       Log.i("MassProductionViewModel", "print: Porta ou endereço ip inválidos")
     } catch (e: FileNotFoundException) {

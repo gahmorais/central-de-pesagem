@@ -23,13 +23,13 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
       printerAddress: String?,
       printerPort: Int,
       label: String
-    ) : OneTimeWorkRequest {
+    ): OneTimeWorkRequest {
 
-      if(printerAddress.isNullOrEmpty()){
+      if (printerAddress.isNullOrEmpty()) {
         throw InvalidParameterException("Endereço IP inválido")
       }
 
-      if(printerPort == 0){
+      if (printerPort == 0) {
         throw InvalidParameterException("Porta Inválida")
       }
 

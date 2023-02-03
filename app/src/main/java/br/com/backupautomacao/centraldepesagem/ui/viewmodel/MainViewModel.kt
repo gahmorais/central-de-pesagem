@@ -76,8 +76,6 @@ class MainFragmentViewModel(application: Application) :
   private val _statusMessage: MutableLiveData<String> = MutableLiveData()
   val statusMessage: LiveData<String> = _statusMessage
 
-  fun printStatus() = workManager.getWorkInfosForUniqueWorkLiveData(PrintWorker.PRINT_TASK)
-
   private val _scale: MutableStateFlow<Int?> = MutableStateFlow(null)
   val scale: StateFlow<Int?> = _scale
 

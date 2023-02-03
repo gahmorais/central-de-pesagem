@@ -218,31 +218,33 @@ class MainFragment : Fragment() {
   }
 
   private fun monitoringPrint() {
-    mainViewModel.printStatus().observe(viewLifecycleOwner) { workInfos ->
-      if (workInfos.isNotEmpty()) {
-        when (workInfos[0].state) {
-          WorkInfo.State.SUCCEEDED -> {
-            stopLoading()
-            mainViewModel.showMessage(getString(R.string.printing_done))
+    workManager
+      .getWorkInfosForUniqueWorkLiveData(PrintWorker.PRINT_TASK)
+      .observe(viewLifecycleOwner) { workInfos ->
+        if (workInfos.isNotEmpty()) {
+          when (workInfos[0].state) {
+            WorkInfo.State.SUCCEEDED -> {
+              stopLoading()
+              mainViewModel.showMessage(getString(R.string.printing_done))
+            }
+            WorkInfo.State.FAILED -> {
+              stopLoading()
+              mainViewModel.showMessage(getString(R.string.printing_error))
+            }
+            WorkInfo.State.CANCELLED -> {
+              stopLoading()
+              mainViewModel.showMessage(getString(R.string.printing_cancelled))
+            }
+            WorkInfo.State.RUNNING -> {
+              Log.i("MainFragment", "monitoringPrint: Rodando tarefa")
+            }
+            WorkInfo.State.ENQUEUED -> {
+              startLoading(getString(R.string.printing))
+            }
+            else -> stopLoading()
           }
-          WorkInfo.State.FAILED -> {
-            stopLoading()
-            mainViewModel.showMessage(getString(R.string.printing_error))
-          }
-          WorkInfo.State.CANCELLED -> {
-            stopLoading()
-            mainViewModel.showMessage(getString(R.string.printing_cancelled))
-          }
-          WorkInfo.State.RUNNING -> {
-            Log.i("MainFragment", "monitoringPrint: Rodando tarefa")
-          }
-          WorkInfo.State.ENQUEUED -> {
-            startLoading(getString(R.string.printing))
-          }
-          else -> stopLoading()
         }
       }
-    }
   }
 
   override fun onDestroyView() {
