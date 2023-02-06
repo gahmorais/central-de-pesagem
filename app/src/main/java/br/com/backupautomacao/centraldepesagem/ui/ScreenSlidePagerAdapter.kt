@@ -19,8 +19,8 @@ class ScreenSlidePagerAdapter(fragmentActivity: FragmentActivity) :
     return when (position) {
       0 -> MainFragment()
       1 -> MassProductionFragment()
-      2 -> SettingsFragment()
-      else -> ReportFragment()
+      2 -> ReportFragment()
+      else -> SettingsFragment()
     }
   }
 }

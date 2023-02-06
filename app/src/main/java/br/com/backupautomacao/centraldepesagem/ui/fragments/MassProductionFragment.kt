@@ -3,7 +3,6 @@ package br.com.backupautomacao.centraldepesagem.ui.fragments
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -101,9 +100,8 @@ class MassProductionFragment : Fragment() {
       }
   }
 
-
   private fun configureListeners() {
-    binding.etProductCode.setOnEditorActionListener { textView, actionId, keyEvent ->
+    binding.etProductCode.setOnEditorActionListener { textView, actionId, _ ->
       if (actionId == EditorInfo.IME_ACTION_DONE) {
         fetchItem()
         closeVirtualKeyboard(textView)
@@ -112,7 +110,7 @@ class MassProductionFragment : Fragment() {
       false
     }
 
-    binding.etWeight.setOnEditorActionListener { textView, actionId, keyEvent ->
+    binding.etWeight.setOnEditorActionListener { textView, actionId, _ ->
       Log.i("MassProductionFragment", "configureListeners: $actionId")
       if (actionId == EditorInfo.IME_ACTION_DONE) {
         val weight = textView.text.toString().toDouble()
@@ -122,6 +120,7 @@ class MassProductionFragment : Fragment() {
       }
       false
     }
+
     binding.printButton.setOnClickListener {
       print()
     }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.databinding.ActivityMainBinding
 import br.com.backupautomacao.centraldepesagem.ui.ScreenSlidePagerAdapter
 
@@ -18,7 +19,7 @@ class MainActivity : AppCompatActivity() {
     binding.viewPager.adapter = pagerAdapter
 
     binding.toolbar.apply {
-      title = "Central de pesagem"
+      title = getString(R.string.app_name)
       setTitleTextColor(Color.WHITE)
       setSupportActionBar(this)
     }
