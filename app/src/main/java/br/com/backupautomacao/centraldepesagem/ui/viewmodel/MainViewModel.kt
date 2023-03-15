@@ -53,12 +53,13 @@ enum class StatusApp {
 }
 
 class MainFragmentViewModel(application: Application) :
-  AndroidViewModel(application),
-  SpeechDelegate, BluetoothListener {
+  AndroidViewModel(application), BluetoothListener {
 
   private val configRepository by lazy { getApplication<AppApplication>().configRepository }
   private val operationRepository by lazy { getApplication<AppApplication>().operationRepository }
   private val workManager by lazy { getApplication<AppApplication>().workManager }
+  private val _bluetoothStatus = MutableLiveData<Boolean>(false)
+  val bluetoothStatus: LiveData<Boolean> = _bluetoothStatus
 
   private val bluetoothAdapter by lazy {
     val bm = getApplication<AppApplication>().getSystemService(BluetoothManager::class.java)
@@ -153,12 +154,12 @@ class MainFragmentViewModel(application: Application) :
         }
 
         item?.also { product ->
-          product.extraInfo = item.codExtraInfo?.let { code ->
-            getExtraInfo(mgvPassword, storeNumber, code)
-          }
-          product.nutrictionFacts = item.codNutrictionFacts?.let { code ->
-            getNutriction(mgvPassword, storeNumber, code)
-          }
+//          product.extraInfo = item.codExtraInfo?.let { code ->
+//            getExtraInfo(mgvPassword, storeNumber, code)
+//          }
+//          product.nutrictionFacts = item.codNutrictionFacts?.let { code ->
+//            getNutriction(mgvPassword, storeNumber, code)
+//          }
           _mgvProduct.value = product
           _updateStatus.value = StatusApp.REALIZAR_PESAGEM
         }
@@ -264,7 +265,7 @@ class MainFragmentViewModel(application: Application) :
     return MutableLiveData(devices)
   }
 
-  fun setActiveThread(currentThread: Int) {
+  private fun setActiveThread(currentThread: Int) {
     _connectedThreads.value.let { devicesConnected ->
       devicesConnected?.let {
         _currentDeviceConnected.value = it[currentThread]
@@ -317,62 +318,6 @@ class MainFragmentViewModel(application: Application) :
       Log.e("MainFragmentViewModel", "saveOperation: Erro ao salvar operação", e)
       showMessage(e.message!!)
     }
-
-  }
-
-  override fun onStartOfSpeech() {
-    showMessage(getString(R.string.listening))
-  }
-
-  override fun onSpeechRmsChanged(value: Float) {
-
-  }
-
-  override fun onSpeechPartialResults(results: MutableList<String>?) {
-
-  }
-
-  override fun onSpeechResult(result: String?) {
-    //Balança 1 código 29 [balança, 1, código, 29]
-    //Balança 1 bacon [balanca, 1, bacon]
-    val wordsArray = result?.split(" ") ?: listOf()
-    wordsArray.forEach {
-      Log.i("MainFragmentViewModel", "onSpeechResult: $it")
-    }
-    executeTask(wordsArray)
-  }
-
-  fun listening() {
-    //speechInstance.startListening(this)
-  }
-
-  private fun executeTask(wordsArray: List<String>) {
-    if (wordsArray.isNotEmpty()) {
-      val (_, index) = wordsArray
-      val product = wordsArray
-        .drop(2)
-        .joinToString { words -> words }
-        .replace(",", "")
-      val scaleNumber = Util.transformStringToNumber(index) - 1
-      val code = findItem(product)
-      Log.i("MainFragmentViewModel", "executeTask: Balança: $scaleNumber")
-      Log.i("MainFragmentViewModel", "executeTask: Número Balança -> $index")
-      Log.i("MainFragmentViewModel", "executeTask: Produto -> $product")
-      Log.i("MainFragmentViewModel", "executeTask: Código -> $code")
-      if (scaleNumber < 0) {
-        showMessage(getString(R.string.error_to_set_scale))
-        return
-      }
-      if (code == 0) {
-        showMessage(getString(R.string.product_not_found))
-        return
-      }
-      _scale.value = scaleNumber
-      Log.i("MainFragmentViewModel", "executeTask: Indice Balança ${_scale.value}")
-      _connectedThreads.value?.let { setActiveThread(scaleNumber) }
-
-      fetchItem(codItem = code.toString())
-    }
   }
 
   private fun getString(stringRes: Int, vararg inputs: Any): String {
@@ -390,7 +335,7 @@ class MainFragmentViewModel(application: Application) :
 
   override fun onBluetoothRead(data: ByteArray) {
     val msgString = String(data, StandardCharsets.UTF_8)
-    Log.i("MainFragmentViewModel", "onBluetoothRead: Recebendo peso")
+
     if (Formatter.removeNonAlphaCharacters(msgString) == "IIIII") {
       showMessage(getString(R.string.unstable_weight))
     } else {
@@ -407,6 +352,7 @@ class MainFragmentViewModel(application: Application) :
     if (_connectedThreads.value?.size == 1) {
       val firstDevice = 0
       setActiveThread(firstDevice)
+      _bluetoothStatus.value = true
     }
     val scaleNumber = connectedThreads.value?.size
 

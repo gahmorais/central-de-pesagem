@@ -8,12 +8,9 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import br.com.backupautomacao.centraldepesagem.AppApplication
@@ -24,9 +21,6 @@ import br.com.backupautomacao.centraldepesagem.permission.Permission
 import br.com.backupautomacao.centraldepesagem.permission.PermissionManager
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainFragmentViewModel
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
 
@@ -74,7 +68,6 @@ class MainFragment : Fragment() {
     bluetoothPermission()
     handleMessages()
     handleButtons()
-    configureSpinner()
 
   }
 
@@ -99,40 +92,7 @@ class MainFragment : Fragment() {
   private fun configureObservers() {
     mainViewModel.getAvailableDevices().observe(viewLifecycleOwner) { deviceList ->
       mainViewModel.connectToDevices(deviceList)
-      val devices = deviceList.mapIndexed { i, _ -> "Balança ${i + 1}" }
-      ArrayAdapter(
-        requireActivity(),
-        android.R.layout.simple_spinner_item,
-        devices
-      ).also { adapter ->
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerScale.adapter = adapter
-      }
     }
-  }
-
-  private fun configureSpinner() {
-    lifecycleScope.launchWhenStarted {
-      mainViewModel.scale.collectLatest { value ->
-        value?.let { binding.spinnerScale.setSelection(value) }
-      }
-    }
-
-    val itemListener = object : AdapterView.OnItemSelectedListener {
-      override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, i: Int, p3: Long) {
-        mainViewModel.connectedThreads.value?.let { threadList ->
-          if (threadList.size > 0) {
-            mainViewModel.setActiveThread(i)
-          }
-        }
-      }
-
-      override fun onNothingSelected(p0: AdapterView<*>?) {
-
-      }
-    }
-
-    binding.spinnerScale.onItemSelectedListener = itemListener
 
   }
 
@@ -168,25 +128,8 @@ class MainFragment : Fragment() {
       }
   }
 
-  private fun listening() {
-    permissionManager
-      .request(Permission.Record)
-      .rationale(getString(R.string.message_to_access_microphone))
-      .checkPermission { granted ->
-        if (granted) {
-          binding.viewModel!!.listening()
-        } else {
-          error(getString(R.string.fail_to_access_microphone))
-        }
-      }
-  }
-
   private fun handleButtons() {
     binding.apply {
-//      buttonFetchProduct.setOnClickListener {
-//        getProduct()
-//      }
-
       buttonPrint.setOnClickListener {
         print()
       }
@@ -203,10 +146,6 @@ class MainFragment : Fragment() {
 
       buttonWeighing.setOnClickListener {
         viewModel!!.weighing()
-      }
-
-      buttonRecord.setOnClickListener {
-        listening()
       }
     }
   }
