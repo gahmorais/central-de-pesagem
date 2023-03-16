@@ -58,8 +58,10 @@ class MainFragmentViewModel(application: Application) :
   private val configRepository by lazy { getApplication<AppApplication>().configRepository }
   private val operationRepository by lazy { getApplication<AppApplication>().operationRepository }
   private val workManager by lazy { getApplication<AppApplication>().workManager }
-  private val _bluetoothStatus = MutableLiveData<Boolean>(false)
+  private val _bluetoothStatus = MutableLiveData(false)
   val bluetoothStatus: LiveData<Boolean> = _bluetoothStatus
+
+  val isFixed = MutableLiveData(false)
 
   private val bluetoothAdapter by lazy {
     val bm = getApplication<AppApplication>().getSystemService(BluetoothManager::class.java)
@@ -78,11 +80,10 @@ class MainFragmentViewModel(application: Application) :
   val statusMessage: LiveData<String> = _statusMessage
 
   private val _scale: MutableStateFlow<Int?> = MutableStateFlow(null)
-  val scale: StateFlow<Int?> = _scale
 
   private val _connectedThreads: MutableLiveData<ArrayList<ConnectedThread>> =
     MutableLiveData(ArrayList())
-  val connectedThreads: LiveData<ArrayList<ConnectedThread>> = _connectedThreads
+  private val connectedThreads: LiveData<ArrayList<ConnectedThread>> = _connectedThreads
 
   private val _updateStatus: MutableStateFlow<StatusApp> = MutableStateFlow(StatusApp.INICIO)
 
@@ -240,7 +241,7 @@ class MainFragmentViewModel(application: Application) :
       workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
       _scale.value = null
       _updateStatus.value = StatusApp.FINALIZAR
-      clearFields()
+      if (isFixed.value == false) clearFields()
     } catch (e: FileNotFoundException) {
       showMessage(getString(R.string.file_not_found_error))
     } catch (e: InvalidParameterException) {

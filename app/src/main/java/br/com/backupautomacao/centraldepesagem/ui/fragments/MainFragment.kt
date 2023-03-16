@@ -1,6 +1,8 @@
 package br.com.backupautomacao.centraldepesagem.ui.fragments
 
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.work.WorkInfo
@@ -94,6 +97,15 @@ class MainFragment : Fragment() {
       mainViewModel.connectToDevices(deviceList)
     }
 
+    mainViewModel.bluetoothStatus.observe(viewLifecycleOwner) { isConnnected ->
+      if (isConnnected) {
+        binding.bluetoothStatus.background =
+          AppCompatResources.getDrawable(requireActivity(), R.color.green)
+      } else {
+        binding.bluetoothStatus.background =
+          AppCompatResources.getDrawable(requireActivity(), R.color.dark_red)
+      }
+    }
   }
 
   private fun success(message: String) {
@@ -112,6 +124,11 @@ class MainFragment : Fragment() {
     val code = binding.inputProductCode.text.toString()
     binding.viewModel!!.fetchItem(code)
     binding.inputProductCode.setText("")
+  }
+
+  private fun blockProduct() {
+    mainViewModel.isFixed.value = true
+    mainViewModel.showMessage("Produto fixado")
   }
 
   private fun print() {
@@ -146,6 +163,10 @@ class MainFragment : Fragment() {
 
       buttonWeighing.setOnClickListener {
         viewModel!!.weighing()
+      }
+
+      buttonFixProduct.setOnClickListener {
+        blockProduct()
       }
     }
   }

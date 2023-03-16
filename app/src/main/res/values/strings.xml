@@ -67,4 +67,5 @@
     <string name="text_description_img_close">Botão para fechar a aplicação</string>
     <string name="insert_label_quantity">Insira a quantidade de etiquetas</string>
     <string name="insert_label_weight">Insira o peso do produto</string>
+    <string name="text_button_fix_product">Fixar produto</string>
 </resources>
