@@ -1,6 +1,7 @@
 package br.com.backupautomacao.centraldepesagem.utils
 
 import android.content.Context
+import br.com.backupautomacao.centraldepesagem.Constants.Companion.ONE_DAY_MILLIS
 import br.com.backupautomacao.centraldepesagem.FileController
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
@@ -13,7 +14,7 @@ import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.*
 
-private const val ONE_DAY_MILLIS = 60 * 60 * 24 * 1000
+
 
 class Label(context: Context) {
 
@@ -24,7 +25,7 @@ class Label(context: Context) {
   fun generateLabelBase(mgvProduct: MgvProduct, labelName: String?): String {
 
     var labelBase: String = try {
-      fileController.readFileFromAssets(labelName ?: "etiqueta_base.prn")
+      fileController.readFileFromAssets(labelName ?: "labels/etiqueta_base.prn")
     } catch (e: FileNotFoundException) {
       throw e
     }

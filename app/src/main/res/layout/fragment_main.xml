@@ -37,13 +37,13 @@
                 android:id="@+id/textView"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:textColor="@color/black"
                 android:layout_marginStart="@dimen/big_margin"
-                android:layout_marginTop="88dp"
+                android:layout_marginTop="22dp"
                 android:text="@string/text_title_description"
+                android:textColor="@color/black"
                 android:textSize="35sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
             <TextView
                 android:id="@+id/textView3"
@@ -76,7 +76,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:paddingStart="@dimen/default_margin"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="128dp"
                 android:layout_marginEnd="@dimen/extra_big_margin"
                 android:textSize="35sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -89,33 +89,33 @@
                 android:id="@+id/textView4"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:textColor="@color/black"
                 android:layout_marginStart="@dimen/big_margin"
-                android:layout_marginTop="161dp"
+                android:layout_marginTop="23dp"
                 android:text="@string/text_title_weight"
+                android:textColor="@color/black"
                 android:textSize="35sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
 
             <TextView
                 android:id="@+id/textView6"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_marginTop="161dp"
+                android:layout_marginTop="23dp"
                 android:text="@string/text_title_price"
                 android:textColor="@color/black"
                 android:textSize="35sp"
                 app:layout_constraintStart_toStartOf="@+id/guideline4"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/productDescription" />
 
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:textColor="@color/black"
                 android:layout_marginStart="@dimen/big_margin"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="128dp"
                 android:text="@string/text_title_barcode"
+                android:textColor="@color/black"
                 android:textSize="35sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
@@ -124,61 +124,61 @@
                 android:id="@+id/productDescription"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:paddingStart="@dimen/default_margin"
-                tools:text="BACON MANTA RIO SUL"
                 android:layout_marginEnd="@dimen/extra_big_margin"
+                android:paddingStart="@dimen/default_margin"
                 android:text="@{viewModel.mgvProduct.description}"
                 android:textSize="35sp"
                 app:layout_constraintBaseline_toBaselineOf="@+id/textView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.177"
-                app:layout_constraintStart_toEndOf="@+id/textView" />
+                app:layout_constraintStart_toEndOf="@+id/textView"
+                tools:text="BACON MANTA RIO SUL" />
 
             <TextView
                 android:id="@+id/textView5"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:textSize="35sp"
-                tools:text="1,000 Kg"
                 android:paddingStart="@dimen/default_margin"
+                android:textSize="35sp"
                 app:layout_constraintBaseline_toBaselineOf="@+id/textView4"
                 app:layout_constraintEnd_toStartOf="@+id/guideline4"
                 app:layout_constraintStart_toEndOf="@+id/textView4"
-                app:productWeight="@{viewModel.mgvProduct.weight}" />
+                app:productWeight="@{viewModel.mgvProduct.weight}"
+                tools:text="1,000 Kg" />
 
             <TextView
                 android:id="@+id/textView10"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                tools:text="R$ 222,00"
-                android:paddingStart="@dimen/default_margin"
                 android:layout_marginEnd="@dimen/extra_big_margin"
+                android:paddingStart="@dimen/default_margin"
                 android:textSize="35sp"
                 app:layout_constraintBaseline_toBaselineOf="@+id/textView6"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/textView6"
-                app:productPrice="@{viewModel.mgvProduct.totalPrice}" />
+                app:productPrice="@{viewModel.mgvProduct.totalPrice}"
+                tools:text="R$ 222,00" />
 
             <Button
                 android:id="@+id/buttonWeighing"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
-                android:layout_marginTop="241dp"
+                android:layout_marginTop="30dp"
                 android:text="@string/text_button_weighing"
                 app:layout_constraintStart_toStartOf="@+id/guideline4"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
             <Button
                 android:id="@+id/buttonPrint"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_marginStart="47dp"
+                android:layout_marginTop="30dp"
                 android:layout_marginEnd="@dimen/extra_big_margin"
-                android:layout_marginTop="241dp"
                 android:text="@string/text_button_print"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/buttonWeighing"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/textView10" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout"
@@ -203,22 +203,22 @@
                 android:layout_height="50dp"
                 android:layout_marginHorizontal="@dimen/big_margin"
                 android:layout_marginStart="32dp"
-                android:layout_marginTop="240dp"
+                android:layout_marginTop="29dp"
                 android:text="@string/text_button_fix_product"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
             <Button
                 android:id="@+id/buttonLoadPrice"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_marginHorizontal="@dimen/big_margin"
-                android:layout_marginTop="241dp"
+                android:layout_marginTop="30dp"
                 android:width="0dp"
                 android:text="@string/text_button_load_price"
                 app:layout_constraintEnd_toStartOf="@+id/guideline4"
                 app:layout_constraintStart_toEndOf="@+id/buttonFixProduct"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline4"
@@ -250,6 +250,31 @@
                     android:layout_height="match_parent"
                     android:background="@color/dark_red" />
             </LinearLayout>
+
+            <Spinner
+                android:id="@+id/selectLabel"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="40dp"
+                android:layout_marginHorizontal="@dimen/extra_big_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/guideline4"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+            <TextView
+                android:id="@+id/textView15"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="@dimen/big_margin"
+                android:layout_marginTop="40dp"
+                android:text="@string/title_label_model"
+                android:textColor="@color/black"
+                android:textSize="35sp"
+                app:layout_constraintEnd_toStartOf="@+id/guideline4"
+                app:layout_constraintHorizontal_bias="0.503"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

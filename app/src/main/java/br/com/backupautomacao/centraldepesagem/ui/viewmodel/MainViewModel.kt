@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import br.com.backupautomacao.centraldepesagem.AppApplication
+import br.com.backupautomacao.centraldepesagem.FileController
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.bluetooth.BluetoothListener
@@ -19,6 +20,8 @@ import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
 import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
+import br.com.backupautomacao.centraldepesagem.labels.ET119
+import br.com.backupautomacao.centraldepesagem.labels.LabelBuilder
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
@@ -60,6 +63,8 @@ class MainFragmentViewModel(application: Application) :
   private val workManager by lazy { getApplication<AppApplication>().workManager }
   private val _bluetoothStatus = MutableLiveData(false)
   val bluetoothStatus: LiveData<Boolean> = _bluetoothStatus
+  private val _labelsList = MutableLiveData<List<String>>()
+  val labelsList:LiveData<List<String>> = _labelsList
 
   val isFixed = MutableLiveData(false)
 
@@ -89,6 +94,7 @@ class MainFragmentViewModel(application: Application) :
 
   init {
     applicationMonitor()
+    updateLabelList()
   }
 
   private fun applicationMonitor() {
@@ -107,13 +113,16 @@ class MainFragmentViewModel(application: Application) :
     }
   }
 
+  fun updateLabelList(){
+    val labelBuild = LabelBuilder()
+    _labelsList.value = labelBuild.listLabels(getApplication())
+  }
+
   private val _currentDeviceConnected: MutableLiveData<ConnectedThread> = MutableLiveData()
 
   private fun updateWeightProduct(message: ByteArray) {
 
     val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
-
-    //weight = Formatter.formatFromUranoUseCb2Protocol(message)
     val updateProduct = _mgvProduct.value!!
     updateProduct.apply {
       weight = newWeight
@@ -230,8 +239,9 @@ class MainFragmentViewModel(application: Application) :
         showMessage(getString(R.string.make_weighing))
         return
       }
-      val label = Label(getApplication())
-      val newLabel = label.generateLabelBase(product, null)
+      val label = ET119(getApplication())
+      val newLabel = label.generateLabel(product)
+
       val printTask = PrintWorker.createUniquePrintTask(
         printerAddress = printerIp,
         printerPort = printerPort,
@@ -242,6 +252,7 @@ class MainFragmentViewModel(application: Application) :
       _scale.value = null
       _updateStatus.value = StatusApp.FINALIZAR
       if (isFixed.value == false) clearFields()
+
     } catch (e: FileNotFoundException) {
       showMessage(getString(R.string.file_not_found_error))
     } catch (e: InvalidParameterException) {

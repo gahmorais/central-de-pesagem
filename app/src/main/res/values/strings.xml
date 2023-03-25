@@ -68,4 +68,5 @@
     <string name="insert_label_quantity">Insira a quantidade de etiquetas</string>
     <string name="insert_label_weight">Insira o peso do produto</string>
     <string name="text_button_fix_product">Fixar produto</string>
+    <string name="title_label_model">Modelo de etiqueta</string>
 </resources>

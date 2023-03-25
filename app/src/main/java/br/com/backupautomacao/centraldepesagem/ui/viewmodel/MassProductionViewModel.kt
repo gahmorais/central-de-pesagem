@@ -73,7 +73,7 @@ class MassProductionViewModel(application: Application) : AndroidViewModel(appli
       val product: MgvProduct = mgvProduct.value ?: MgvProduct()
       val label = Label(getApplication())
       val newLabel =
-        label.generateLabelWithQuantity(product, "etiqueta_modelo_grande.prn", quantity.toInt())
+        label.generateLabelWithQuantity(product, "labels/etiqueta_modelo_grande.prn", quantity.toInt())
       val printerIp: String? = configRepository.getConfig(ConfigRepository.PRINTER_IP)
       val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
       val printTask = PrintWorker.createUniquePrintTask(

@@ -10,6 +10,8 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
@@ -104,6 +106,27 @@ class MainFragment : Fragment() {
       } else {
         binding.bluetoothStatus.background =
           AppCompatResources.getDrawable(requireActivity(), R.color.dark_red)
+      }
+    }
+
+    mainViewModel.labelsList.observe(viewLifecycleOwner) { labels ->
+      val spinnerAdapter =
+        ArrayAdapter<String>(requireActivity(), android.R.layout.simple_spinner_item)
+      spinnerAdapter.addAll(labels)
+      binding.selectLabel.adapter = spinnerAdapter
+      binding.selectLabel.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(
+          adapterView: AdapterView<*>?,
+          view: View?,
+          position: Int,
+          p3: Long
+        ) {
+          Toast.makeText(requireActivity(), labels[position], Toast.LENGTH_SHORT).show()
+        }
+
+        override fun onNothingSelected(p0: AdapterView<*>?) {
+          TODO("Not yet implemented")
+        }
       }
     }
   }
