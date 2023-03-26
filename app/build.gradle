@@ -6,8 +6,8 @@ plugins {
 
 android {
     testOptions {
-        unitTests {
-            includeAndroidResources = true
+        unitTests.all {
+            useJUnitPlatform()
         }
     }
 
@@ -65,6 +65,8 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.5.4'
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.0-Beta'
+//    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
 
     //Room
     def roomVersion = "2.4.3"
@@ -88,18 +90,26 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
+    //Ktor Client
+    def ktor_version = "2.2.4"
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
+    implementation("io.ktor:ktor-serialization-gson:$ktor_version")
+    implementation("io.ktor:ktor-client-logging:$ktor_version")
+    def slf4j_version = "2.0.6"
+    implementation("org.slf4j:slf4j-simple:$slf4j_version")
+
     //Dependecies Injection
     def koin_version = "3.2.2"
-    def koin_android_version= "3.3.0"
+    def koin_android_version = "3.3.0"
     implementation "io.insert-koin:koin-android:$koin_android_version"
     implementation "io.insert-koin:koin-core:$koin_version"
     testImplementation "io.insert-koin:koin-test:$koin_version"
-
-    //Speech Recognizer
-    implementation 'net.gotev:speech:1.6.2'
+    testImplementation "io.insert-koin:koin-test-junit4:$koin_version"
 
     //Test
-    testImplementation 'junit:junit:4.13.2'
+//    testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

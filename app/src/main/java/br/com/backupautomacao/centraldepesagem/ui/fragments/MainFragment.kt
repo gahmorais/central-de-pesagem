@@ -1,8 +1,6 @@
 package br.com.backupautomacao.centraldepesagem.ui.fragments
 
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -13,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.work.WorkInfo
@@ -99,19 +96,9 @@ class MainFragment : Fragment() {
       mainViewModel.connectToDevices(deviceList)
     }
 
-    mainViewModel.bluetoothStatus.observe(viewLifecycleOwner) { isConnnected ->
-      if (isConnnected) {
-        binding.bluetoothStatus.background =
-          AppCompatResources.getDrawable(requireActivity(), R.color.green)
-      } else {
-        binding.bluetoothStatus.background =
-          AppCompatResources.getDrawable(requireActivity(), R.color.dark_red)
-      }
-    }
-
     mainViewModel.labelsList.observe(viewLifecycleOwner) { labels ->
       val spinnerAdapter =
-        ArrayAdapter<String>(requireActivity(), android.R.layout.simple_spinner_item)
+        ArrayAdapter<String>(requireActivity(), R.layout.custom_item_spinner)
       spinnerAdapter.addAll(labels)
       binding.selectLabel.adapter = spinnerAdapter
       binding.selectLabel.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -121,7 +108,8 @@ class MainFragment : Fragment() {
           position: Int,
           p3: Long
         ) {
-          Toast.makeText(requireActivity(), labels[position], Toast.LENGTH_SHORT).show()
+          mainViewModel.updateLabelType(adapterView?.selectedItem.toString())
+
         }
 
         override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -150,8 +138,17 @@ class MainFragment : Fragment() {
   }
 
   private fun blockProduct() {
-    mainViewModel.isFixed.value = true
-    mainViewModel.showMessage("Produto fixado")
+    mainViewModel.isFixed.value = mainViewModel.isFixed.value?.not()
+    mainViewModel.isFixed.value?.let {fixed ->
+      if(fixed){
+        mainViewModel.showMessage("Produto fixado")
+        binding.buttonFixProduct.text = getString(R.string.release_product)
+
+      }else{
+        binding.buttonFixProduct.text = getString(R.string.fix_product)
+        mainViewModel.showMessage("Produto liberado")
+      }
+    }
   }
 
   private fun print() {

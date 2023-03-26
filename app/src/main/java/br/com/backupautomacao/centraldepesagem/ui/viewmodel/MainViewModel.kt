@@ -10,8 +10,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
+import androidx.work.WorkManager
 import br.com.backupautomacao.centraldepesagem.AppApplication
-import br.com.backupautomacao.centraldepesagem.FileController
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.bluetooth.BluetoothListener
@@ -20,26 +20,18 @@ import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
 import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
-import br.com.backupautomacao.centraldepesagem.labels.ET119
+import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 import br.com.backupautomacao.centraldepesagem.labels.LabelBuilder
-import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
-import br.com.backupautomacao.centraldepesagem.network.MgvApi
-import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
-import br.com.backupautomacao.centraldepesagem.network.MgvProduct
+import br.com.backupautomacao.centraldepesagem.network.*
 import br.com.backupautomacao.centraldepesagem.ui.UiHandler
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
-import br.com.backupautomacao.centraldepesagem.utils.Label
-import br.com.backupautomacao.centraldepesagem.utils.Util
-import br.com.backupautomacao.centraldepesagem.utils.findItem
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import net.gotev.speech.Speech
-import net.gotev.speech.SpeechDelegate
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.io.FileNotFoundException
+import java.net.NoRouteToHostException
 import java.nio.charset.StandardCharsets
 import java.security.InvalidParameterException
 import java.util.concurrent.Executors
@@ -56,15 +48,17 @@ enum class StatusApp {
 }
 
 class MainFragmentViewModel(application: Application) :
-  AndroidViewModel(application), BluetoothListener {
+  AndroidViewModel(application), BluetoothListener, KoinComponent {
 
-  private val configRepository by lazy { getApplication<AppApplication>().configRepository }
-  private val operationRepository by lazy { getApplication<AppApplication>().operationRepository }
-  private val workManager by lazy { getApplication<AppApplication>().workManager }
-  private val _bluetoothStatus = MutableLiveData(false)
-  val bluetoothStatus: LiveData<Boolean> = _bluetoothStatus
-  private val _labelsList = MutableLiveData<List<String>>()
-  val labelsList:LiveData<List<String>> = _labelsList
+  private val configRepository: ConfigRepository by inject()
+  private val operationRepository: OperationRepository by inject()
+  private val workManager: WorkManager by inject()
+
+  private val _labelsList = MutableLiveData<List<String>>(listOf())
+  val labelsList: LiveData<List<String>> = _labelsList
+
+  private val _labelType = MutableLiveData<String>("")
+  val labelType: LiveData<String> = _labelType
 
   val isFixed = MutableLiveData(false)
 
@@ -73,18 +67,11 @@ class MainFragmentViewModel(application: Application) :
     bm.adapter
   }
 
-  private val retrofitInstance by lazy {
-    val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
-    MgvApi.retrofitService(serverAddress)
-  }
-
   private val _mgvProduct: MutableLiveData<MgvProduct?> = MutableLiveData()
   val mgvProduct: LiveData<MgvProduct?> = _mgvProduct
 
   private val _statusMessage: MutableLiveData<String> = MutableLiveData()
   val statusMessage: LiveData<String> = _statusMessage
-
-  private val _scale: MutableStateFlow<Int?> = MutableStateFlow(null)
 
   private val _connectedThreads: MutableLiveData<ArrayList<ConnectedThread>> =
     MutableLiveData(ArrayList())
@@ -113,30 +100,36 @@ class MainFragmentViewModel(application: Application) :
     }
   }
 
-  fun updateLabelList(){
+  private fun updateLabelList() {
     val labelBuild = LabelBuilder()
     _labelsList.value = labelBuild.listLabels(getApplication())
+    _labelType.value = labelsList.value?.get(0) ?: ""
+  }
+
+  fun updateLabelType(label: String) {
+    _labelType.value = label
   }
 
   private val _currentDeviceConnected: MutableLiveData<ConnectedThread> = MutableLiveData()
 
   private fun updateWeightProduct(message: ByteArray) {
-
     val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
     val updateProduct = _mgvProduct.value!!
+
     updateProduct.apply {
       weight = newWeight
       totalPrice = price.times(updateProduct.weight!!)
       loadPrice(price)
     }
+
     _mgvProduct.value = updateProduct
     _updateStatus.value = StatusApp.GRAVAR_OPERACAO
+
   }
 
   fun fetchItem(codItem: String) {
     Log.i("MainFragmentViewModel", "fetchItem: Buscando item")
-    val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
-    val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
+
     if (codItem.isEmpty()) {
       showMessage(getApplication<AppApplication>().getString(R.string.barcode_error))
       return
@@ -144,74 +137,30 @@ class MainFragmentViewModel(application: Application) :
     _updateStatus.value = StatusApp.BUSCAR_PRODUTO
     viewModelScope.launch {
       try {
-        val (mgvError, item) = withContext(Dispatchers.Default) {
-          retrofitInstance.queryItem(
-            item = codItem,
-            palavraChave = mgvPassword,
-            numeroLoja = storeNumber
-          )
+        val mgvRepository = MgvRepository()
+        val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
+        val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
+        val product = mgvRepository.queryItem(mgvPassword, storeNumber, codItem)
+
+        product?.codNutrictionFacts?.let {
+          product.nutrictionFacts = mgvRepository.getNutriction(mgvPassword, storeNumber, it)
         }
 
-        mgvError?.let { error ->
-          Log.i("MainFragmentViewModel", "fetchItem: $error")
-          showMessage(
-            getApplication<AppApplication>().getString(
-              R.string.error_responde_mgv,
-              error.message,
-              error.code
-            )
-          )
+        product?.codExtraInfo?.let {
+          product.extraInfo = mgvRepository.getExtraInfo(mgvPassword, storeNumber, it)
         }
 
-        item?.also { product ->
-//          product.extraInfo = item.codExtraInfo?.let { code ->
-//            getExtraInfo(mgvPassword, storeNumber, code)
-//          }
-//          product.nutrictionFacts = item.codNutrictionFacts?.let { code ->
-//            getNutriction(mgvPassword, storeNumber, code)
-//          }
-          _mgvProduct.value = product
-          _updateStatus.value = StatusApp.REALIZAR_PESAGEM
-        }
-      } catch (e: IllegalArgumentException) {
+        _mgvProduct.value = product
+        _updateStatus.value = StatusApp.REALIZAR_PESAGEM
+      } catch (e: NoRouteToHostException) {
         showMessage(getString(R.string.invalid_address_server))
         Log.e("MainFragmentViewModel", "fetchItem: ", e)
       } catch (e: Exception) {
-        showMessage(getString(R.string.request_error))
-        Log.e("MainFragmentViewModel", "fetchItem: ", e)
+        e.message?.let {
+          showMessage(it)
+          Log.e("MainFragmentViewModel", "fetchItem: ", e)
+        }
       }
-    }
-  }
-
-  private suspend fun getNutriction(
-    mgvPassword: String,
-    storeNumber: String,
-    codItem: Int
-  ): MgvInformacoesNutricionais? {
-    val responseNutritionalInfo = withContext(Dispatchers.Default) {
-      retrofitInstance.queryNutritionalInfo(
-        palavraChave = mgvPassword,
-        numeroLoja = storeNumber
-      )
-    }
-    return responseNutritionalInfo.nutrictionFacts?.find {
-      it.Codigo == codItem.toString()
-    }
-  }
-
-  private suspend fun getExtraInfo(
-    mgvPassword: String,
-    storeNumber: String,
-    codItem: Int
-  ): ExtraInfo? {
-
-
-    val responseExtraInfo = withContext(Dispatchers.Default) {
-      retrofitInstance.queryExtraInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
-    }
-
-    return responseExtraInfo.extraInfos?.find {
-      it.code == codItem.toString()
     }
   }
 
@@ -223,6 +172,7 @@ class MainFragmentViewModel(application: Application) :
     }
     val command = byteArrayOf(0x05)
     _currentDeviceConnected.value?.write(command)
+//    updateWeightProduct("5000".toByteArray())
   }
 
   fun print() {
@@ -235,11 +185,13 @@ class MainFragmentViewModel(application: Application) :
       val printerIp: String? = configRepository.getConfig(PRINTER_IP)
       val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
       val product = _mgvProduct.value!!
+
       if (product.weight == null || product.weight == 0.0) {
         showMessage(getString(R.string.make_weighing))
         return
       }
-      val label = ET119(getApplication())
+
+      val label = LabelBuilder.build(labelType.value ?: "", getApplication())
       val newLabel = label.generateLabel(product)
 
       val printTask = PrintWorker.createUniquePrintTask(
@@ -249,15 +201,19 @@ class MainFragmentViewModel(application: Application) :
       )
 
       workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
-      _scale.value = null
       _updateStatus.value = StatusApp.FINALIZAR
-      if (isFixed.value == false) clearFields()
+      if (isFixed.value == false) {
+        clearFields()
+      } else {
+        updateWeightProduct("0.0".toByteArray())
+      }
 
     } catch (e: FileNotFoundException) {
       showMessage(getString(R.string.file_not_found_error))
     } catch (e: InvalidParameterException) {
       showMessage("Porta ou endereço ip inválidos")
     } catch (e: Exception) {
+      e.printStackTrace()
       showMessage("Erro não esperado")
     }
   }
@@ -295,7 +251,7 @@ class MainFragmentViewModel(application: Application) :
   }
 
   private fun clearFields() {
-    _mgvProduct.value = MgvProduct()
+    _mgvProduct.value = null
   }
 
   fun connectToDevices(devices: List<BluetoothDevice>) {
@@ -333,13 +289,11 @@ class MainFragmentViewModel(application: Application) :
   }
 
   private fun getString(stringRes: Int, vararg inputs: Any): String {
-
     return getApplication<AppApplication>().getString(stringRes, inputs)
   }
 
   override fun onCleared() {
     super.onCleared()
-    Speech.getInstance().shutdown()
     _connectedThreads.value?.run {
       forEach { it.cancel() }
     }
@@ -364,7 +318,6 @@ class MainFragmentViewModel(application: Application) :
     if (_connectedThreads.value?.size == 1) {
       val firstDevice = 0
       setActiveThread(firstDevice)
-      _bluetoothStatus.value = true
     }
     val scaleNumber = connectedThreads.value?.size
 

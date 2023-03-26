@@ -10,17 +10,17 @@ data class MgvResponseProduct(
 
 data class MgvProduct(
   var nutrictionFacts: MgvInformacoesNutricionais? = null,
-  var extraInfo: ExtraInfo? = null,
+  var extraInfo: ExtraInfo?,
   @SerializedName("Codigo")
   val code: String = "",
   @SerializedName("Descritivo1aLinha")
   val description: String = "",
   @SerializedName("CodInfoExtra")
-  val codExtraInfo: Int? = null,
+  val codExtraInfo: Int?,
   @SerializedName("CodInfoNutricional")
-  val codNutrictionFacts: Int? = null,
+  val codNutrictionFacts: Int?,
   @SerializedName("CodTara")
-  val codTara: Int? = null,
+  val codTara: Int?,
   @SerializedName("DiasValidade")
   val shelfLife: Int = 0,
   @SerializedName("Preco")

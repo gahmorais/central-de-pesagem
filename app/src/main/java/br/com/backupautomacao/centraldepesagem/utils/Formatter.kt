@@ -16,6 +16,9 @@ class Formatter private constructor() {
     }
 
     fun <T> formatWeight(value: T?): String {
+      if (value == null) {
+        return String.format(Locale.ENGLISH, "%.3f Kg", 0.0).replace(".", ",")
+      }
       return String.format(Locale.ENGLISH, "%.3f Kg", value).replace(".", ",")
     }
 

@@ -7,9 +7,11 @@ import br.com.backupautomacao.centraldepesagem.AppApplication
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.utils.Validate
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
-  private val configRepository = getApplication<AppApplication>().configRepository
+class SettingsViewModel(application: Application) : AndroidViewModel(application), KoinComponent {
+  private val configRepository:ConfigRepository by inject()
   private val _statusMessage = MutableLiveData<String>()
   var automaticPrintingEnable: Boolean =
     configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)

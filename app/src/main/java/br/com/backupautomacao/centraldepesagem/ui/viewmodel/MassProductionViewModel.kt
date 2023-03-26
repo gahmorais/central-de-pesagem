@@ -2,28 +2,29 @@ package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
-import br.com.backupautomacao.centraldepesagem.AppApplication
+import androidx.work.WorkManager
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.io.FileNotFoundException
 import java.security.InvalidParameterException
 
-class MassProductionViewModel(application: Application) : AndroidViewModel(application) {
+class MassProductionViewModel(application: Application) : AndroidViewModel(application), KoinComponent {
   private val _mgvProduct = MutableLiveData<MgvProduct?>()
   val mgvProduct: LiveData<MgvProduct?> = _mgvProduct
 
-  private val configRepository by lazy {
-    getApplication<AppApplication>().configRepository
-  }
-  private val workManager by lazy {
-    getApplication<AppApplication>().workManager
-  }
+  private val configRepository:ConfigRepository by inject()
+  private val workManager:WorkManager by inject()
 
   private val retrofitInstance by lazy {
     val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
@@ -70,7 +71,7 @@ class MassProductionViewModel(application: Application) : AndroidViewModel(appli
 
   fun print(quantity: String) {
     try {
-      val product: MgvProduct = mgvProduct.value ?: MgvProduct()
+      val product: MgvProduct = mgvProduct.value ?: throw Exception("Produto nulo")
       val label = Label(getApplication())
       val newLabel =
         label.generateLabelWithQuantity(product, "labels/etiqueta_modelo_grande.prn", quantity.toInt())
@@ -82,7 +83,7 @@ class MassProductionViewModel(application: Application) : AndroidViewModel(appli
         label = newLabel
       )
       workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
-      _mgvProduct.value = MgvProduct()
+      _mgvProduct.value = null
     } catch (e: InvalidParameterException) {
       Log.i("MassProductionViewModel", "print: Porta ou endereço ip inválidos")
     } catch (e: FileNotFoundException) {

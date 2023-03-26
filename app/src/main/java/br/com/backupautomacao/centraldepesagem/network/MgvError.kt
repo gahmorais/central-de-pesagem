@@ -2,6 +2,8 @@ package br.com.backupautomacao.centraldepesagem.network
 
 import com.google.gson.annotations.SerializedName
 
+const val LOJA_NAO_ENCONTRADA = "-3"
+const val PRODUTO_NAO_ENCONTRADO = "-6"
 data class MgvError(
   @SerializedName("Codigo")
   val code: String,

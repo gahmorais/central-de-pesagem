@@ -15,7 +15,6 @@
     </style>
 
     <style name="BlueButton">
-        <item name="fontFamily">@font/amplesoft_med</item>
         <item name="color">@color/dark_blue</item>
         <item name="android:textSize">@dimen/big_font</item>
         <item name="android:gravity">center</item>

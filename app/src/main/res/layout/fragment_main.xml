@@ -183,9 +183,11 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout"
                 android:layout_width="0dp"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/big_margin"
-                app:layout_constraintEnd_toStartOf="@+id/linearLayout6"
+                android:layout_marginEnd="@dimen/extra_big_margin"
+                android:layout_marginTop="@dimen/small_margin"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -193,13 +195,14 @@
                     android:id="@+id/inputProductCode"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:textSize="@dimen/big_font"
                     android:hint="@string/placeholder_input_text"
                     android:inputType="number" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/buttonFixProduct"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:layout_marginHorizontal="@dimen/big_margin"
                 android:layout_marginStart="32dp"
@@ -225,38 +228,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintGuide_begin="466dp" />
-
-            <LinearLayout
-                android:id="@+id/linearLayout6"
-                android:layout_width="110dp"
-                android:layout_height="50dp"
-                android:layout_marginEnd="@dimen/extra_big_margin"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textColor="@color/black"
-                    android:text="Status"
-                    android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/bluetoothStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/dark_red" />
-            </LinearLayout>
+                app:layout_constraintGuide_begin="569dp" />
 
             <Spinner
                 android:id="@+id/selectLabel"
+                android:background="@drawable/custom_layout_spinner"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="40dp"
-                android:layout_marginHorizontal="@dimen/extra_big_margin"
+                android:layout_marginEnd="@dimen/extra_big_margin"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/guideline4"
