@@ -1,15 +1,9 @@
-package br.com.backupautomacao.centraldepesagem.network
+package br.com.backupautomacao.centraldepesagem.models
 
 import com.google.gson.annotations.SerializedName
 
-data class MgvResponseExtraInfo(
-  @SerializedName("informacoesExtras")
-  val extraInfos: List<ExtraInfo>?,
-  @SerializedName("ExportaInformacaoExtraResult")
-  val mgvError: MgvError?
-)
 
-data class ExtraInfo(
+data class MgvExtraInfo(
   @SerializedName("Codigo")
   val code: String,
   @SerializedName("Linha1")

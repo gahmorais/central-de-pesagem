@@ -63,7 +63,7 @@
                 android:layout_height="50dp"
                 android:paddingStart="@dimen/default_margin"
                 android:layout_marginStart="2dp"
-                android:text="@{viewModel.mgvProduct.code}"
+                android:text="@{viewModel.mgvProductImpl.code}"
                 android:textSize="35sp"
                 app:layout_constraintBaseline_toBaselineOf="@+id/textView2"
                 app:layout_constraintEnd_toStartOf="@+id/guideline4"
@@ -82,7 +82,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/textView3"
                 app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
-                app:productPrice="@{viewModel.mgvProduct.price}"
+                app:productPrice="@{viewModel.mgvProductImpl.price}"
                 tools:text="R$ 222,00" />
 
             <TextView
@@ -126,7 +126,7 @@
                 android:layout_height="50dp"
                 android:layout_marginEnd="@dimen/extra_big_margin"
                 android:paddingStart="@dimen/default_margin"
-                android:text="@{viewModel.mgvProduct.description}"
+                android:text="@{viewModel.mgvProductImpl.description}"
                 android:textSize="35sp"
                 app:layout_constraintBaseline_toBaselineOf="@+id/textView"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -143,7 +143,7 @@
                 app:layout_constraintBaseline_toBaselineOf="@+id/textView4"
                 app:layout_constraintEnd_toStartOf="@+id/guideline4"
                 app:layout_constraintStart_toEndOf="@+id/textView4"
-                app:productWeight="@{viewModel.mgvProduct.weight}"
+                app:productWeight="@{viewModel.mgvProductImpl.weight}"
                 tools:text="1,000 Kg" />
 
             <TextView
@@ -156,7 +156,7 @@
                 app:layout_constraintBaseline_toBaselineOf="@+id/textView6"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/textView6"
-                app:productPrice="@{viewModel.mgvProduct.totalPrice}"
+                app:productPrice="@{viewModel.mgvProductImpl.totalPrice}"
                 tools:text="R$ 222,00" />
 
             <Button

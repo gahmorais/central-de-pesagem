@@ -1,4 +1,4 @@
-package br.com.backupautomacao.centraldepesagem.network
+package br.com.backupautomacao.centraldepesagem.errors
 
 import com.google.gson.annotations.SerializedName
 

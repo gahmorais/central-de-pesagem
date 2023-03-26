@@ -66,7 +66,9 @@
     <string name="save_operation_error">Erro ao salvar operação</string>
     <string name="text_description_img_close">Botão para fechar a aplicação</string>
     <string name="insert_label_quantity">Insira a quantidade de etiquetas</string>
-    <string name="insert_label_weight">Insira o peso do produto</string>
+    <string name="insert_product_quantity">Insira a quantidade do produto</string>
     <string name="text_button_fix_product">Fixar produto</string>
     <string name="title_label_model">Modelo de etiqueta</string>
+    <string name="release_product">Desfixar Produto</string>
+    <string name="fix_product">Fixar Produto</string>
 </resources>

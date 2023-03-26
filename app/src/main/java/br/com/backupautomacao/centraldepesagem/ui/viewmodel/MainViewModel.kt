@@ -22,6 +22,8 @@ import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
 import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 import br.com.backupautomacao.centraldepesagem.labels.LabelBuilder
+import br.com.backupautomacao.centraldepesagem.labels.LabelBuilder.Companion.properties
+import br.com.backupautomacao.centraldepesagem.models.MgvProductImpl
 import br.com.backupautomacao.centraldepesagem.network.*
 import br.com.backupautomacao.centraldepesagem.ui.UiHandler
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
@@ -67,8 +69,8 @@ class MainFragmentViewModel(application: Application) :
     bm.adapter
   }
 
-  private val _mgvProduct: MutableLiveData<MgvProduct?> = MutableLiveData()
-  val mgvProduct: LiveData<MgvProduct?> = _mgvProduct
+  private val _mgvProductImpl: MutableLiveData<MgvProductImpl?> = MutableLiveData()
+  val mgvProductImpl: LiveData<MgvProductImpl?> = _mgvProductImpl
 
   private val _statusMessage: MutableLiveData<String> = MutableLiveData()
   val statusMessage: LiveData<String> = _statusMessage
@@ -114,7 +116,7 @@ class MainFragmentViewModel(application: Application) :
 
   private fun updateWeightProduct(message: ByteArray) {
     val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
-    val updateProduct = _mgvProduct.value!!
+    val updateProduct = _mgvProductImpl.value!!
 
     updateProduct.apply {
       weight = newWeight
@@ -122,8 +124,11 @@ class MainFragmentViewModel(application: Application) :
       loadPrice(price)
     }
 
-    _mgvProduct.value = updateProduct
-    _updateStatus.value = StatusApp.GRAVAR_OPERACAO
+    _mgvProductImpl.value = updateProduct
+    //Só grava a operação se o peso for maior que zero
+    if(newWeight > 0.0){
+      _updateStatus.value = StatusApp.GRAVAR_OPERACAO
+    }
 
   }
 
@@ -150,7 +155,7 @@ class MainFragmentViewModel(application: Application) :
           product.extraInfo = mgvRepository.getExtraInfo(mgvPassword, storeNumber, it)
         }
 
-        _mgvProduct.value = product
+        _mgvProductImpl.value = product
         _updateStatus.value = StatusApp.REALIZAR_PESAGEM
       } catch (e: NoRouteToHostException) {
         showMessage(getString(R.string.invalid_address_server))
@@ -184,7 +189,7 @@ class MainFragmentViewModel(application: Application) :
     try {
       val printerIp: String? = configRepository.getConfig(PRINTER_IP)
       val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
-      val product = _mgvProduct.value!!
+      val product = _mgvProductImpl.value!!
 
       if (product.weight == null || product.weight == 0.0) {
         showMessage(getString(R.string.make_weighing))
@@ -192,7 +197,7 @@ class MainFragmentViewModel(application: Application) :
       }
 
       val label = LabelBuilder.build(labelType.value ?: "", getApplication())
-      val newLabel = label.generateLabel(product)
+      val newLabel = label.generateLabel(product).properties(1)
 
       val printTask = PrintWorker.createUniquePrintTask(
         printerAddress = printerIp,
@@ -219,7 +224,7 @@ class MainFragmentViewModel(application: Application) :
   }
 
   private fun checkProductIsNullOrEmpty(): Boolean {
-    return _mgvProduct.value?.run {
+    return _mgvProductImpl.value?.run {
       code.isEmpty()
     } ?: true
   }
@@ -251,7 +256,7 @@ class MainFragmentViewModel(application: Application) :
   }
 
   private fun clearFields() {
-    _mgvProduct.value = null
+    _mgvProductImpl.value = null
   }
 
   fun connectToDevices(devices: List<BluetoothDevice>) {
@@ -266,7 +271,7 @@ class MainFragmentViewModel(application: Application) :
 
   private fun saveOperation() {
     try {
-      val operation = _mgvProduct.value?.let { product ->
+      val operation = _mgvProductImpl.value?.let { product ->
         Operation(
           weight = product.weight!!,
           totalPrice = product.totalPrice!!,

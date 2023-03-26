@@ -2,13 +2,13 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="br.com.backupautomacao.centraldepesagem.ui.fragments.MassProductionFragment">
+    tools:context="br.com.backupautomacao.centraldepesagem.ui.fragments.SaleForUnitFragment">
 
     <data>
 
         <variable
             name="viewModel"
-            type="br.com.backupautomacao.centraldepesagem.ui.viewmodel.MassProductionViewModel" />
+            type="br.com.backupautomacao.centraldepesagem.ui.viewmodel.SaleForUnitViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -88,12 +88,12 @@
                 app:layout_constraintTop_toBottomOf="@+id/textInputLayout2">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etWeight"
+                    android:id="@+id/etProductQuantity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/custom_layout_spinner"
                     android:digits="0123456789.,"
-                    android:hint="@string/insert_label_weight"
+                    android:hint="@string/insert_product_quantity"
                     android:imeOptions="actionDone"
                     android:inputType="numberDecimal"
                     android:textSize="20sp" />
@@ -141,6 +141,7 @@
                     style="@style/ItemTextView"
                     android:layout_marginStart="50dp"
                     android:text="@{viewModel.mgvProduct.code}"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/textView12"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -152,6 +153,7 @@
                     android:layout_marginTop="60dp"
                     android:maxEms="10"
                     android:text="@{viewModel.mgvProduct.description}"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/textView13"
                     app:layout_constraintTop_toBottomOf="@+id/tvProductCode" />
 
@@ -160,6 +162,7 @@
                     style="@style/ItemTextView"
                     android:layout_marginStart="75dp"
                     android:layout_marginTop="60dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/textView14"
                     app:layout_constraintTop_toBottomOf="@+id/tvProductDescription"
                     app:productPrice="@{viewModel.mgvProduct.price}" />

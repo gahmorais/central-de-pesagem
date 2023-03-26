@@ -1,15 +1,6 @@
-package br.com.backupautomacao.centraldepesagem.network
+package br.com.backupautomacao.centraldepesagem.models
 
-import com.google.gson.annotations.SerializedName
-
-data class MgvResponseNutritionalInfo(
-  @SerializedName("informacoesNutricionais")
-  val nutrictionFacts: List<MgvInformacoesNutricionais>?,
-  @SerializedName("ExportaInformacaoNutricionalResult")
-  val mgvError: MgvError?
-)
-
-data class MgvInformacoesNutricionais(
+data class MgvNutritionalInfo(
   val Codigo: String?,
   val Carboidrato: Double?,
   val DescricaoMedidaCaseira: Int?,

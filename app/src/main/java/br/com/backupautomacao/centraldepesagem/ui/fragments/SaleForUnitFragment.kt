@@ -16,22 +16,22 @@ import androidx.work.WorkManager
 import br.com.backupautomacao.centraldepesagem.AppApplication
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.R
-import br.com.backupautomacao.centraldepesagem.databinding.FragmentMassProductionBinding
-import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MassProductionViewModel
+import br.com.backupautomacao.centraldepesagem.databinding.FragmentSaleForUnitBinding
+import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SaleForUnitViewModel
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 
-class MassProductionFragment : Fragment() {
-  private var _binding: FragmentMassProductionBinding? = null
+class SaleForUnitFragment : Fragment() {
+  private var _binding: FragmentSaleForUnitBinding? = null
   private val binding get() = _binding!!
   private lateinit var workManager: WorkManager
-  private val viewModel: MassProductionViewModel by viewModels()
+  private val viewModel: SaleForUnitViewModel by viewModels()
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
-    _binding = FragmentMassProductionBinding.inflate(inflater)
+    _binding = FragmentSaleForUnitBinding.inflate(inflater)
     binding.lifecycleOwner = this
     workManager = (requireActivity().application as AppApplication).workManager
     configureListeners()
@@ -110,11 +110,11 @@ class MassProductionFragment : Fragment() {
       false
     }
 
-    binding.etWeight.setOnEditorActionListener { textView, actionId, _ ->
+    binding.etProductQuantity.setOnEditorActionListener { textView, actionId, _ ->
       Log.i("MassProductionFragment", "configureListeners: $actionId")
       if (actionId == EditorInfo.IME_ACTION_DONE) {
-        val weight = textView.text.toString().toDouble()
-        viewModel.updateWeight(weight)
+        val quantity = textView.text.toString().toInt()
+        viewModel.updateQuantity(quantity)
         closeVirtualKeyboard(textView)
         return@setOnEditorActionListener true
       }
@@ -136,16 +136,14 @@ class MassProductionFragment : Fragment() {
           tvProductDescription.text = ""
           tvProductPrice.text = ""
         }
-
       }
     }
   }
 
   private fun clearFields() {
     binding.apply {
-      etProductCode.setText("")
       etLabelQuantity.setText("")
-      etWeight.setText("")
+      etProductQuantity.setText("")
     }
   }
 
@@ -159,7 +157,7 @@ class MassProductionFragment : Fragment() {
       Toast.makeText(requireActivity(), "Insira o código do produto", Toast.LENGTH_SHORT).show()
       return
     }
-    if (binding.etWeight.text.isNullOrEmpty()) {
+    if (binding.etProductQuantity.text.isNullOrEmpty()) {
       Toast.makeText(requireContext(), "Insira o peso do produto", Toast.LENGTH_SHORT).show()
       return
     }
@@ -169,6 +167,7 @@ class MassProductionFragment : Fragment() {
         .show()
       return
     }
+
     val quantity = binding.etLabelQuantity.text.toString()
     viewModel.print(quantity)
     monitoringPrint()

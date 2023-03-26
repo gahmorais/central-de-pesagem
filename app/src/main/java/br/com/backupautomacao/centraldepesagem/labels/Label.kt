@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import br.com.backupautomacao.centraldepesagem.Constants
 import br.com.backupautomacao.centraldepesagem.FileController
-import br.com.backupautomacao.centraldepesagem.network.MgvProduct
+import br.com.backupautomacao.centraldepesagem.models.MgvProductImpl
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
@@ -13,7 +13,7 @@ import java.util.*
 interface Label {
   val context: Context
   val name: String
-  fun generateLabel(mgvProduct: MgvProduct): String {
+  fun generateLabel(mgvProduct: MgvProductImpl): String {
     val fileController = FileController(context)
     var labelBase: String = try {
       fileController.readFileFromAssets("labels/${name}.zpl")

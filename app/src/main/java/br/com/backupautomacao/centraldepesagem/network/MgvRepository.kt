@@ -1,6 +1,11 @@
 package br.com.backupautomacao.centraldepesagem.network
 
 import android.util.Log
+import br.com.backupautomacao.centraldepesagem.errors.LOJA_NAO_ENCONTRADA
+import br.com.backupautomacao.centraldepesagem.errors.MgvProductNotFoundedException
+import br.com.backupautomacao.centraldepesagem.errors.MgvStoreNotFoundedException
+import br.com.backupautomacao.centraldepesagem.errors.PRODUTO_NAO_ENCONTRADO
+import br.com.backupautomacao.centraldepesagem.models.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -17,7 +22,7 @@ class MgvRepository : KoinComponent {
     keyWord: String = PALAVRA_CHAVE,
     storeNumber: String = NUMERO_LOJA,
     itemCode: String
-  ): MgvProduct? {
+  ): MgvProductImpl? {
 
     try {
       val response = client.get("ConsultaItem") {
@@ -57,7 +62,7 @@ class MgvRepository : KoinComponent {
     keyWord: String,
     storeNumber: String,
     codItem: Int
-  ): MgvInformacoesNutricionais? {
+  ): MgvNutritionalInfo? {
 
     val response = client.get("ExportaInformacaoNutricional") {
       parameter("palavraChave", keyWord)
@@ -77,7 +82,7 @@ class MgvRepository : KoinComponent {
     keyWord: String,
     storeNumber: String,
     codItem: Int
-  ): ExtraInfo? {
+  ): MgvExtraInfo? {
 
     val response = client.get("ExportaInformacaoExtra") {
       parameter("palavraChave", keyWord)
@@ -85,7 +90,7 @@ class MgvRepository : KoinComponent {
     }
     if (response.status.value in 200..209) {
       val mgvResponseExtraInfo: MgvResponseExtraInfo = response.body()
-      return mgvResponseExtraInfo.extraInfos?.find { it.code == codItem.toString() }
+      return mgvResponseExtraInfo.mgvExtraInfos?.find { it.code == codItem.toString() }
     }
     return null
   }

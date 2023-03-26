@@ -13,6 +13,11 @@ class LabelBuilder {
         else -> throw Exception("Modelo de etiqueta não encontrado")
       }
     }
+
+    fun String.properties(copies: Int): String {
+      return this.replace("var_copies", copies.toString())
+    }
+
   }
 
   fun listLabels(context: Context): List<String> {

@@ -139,12 +139,12 @@ class MainFragment : Fragment() {
 
   private fun blockProduct() {
     mainViewModel.isFixed.value = mainViewModel.isFixed.value?.not()
-    mainViewModel.isFixed.value?.let {fixed ->
-      if(fixed){
+    mainViewModel.isFixed.value?.let { fixed ->
+      if (fixed) {
         mainViewModel.showMessage("Produto fixado")
         binding.buttonFixProduct.text = getString(R.string.release_product)
 
-      }else{
+      } else {
         binding.buttonFixProduct.text = getString(R.string.fix_product)
         mainViewModel.showMessage("Produto liberado")
       }

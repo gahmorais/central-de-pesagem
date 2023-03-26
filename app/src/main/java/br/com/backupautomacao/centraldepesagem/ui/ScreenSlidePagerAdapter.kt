@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import br.com.backupautomacao.centraldepesagem.ui.fragments.MainFragment
-import br.com.backupautomacao.centraldepesagem.ui.fragments.MassProductionFragment
+import br.com.backupautomacao.centraldepesagem.ui.fragments.SaleForUnitFragment
 import br.com.backupautomacao.centraldepesagem.ui.fragments.ReportFragment
 import br.com.backupautomacao.centraldepesagem.ui.fragments.SettingsFragment
 
@@ -18,7 +18,7 @@ class ScreenSlidePagerAdapter(fragmentActivity: FragmentActivity) :
   override fun createFragment(position: Int): Fragment {
     return when (position) {
       0 -> MainFragment()
-      1 -> MassProductionFragment()
+      1 -> SaleForUnitFragment()
       2 -> ReportFragment()
       else -> SettingsFragment()
     }
