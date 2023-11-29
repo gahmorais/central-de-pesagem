@@ -1,6 +1,6 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.HowWorksWithViewModel" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.PesagemModular" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/dark_blue</item>
         <item name="colorPrimaryVariant">@color/dark_red</item>

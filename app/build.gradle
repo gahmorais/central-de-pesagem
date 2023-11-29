@@ -4,30 +4,34 @@ plugins {
     id 'org.jetbrains.kotlin.kapt' apply true
 }
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['release_storeFile'])
+            storePassword keystoreProperties['release_storePassword']
+            keyAlias keystoreProperties['release_keyAlias']
+            keyPassword keystoreProperties['release_keyPassword']
+        }
+    }
     testOptions {
-        unitTests.all {
-            useJUnitPlatform()
+        unitTests {
+            includeAndroidResources = true
         }
     }
 
-    signingConfigs {
-        create("release") {
-            storeFile = file('/home/gabrielmorais/android')
-            storePassword = 'gabu_171'
-            keyAlias = 'key0'
-            keyPassword = 'gabu_171'
-        }
-    }
     compileSdk 32
 
     defaultConfig {
-        applicationId "br.com.backupautomacao.howworkswithviewmodel"
+        applicationId "br.com.backupautomacao.pesagem_modular"
         minSdk 23
         targetSdk 32
         versionCode 6
         versionName "1.7.0"
-
+        testApplicationId "br.com.backupautomacao.pesagem_modular"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -43,7 +47,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
@@ -66,7 +70,7 @@ dependencies {
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.0-Beta'
-//    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
+    androidTestImplementation "org.mockito.kotlin:mockito-kotlin:4.1.0"
 
     //Room
     def roomVersion = "2.4.3"
@@ -113,6 +117,5 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-
 
 }

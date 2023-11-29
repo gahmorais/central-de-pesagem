@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="br.com.backupautomacao.centraldepesagem">
+    package="br.com.backupautomacao.pesagem_modular">
 
 
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
@@ -19,7 +19,7 @@
         android:required="true" />
 
     <application
-        android:name=".AppApplication"
+        android:name="br.com.backupautomacao.pesagem_modular.AppApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -30,10 +30,10 @@
         android:preserveLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.HowWorksWithViewModel"
+        android:theme="@style/Theme.PesagemModular"
         tools:targetApi="31">
         <activity
-            android:name="br.com.backupautomacao.centraldepesagem.ui.activities.MainActivity"
+            android:name="br.com.backupautomacao.pesagem_modular.ui.activities.MainActivity"
             android:exported="true"
             android:screenOrientation="landscape">
             <intent-filter>

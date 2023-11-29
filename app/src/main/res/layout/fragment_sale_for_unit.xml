@@ -2,13 +2,13 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="br.com.backupautomacao.centraldepesagem.ui.fragments.SaleForUnitFragment">
+    tools:context="br.com.backupautomacao.pesagem_modular.ui.fragments.SaleForUnitFragment">
 
     <data>
 
         <variable
             name="viewModel"
-            type="br.com.backupautomacao.centraldepesagem.ui.viewmodel.SaleForUnitViewModel" />
+            type="br.com.backupautomacao.pesagem_modular.ui.viewmodel.SaleForUnitViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
