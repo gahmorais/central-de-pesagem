@@ -10,6 +10,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import br.com.backupautomacao.pesagem_modular.AppApplication
@@ -18,6 +19,7 @@ import br.com.backupautomacao.pesagem_modular.R
 import br.com.backupautomacao.pesagem_modular.databinding.FragmentSaleForUnitBinding
 import br.com.backupautomacao.pesagem_modular.ui.viewmodel.SaleForUnitViewModel
 import br.com.backupautomacao.pesagem_modular.utils.Formatter
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SaleForUnitFragment : Fragment() {
@@ -73,6 +75,7 @@ class SaleForUnitFragment : Fragment() {
                 Toast.LENGTH_SHORT
               ).show()
             }
+
             WorkInfo.State.FAILED -> {
               stopLoading()
               Toast.makeText(
@@ -81,6 +84,7 @@ class SaleForUnitFragment : Fragment() {
                 Toast.LENGTH_SHORT
               ).show()
             }
+
             WorkInfo.State.CANCELLED -> {
               Toast.makeText(
                 requireContext(),
@@ -88,12 +92,15 @@ class SaleForUnitFragment : Fragment() {
                 Toast.LENGTH_SHORT
               ).show()
             }
+
             WorkInfo.State.RUNNING -> {
               Log.i("MainFragment", "monitoringPrint: Rodando tarefa")
             }
+
             WorkInfo.State.ENQUEUED -> {
               startLoading(getString(R.string.printing))
             }
+
             else -> stopLoading()
           }
         }
@@ -122,7 +129,7 @@ class SaleForUnitFragment : Fragment() {
     }
 
     binding.printButton.setOnClickListener {
-      print()
+      lifecycleScope.launch { print() }
     }
 
     viewModel.mgvProduct.observe(viewLifecycleOwner) { product ->
@@ -152,7 +159,7 @@ class SaleForUnitFragment : Fragment() {
     viewModel.fetchItem(code)
   }
 
-  private fun print() {
+  private suspend fun print() {
     if (binding.etProductCode.text.isNullOrEmpty()) {
       Toast.makeText(requireActivity(), "Insira o código do produto", Toast.LENGTH_SHORT).show()
       return

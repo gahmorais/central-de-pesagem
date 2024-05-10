@@ -68,6 +68,8 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
     return Result.failure(createDataMessage(applicationContext.getString(R.string.printing_error)))
   }
 
+
+
   private fun createDataMessage(message: String): Data {
     return Data.Builder().putString(WORK_RESULT, message).build()
   }

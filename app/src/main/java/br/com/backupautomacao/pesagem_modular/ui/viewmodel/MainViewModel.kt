@@ -1,33 +1,42 @@
 package br.com.backupautomacao.pesagem_modular.ui.viewmodel
 
-import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothAdapter
 import android.os.Build
 import android.util.Log
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import br.com.backup.bluetooth.BluetoothConnected
+import br.com.backup.bluetooth.BluetoothHandler
+import br.com.backup.bluetooth.exceptions.ClosedSocketException
+import br.com.backupautomacao.pesagem_modular.Constants
 import br.com.backupautomacao.pesagem_modular.PrintWorker
 import br.com.backupautomacao.pesagem_modular.R
-import br.com.backupautomacao.pesagem_modular.bluetooth.AndroidBluetoothController
-import br.com.backupautomacao.pesagem_modular.bluetooth.BluetoothListener
-import br.com.backupautomacao.pesagem_modular.bluetooth.ConnectedThread
-import br.com.backupautomacao.pesagem_modular.db.model.Operation
-import br.com.backupautomacao.pesagem_modular.db.repository.ConfigRepository
-import br.com.backupautomacao.pesagem_modular.db.repository.ConfigRepository.Companion.PRINTER_IP
-import br.com.backupautomacao.pesagem_modular.db.repository.OperationRepository
+import br.com.backupautomacao.pesagem_modular.data.model.Operation
+import br.com.backupautomacao.pesagem_modular.data.repository.ConfigRepository
+import br.com.backupautomacao.pesagem_modular.data.repository.OperationRepository
 import br.com.backupautomacao.pesagem_modular.labels.LabelBuilder
 import br.com.backupautomacao.pesagem_modular.models.MgvProductImpl
 import br.com.backupautomacao.pesagem_modular.network.*
 import br.com.backupautomacao.pesagem_modular.utils.Formatter
 import br.com.backupautomacao.pesagem_modular.utils.StringResourceProvider
 import br.com.backupautomacao.pesagem_modular.utils.properties
+import br.com.backupautomacao.pesagem_modular.utils.removeNonAlphaCharacters
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.net.ConnectException
 import java.net.NoRouteToHostException
@@ -45,55 +54,53 @@ enum class StatusApp {
   FINALIZAR
 }
 
-class MainFragmentViewModel(
+class MainViewModel(
   private val configRepository: ConfigRepository,
   private val operationRepository: OperationRepository,
   private val workManager: WorkManager,
-  private val bluetoothController: AndroidBluetoothController,
+  private val btHandler: BluetoothHandler,
   private val labelBuild: LabelBuilder,
   private val stringResourceProvider: StringResourceProvider,
-  private val mgvRepository: MgvRepository
-) :
-  ViewModel(), BluetoothListener {
+  private val apiMgv: ApiMgv
+) : ViewModel() {
 
   private val _labelsList = MutableLiveData<List<String>>(listOf())
   val labelsList: LiveData<List<String>> = _labelsList
 
-  private val _labelType = MutableLiveData<String>("")
+  private val _labelType = MutableLiveData("")
   val labelType: LiveData<String> = _labelType
   val isFixed = MutableLiveData(false)
 
   private val _mgvProductImpl: MutableLiveData<MgvProductImpl?> = MutableLiveData()
   val mgvProductImpl: LiveData<MgvProductImpl?> = _mgvProductImpl
 
-  private val _statusMessage: MutableLiveData<String> = MutableLiveData()
-  val statusMessage: LiveData<String> = _statusMessage
+  private val _statusMessage = MutableSharedFlow<String>()
+  val statusMessage = _statusMessage.asSharedFlow()
 
-  private val _connectedThreads: MutableLiveData<ArrayList<ConnectedThread>> =
-    MutableLiveData(ArrayList())
-  private val connectedThreads: LiveData<ArrayList<ConnectedThread>> = _connectedThreads
-  private val _currentDeviceConnected: MutableLiveData<ConnectedThread> = MutableLiveData()
-  private val _updateStatus: MutableStateFlow<StatusApp> = MutableStateFlow(StatusApp.INICIO)
+  private val _weight = MutableStateFlow(0.0)
+  val weight = _weight.asStateFlow()
+
+  private val _isLoading = MutableStateFlow(false)
+  val isLoading = _isLoading.asStateFlow()
+
+  private val _activeDevice = MutableStateFlow<BluetoothConnected?>(null)
+  val activeDevice = _activeDevice.asStateFlow()
+
+  private val _devices = MutableStateFlow<List<BluetoothConnected>>(listOf())
+  private val _updateStatus = MutableStateFlow(StatusApp.INICIO)
 
   init {
-    applicationMonitor()
     updateLabelList()
-  }
-
-  private fun applicationMonitor() {
-    viewModelScope.launch {
-      _updateStatus.collectLatest { status ->
-        val automaticPrint = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
-        when (status) {
-          StatusApp.INICIO -> Log.i("MainFragmentViewModel", "Inicio: ")
-          StatusApp.BUSCAR_PRODUTO -> Log.i("MainFragmentViewModel", "Buscando produto")
-          StatusApp.REALIZAR_PESAGEM -> weighing()
-          StatusApp.GRAVAR_OPERACAO -> saveOperation()
-          StatusApp.REALIZAR_IMPRESSAO -> if (automaticPrint) print()
-          else -> Log.i("MainFragmentViewModel", "Processo finalizado")
-        }
+    _updateStatus.onEach { status ->
+      val automaticPrint = configRepository.getAutomaticPrint()
+      when (status) {
+        StatusApp.INICIO -> Log.i("MainFragmentViewModel", "Inicio: ")
+        StatusApp.BUSCAR_PRODUTO -> Log.i("MainFragmentViewModel", "Buscando produto")
+        StatusApp.GRAVAR_OPERACAO -> saveOperation()
+        StatusApp.REALIZAR_IMPRESSAO -> if (automaticPrint) print()
+        else -> Log.i("MainFragmentViewModel", "Processo finalizado")
       }
-    }
+    }.launchIn(viewModelScope)
   }
 
   private fun updateLabelList() {
@@ -111,13 +118,15 @@ class MainFragmentViewModel(
     _labelType.postValue(label)
   }
 
-  private fun updateWeightProduct(message: ByteArray) {
-    val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
-    val updateProduct = _mgvProductImpl.value!!
+  private suspend fun updateWeightProduct(message: ByteArray) {
 
-    updateProduct.apply {
+    val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
+    val updateProduct = _mgvProductImpl.value
+
+    updateProduct?.apply {
       weight = newWeight
       totalPrice = price.times(updateProduct.weight!!)
+      delay(100)
       loadPrice(price)
     }
 
@@ -126,81 +135,74 @@ class MainFragmentViewModel(
     if (newWeight > 0.0) {
       _updateStatus.value = StatusApp.GRAVAR_OPERACAO
     }
-
   }
 
-  fun fetchItem(codItem: String) {
+  suspend fun fetchItem(codItem: String) {
     Log.i("MainFragmentViewModel", "fetchItem: Buscando item")
 
     if (codItem.isEmpty()) {
       showMessage(stringResourceProvider.getString(R.string.barcode_error))
       return
     }
+
     _updateStatus.value = StatusApp.BUSCAR_PRODUTO
-    viewModelScope.launch(Dispatchers.IO) {
-      try {
-
-        val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
-        val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
-        val product = mgvRepository.queryItem(mgvPassword, storeNumber, codItem)
-
-        product?.codNutrictionFacts?.let {
-          product.nutrictionFacts = mgvRepository.getNutriction(mgvPassword, storeNumber, it)
-        }
-
-        product?.codExtraInfo?.let {
-          product.extraInfo = mgvRepository.getExtraInfo(mgvPassword, storeNumber, it)
-        }
-
-        _mgvProductImpl.postValue(product)
-        _updateStatus.value = StatusApp.REALIZAR_PESAGEM
-      } catch (e: NoRouteToHostException) {
-        _statusMessage.postValue(stringResourceProvider.getString(R.string.invalid_address_server))
-        Log.e("MainFragmentViewModel", "fetchItem: endereço inválido", e)
-      } catch (e: ConnectException) {
-        _statusMessage.postValue(stringResourceProvider.getString(R.string.fail_to_connect_server))
-      } catch (e: Exception) {
-        e.message?.let {
-          _statusMessage.postValue(it)
-          Log.e("MainFragmentViewModel", "fetchItem: ", e)
-        }
+    try {
+      val mgvPassword = configRepository.getServerPassword()
+      val storeNumber = configRepository.getStoreNumber()
+      val product = apiMgv.queryItem(mgvPassword, storeNumber, codItem)
+      _mgvProductImpl.postValue(product)
+      _updateStatus.value = StatusApp.REALIZAR_PESAGEM
+    } catch (e: NoRouteToHostException) {
+      _statusMessage.emit(stringResourceProvider.getString(R.string.invalid_address_server))
+      Log.e("MainFragmentViewModel", "fetchItem: endereço inválido", e)
+    } catch (e: ConnectException) {
+      _statusMessage.emit(stringResourceProvider.getString(R.string.fail_to_connect_server))
+    } catch (e: Exception) {
+      e.message?.let {
+        _statusMessage.emit(it)
+        Log.e("MainFragmentViewModel", "fetchItem: ", e)
       }
     }
+
   }
 
-  fun weighing() {
-    Log.i("MainFragmentViewModel", "weighing: Realizando pesagem")
-    if (checkProductIsNullOrEmpty()) {
-      showMessage(stringResourceProvider.getString(R.string.error_get_product))
-      return
-    }
-    val command = byteArrayOf(0x05)
-    _currentDeviceConnected.value?.write(command)
+  fun weighing(btConnected: BluetoothConnected) {
+    try {
+      Log.i("MainFragmentViewModel", "weighing: Realizando pesagem")
+      if (checkProductIsNullOrEmpty()) {
+        showMessage(stringResourceProvider.getString(R.string.error_get_product))
+        return
+      }
+      val command = byteArrayOf(0x05)
+      btConnected.write(command)
 //    updateWeightProduct("5000".toByteArray())
+    } catch (e: ClosedSocketException) {
+      e.message?.let { showMessage(it) }
+    } catch (e: Exception) {
+      e.message?.let { showMessage(it) }
+    }
   }
 
-  fun print() {
+  suspend fun print() {
 
     if (checkProductIsNullOrEmpty()) {
       showMessage(stringResourceProvider.getString(R.string.error_to_get_product))
       return
     }
+    val product: MgvProductImpl? = _mgvProductImpl.value
+    if ((product?.weight == null) || (product.weight == 0.0)) {
+      showMessage(stringResourceProvider.getString(R.string.make_weighing))
+      return
+    }
+
     try {
-      val printerIp: String? = configRepository.getConfig(PRINTER_IP)
-      val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
-      val product: MgvProductImpl? = _mgvProductImpl.value
-
-      if ((product?.weight == null) || (product.weight == 0.0)) {
-        showMessage(stringResourceProvider.getString(R.string.make_weighing))
-        return
-      }
-
+      val printer = configRepository.getPrinterConfig()
       val label = labelBuild.build(_labelType.value ?: "")
       val newLabel = label.generateLabel(product).properties(1)
 
       val printTask = PrintWorker.createUniquePrintTask(
-        printerAddress = printerIp,
-        printerPort = printerPort,
+        printerAddress = printer.address,
+        printerPort = printer.port,
         label = newLabel
       )
 
@@ -228,37 +230,91 @@ class MainFragmentViewModel(
     } ?: true
   }
 
-  @Throws(SecurityException::class)
-  fun getAvailableDevices(): LiveData<List<BluetoothDevice>> {
-    val devices = bluetoothController.getPairedDevices()
-    return MutableLiveData(devices)
-  }
-
-  private fun setActiveThread(currentThread: Int) {
-    _connectedThreads.value.let { devicesConnected ->
-      devicesConnected?.let {
-        _currentDeviceConnected.value = it[currentThread]
-      }
-    }
-  }
-
   fun showMessage(message: String = "") {
-    _statusMessage.postValue(message)
+    viewModelScope.launch { _statusMessage.emit(message) }
   }
 
   private fun loadPrice(value: Double) {
     val priceByteArray = Formatter.formatDataToLoadPriceToledo(value)
-    _currentDeviceConnected.value?.write(priceByteArray)
+    _activeDevice.value?.write(priceByteArray)
   }
 
   private fun clearFields() {
     _mgvProductImpl.value = null
   }
 
-  fun connectToDevices(devices: List<BluetoothDevice>) = bluetoothController.connectToDevices(
-    devices,
-    this
-  )
+  fun monitoringPrintStatus(lifecycleOwner: LifecycleOwner) = workManager
+    .getWorkInfosForUniqueWorkLiveData(PrintWorker.PRINT_TASK)
+    .observe(lifecycleOwner) { worksInfo ->
+      if (worksInfo.isNotEmpty()) {
+        val workInfo = worksInfo[0]
+        when (workInfo.state) {
+          WorkInfo.State.ENQUEUED, WorkInfo.State.RUNNING -> _isLoading.value = true
+          WorkInfo.State.SUCCEEDED -> {
+            showMessage("Impressão finalizada com sucesso")
+            _isLoading.value = false
+          }
+
+          WorkInfo.State.FAILED -> {
+            showMessage("Impressão falhou")
+            _isLoading.value = false
+          }
+
+          WorkInfo.State.BLOCKED -> {
+            showMessage("Impressão bloqueada")
+            _isLoading.value = false
+          }
+
+          WorkInfo.State.CANCELLED -> {
+            showMessage("Impressão cancelada")
+            _isLoading.value = false
+          }
+        }
+      }
+    }
+
+  fun cancelPrint() {
+    workManager.cancelUniqueWork(PrintWorker.PRINT_TASK)
+  }
+
+  private fun startCollectData(deviceConnected: BluetoothConnected) = deviceConnected
+    .read().onEach { bytes ->
+      val rawData = String(bytes, StandardCharsets.UTF_8)
+      Log.i("MainFragmentViewModel", "startCollectData: Mostrando dados $rawData")
+      when (val data = rawData.removeNonAlphaCharacters()) {
+        Constants.UNSTABLE_WEIGHT -> showMessage("Peso instável, faça a pesagem novamente")
+        Constants.NEGATIVE_WEIGHT -> showMessage("Peso negativo, faça a pesagem novamente")
+        Constants.OVERWEIGHT -> showMessage("Balança em sobrecarga, remove o peso extra")
+        else -> {
+          if (data.isNotEmpty()) {
+            updateWeightProduct(bytes)
+          }
+        }
+      }
+    }.launchIn(viewModelScope)
+
+  suspend fun connectToDevices(btAdapter: BluetoothAdapter) {
+    val devices = btHandler.getAvailableDevices(adapter = btAdapter)
+    val newDevices = mutableListOf<BluetoothConnected>()
+    showMessage("Buscando dispositivos disponíveis")
+
+    devices.forEach { device ->
+      val socket = withContext(Dispatchers.IO) {
+        btHandler.connectToDevice(device)
+      }
+      showMessage("Conectando ao dispositivo ${newDevices.size + 1}")
+      newDevices.add(socket)
+      startCollectData(socket)
+      showMessage("Dispositivo conectado")
+    }
+
+    if (newDevices.size == 1) {
+      _activeDevice.value = newDevices[0]
+    }
+
+    _devices.value = newDevices.toList()
+
+  }
 
   private fun saveOperation() {
     try {
@@ -282,44 +338,6 @@ class MainFragmentViewModel(
       Log.e("MainFragmentViewModel", "saveOperation: Erro ao salvar operação", e)
       showMessage(e.message!!)
     }
-  }
-
-  override fun onCleared() {
-    super.onCleared()
-    _connectedThreads.value?.run {
-      forEach { it.cancel() }
-    }
-  }
-
-  override fun onBluetoothRead(data: ByteArray) {
-    val msgString = String(data, StandardCharsets.UTF_8)
-
-    if (Formatter.removeNonAlphaCharacters(msgString) == "IIIII") {
-      showMessage(stringResourceProvider.getString(R.string.unstable_weight))
-    } else {
-      updateWeightProduct(data)
-    }
-  }
-
-  override fun onBluetoothConnecting() {
-    showMessage(stringResourceProvider.getString(R.string.connecting))
-  }
-
-  override fun onBluetoothConnected(device: ConnectedThread) {
-    _connectedThreads.value?.add(device)
-    if (_connectedThreads.value?.size == 1) {
-      val firstDevice = 0
-      setActiveThread(firstDevice)
-    }
-    val scaleNumber = connectedThreads.value?.size
-
-    showMessage(
-      stringResourceProvider.getString(R.string.message_scale_connected)
-    )
-  }
-
-  override fun onBluetoothError(message: String) {
-    showMessage(message)
   }
 }
 

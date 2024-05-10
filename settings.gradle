@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "PesagemModular"
 include ':app'
+include ':bluetooth'

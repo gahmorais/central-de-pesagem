@@ -23,12 +23,12 @@ android {
         }
     }
 
-    compileSdk 32
+    compileSdk 34
 
     defaultConfig {
         applicationId "br.com.backupautomacao.pesagem_modular"
-        minSdk 23
-        targetSdk 32
+        minSdk 27
+        targetSdk 34
         versionCode 6
         versionName "1.7.0"
         testApplicationId "br.com.backupautomacao.pesagem_modular"
@@ -54,6 +54,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    packagingOptions {
+        resources {
+            exclude "META-INF/LICENSE*"
+            exclude "META-INF/NOTICE.txt"
+        }
+    }
     kotlinOptions {
         jvmTarget = '1.8'
     }
@@ -68,6 +74,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.fragment:fragment-ktx:1.5.4'
     implementation 'androidx.test.ext:junit-ktx:1.1.5'
+    implementation project(path: ':bluetooth')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.0-Beta'
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:4.1.0"

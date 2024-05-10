@@ -31,6 +31,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PesagemModular"
+        tools:replace="android:icon"
         tools:targetApi="31">
         <activity
             android:name="br.com.backupautomacao.pesagem_modular.ui.activities.MainActivity"

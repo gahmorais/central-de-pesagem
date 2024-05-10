@@ -1,6 +1,6 @@
 package br.com.backupautomacao.pesagem_modular.di
 
-import br.com.backupautomacao.pesagem_modular.db.repository.ConfigRepository
+import br.com.backupautomacao.pesagem_modular.data.repository.ConfigRepository
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -24,10 +24,8 @@ val networkModule = module {
         level = LogLevel.BODY
       }
       defaultRequest {
-        val server = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
-        server?.let {
-          url(it)
-        }
+        val server = configRepository.getServerAddress()
+        url(server)
       }
     }
   }

@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import br.com.backupautomacao.pesagem_modular.databinding.OperationListItemBinding
-import br.com.backupautomacao.pesagem_modular.db.model.Operation
+import br.com.backupautomacao.pesagem_modular.data.model.Operation
 import br.com.backupautomacao.pesagem_modular.utils.Formatter
 
 class OperationListAdapter :

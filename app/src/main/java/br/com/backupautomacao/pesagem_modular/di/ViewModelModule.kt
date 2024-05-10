@@ -1,6 +1,6 @@
 package br.com.backupautomacao.pesagem_modular.di
 
-import br.com.backupautomacao.pesagem_modular.ui.viewmodel.MainFragmentViewModel
+import br.com.backupautomacao.pesagem_modular.ui.viewmodel.MainViewModel
 import br.com.backupautomacao.pesagem_modular.ui.viewmodel.ReportViewModel
 import br.com.backupautomacao.pesagem_modular.ui.viewmodel.SaleForUnitViewModel
 import br.com.backupautomacao.pesagem_modular.ui.viewmodel.SettingsViewModel
@@ -9,14 +9,14 @@ import org.koin.dsl.module
 
 val viewModelModule = module {
   viewModel {
-    MainFragmentViewModel(
+    MainViewModel(
       configRepository = get(),
       operationRepository = get(),
       workManager = get(),
-      bluetoothController = get(),
+      btHandler = get(),
       labelBuild = get(),
       stringResourceProvider = get(),
-      mgvRepository = get()
+      apiMgv = get()
     )
   }
 
@@ -24,7 +24,8 @@ val viewModelModule = module {
     SaleForUnitViewModel(
       configRepository = get(),
       workManager = get(),
-      labelBuilder = get()
+      labelBuilder = get(),
+      apiMgv = get()
     )
   }
 

@@ -72,4 +72,6 @@
     <string name="release_product">Desfixar Produto</string>
     <string name="fix_product">Fixar Produto</string>
     <string name="fail_to_connect_server">Falha ao conectar com o servidor</string>
+    <string name="product_unblock">Produto liberado</string>
+    <string name="product_blocked">Produto fixado</string>
 </resources>

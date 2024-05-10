@@ -6,16 +6,21 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.pesagem_modular.databinding.FragmentSettingsBinding
-import br.com.backupautomacao.pesagem_modular.db.repository.ConfigRepository
+import br.com.backupautomacao.pesagem_modular.data.repository.ConfigRepository
 import br.com.backupautomacao.pesagem_modular.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.pesagem_modular.utils.EventMask
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsFragment : Fragment() {
   private var _binding: FragmentSettingsBinding? = null
   private val binding get() = _binding!!
   private val viewModel: SettingsViewModel by viewModel()
+
+  private val configRepository: ConfigRepository by inject()
 
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
@@ -43,20 +48,20 @@ class SettingsFragment : Fragment() {
 
   private fun handleButtons() {
     binding.buttonSavePrinterAddress.setOnClickListener {
-      savePrinterConfig()
+      lifecycleScope.launch { savePrinterConfig() }
     }
 
     binding.buttonSaveServerAddress.setOnClickListener {
       val serverAddress: String = binding.textInputServerAddress.text.toString()
-      viewModel.saveServerAddress(serverAddress)
+      lifecycleScope.launch { viewModel.saveServerAddress(serverAddress) }
     }
 
     binding.buttonSaveMgvConfig.setOnClickListener {
-      saveMgvConfig()
+      lifecycleScope.launch { saveMgvConfig() }
     }
   }
 
-  private fun saveMgvConfig() {
+  private suspend fun saveMgvConfig() {
     val password = binding.textInputMgvPassword.text.toString()
     val store = binding.textInputMgvStoreNumber.text.toString()
 
@@ -65,7 +70,7 @@ class SettingsFragment : Fragment() {
 
   }
 
-  private fun savePrinterConfig() {
+  private suspend fun savePrinterConfig() {
     val printerIp: String = binding.textInputPrinterIp.text.toString()
     val printerPort: String = binding.textInputPrinterPort.text.toString()
     viewModel.savePrinterAddress(printerIp, printerPort)
@@ -79,7 +84,7 @@ class SettingsFragment : Fragment() {
 
   private fun handleCheckbox() {
     binding.checkboxAutomaticPrint.setOnCheckedChangeListener { _, isChecked ->
-      viewModel.enableAutomaticPrint(isChecked)
+      lifecycleScope.launch { viewModel.enableAutomaticPrint(isChecked) }
     }
   }
 
@@ -90,17 +95,19 @@ class SettingsFragment : Fragment() {
 
   override fun onResume() {
     super.onResume()
-    binding.checkboxAutomaticPrint.isChecked = viewModel.automaticPrintingEnable
-    val configRepository = ConfigRepository(requireActivity())
-    val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
-    val printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP)
-    val portAddress = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
-    val store = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER)
-    binding.apply {
-      textInputServerAddress.setText(serverAddress)
-      textInputPrinterPort.setText(portAddress.toString())
-      textInputPrinterIp.setText(printerAddress)
-      textInputMgvStoreNumber.setText(store.toString())
+    lifecycleScope.launch{
+      binding.checkboxAutomaticPrint.isChecked = viewModel.automaticPrintingEnable.value
+
+      val printerAddress = viewModel.printerConfig.value.address
+      val portAddress = viewModel.printerConfig.value.port
+      val serverAddress = viewModel.serverAddress.value
+      val storeNumber = viewModel.storeNumber.value
+      binding.apply {
+        textInputServerAddress.setText(serverAddress)
+        textInputPrinterPort.setText(portAddress.toString())
+        textInputPrinterIp.setText(printerAddress)
+        textInputMgvStoreNumber.setText(storeNumber.toString())
+      }
     }
   }
 }
