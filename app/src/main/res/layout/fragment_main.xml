@@ -135,7 +135,7 @@
                 tools:text="BACON MANTA RIO SUL" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/productWeight"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:paddingStart="@dimen/default_margin"
@@ -147,7 +147,7 @@
                 tools:text="1,000 Kg" />
 
             <TextView
-                android:id="@+id/textView10"
+                android:id="@+id/productTotalPrice"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_marginEnd="@dimen/extra_big_margin"
@@ -178,7 +178,7 @@
                 android:text="@string/text_button_print"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/buttonWeighing"
-                app:layout_constraintTop_toBottomOf="@+id/textView10" />
+                app:layout_constraintTop_toBottomOf="@+id/productTotalPrice" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout"
@@ -209,7 +209,7 @@
                 android:layout_marginTop="29dp"
                 android:text="@string/text_button_fix_product"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView5" />
+                app:layout_constraintTop_toBottomOf="@+id/productWeight" />
 
             <Button
                 android:id="@+id/buttonLoadPrice"
@@ -221,7 +221,7 @@
                 android:text="@string/text_button_load_price"
                 app:layout_constraintEnd_toStartOf="@+id/guideline4"
                 app:layout_constraintStart_toEndOf="@+id/buttonFixProduct"
-                app:layout_constraintTop_toBottomOf="@+id/textView5" />
+                app:layout_constraintTop_toBottomOf="@+id/productWeight" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline4"

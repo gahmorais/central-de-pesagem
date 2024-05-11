@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.fragments.MainFragment">
+    <!--    <data>-->
+    <!--        <variable-->
+    <!--            name="viewModel"-->
+    <!--            type="br.com.backupautomacao.pesagem_modular.ui.viewmodel.MainViewModel" />-->
+    <!--    </data>-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mainScreen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="@dimen/big_margin"
+                android:layout_marginTop="22dp"
+                android:text="@string/text_title_description"
+                android:textColor="@color/black"
+                android:textSize="35sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="4dp"
+                android:text="@string/text_title_price_per_kilo"
+                android:textColor="@color/black"
+                android:textSize="35sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/productPrice"
+                app:layout_constraintStart_toStartOf="@+id/guideline4"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+            <!--                android:text="@{viewModel.mgvProductImpl.code}"-->
+            <TextView
+                android:id="@+id/productCode"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="2dp"
+                android:paddingStart="@dimen/default_margin"
+
+                android:textSize="35sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/textView2"
+                app:layout_constraintEnd_toStartOf="@+id/guideline4"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/textView2"
+                tools:text="23" />
+            <!--            app:productPrice="@{viewModel.mgvProductImpl.price}"-->
+
+            <TextView
+                android:id="@+id/productPrice"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="128dp"
+                android:layout_marginEnd="@dimen/extra_big_margin"
+                android:paddingStart="@dimen/default_margin"
+                android:textSize="35sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/textView3"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout"
+                tools:text="R$ 222,00" />
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="@dimen/big_margin"
+                android:layout_marginTop="23dp"
+                android:text="@string/text_title_weight"
+                android:textColor="@color/black"
+                android:textSize="35sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="23dp"
+                android:text="@string/text_title_price"
+                android:textColor="@color/black"
+                android:textSize="35sp"
+                app:layout_constraintStart_toStartOf="@+id/guideline4"
+                app:layout_constraintTop_toBottomOf="@+id/productDescription" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="@dimen/big_margin"
+                android:layout_marginTop="128dp"
+                android:text="@string/text_title_barcode"
+                android:textColor="@color/black"
+                android:textSize="35sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+            <!--            android:text="@{viewModel.mgvProductImpl.description}"-->
+
+            <TextView
+                android:id="@+id/productDescription"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="@dimen/extra_big_margin"
+                android:paddingStart="@dimen/default_margin"
+                android:textSize="35sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/textView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.177"
+                app:layout_constraintStart_toEndOf="@+id/textView"
+                tools:text="BACON MANTA RIO SUL" />
+
+            <TextView
+                android:id="@+id/productWeight"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:paddingStart="@dimen/default_margin"
+                android:textSize="35sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/textView4"
+                app:layout_constraintEnd_toStartOf="@+id/guideline4"
+                app:layout_constraintStart_toEndOf="@+id/textView4"
+                app:productWeight="@{viewModel.mgvProductImpl.weight}"
+                tools:text="1,000 Kg" />
+
+<!--            app:productPrice="@{viewModel.mgvProductImpl.totalPrice}"-->
+            <TextView
+                android:id="@+id/productTotalPrice"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="@dimen/extra_big_margin"
+                android:paddingStart="@dimen/default_margin"
+                android:textSize="35sp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/textView6"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/textView6"
+                tools:text="R$ 222,00" />
+
+            <Button
+                android:id="@+id/buttonWeighing"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="30dp"
+                android:text="@string/text_button_weighing"
+                app:layout_constraintStart_toStartOf="@+id/guideline4"
+                app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+            <Button
+                android:id="@+id/buttonPrint"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="47dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginEnd="@dimen/extra_big_margin"
+                android:text="@string/text_button_print"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/buttonWeighing"
+                app:layout_constraintTop_toBottomOf="@+id/productTotalPrice" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/big_margin"
+                android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginEnd="@dimen/extra_big_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputProductCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/placeholder_input_text"
+                    android:inputType="number"
+                    android:textSize="@dimen/big_font" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/buttonFixProduct"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="@dimen/big_margin"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="29dp"
+                android:text="@string/text_button_fix_product"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/productWeight" />
+
+            <Button
+                android:id="@+id/buttonLoadPrice"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="@dimen/big_margin"
+                android:layout_marginTop="30dp"
+                android:width="0dp"
+                android:text="@string/text_button_load_price"
+                app:layout_constraintEnd_toStartOf="@+id/guideline4"
+                app:layout_constraintStart_toEndOf="@+id/buttonFixProduct"
+                app:layout_constraintTop_toBottomOf="@+id/productWeight" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="569dp" />
+
+            <Spinner
+                android:id="@+id/selectLabel"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="40dp"
+                android:layout_marginEnd="@dimen/extra_big_margin"
+                android:background="@drawable/custom_layout_spinner"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/guideline4"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+            <TextView
+                android:id="@+id/textView15"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginHorizontal="@dimen/big_margin"
+                android:layout_marginTop="40dp"
+                android:text="@string/title_label_model"
+                android:textColor="@color/black"
+                android:textSize="35sp"
+                app:layout_constraintEnd_toStartOf="@+id/guideline4"
+                app:layout_constraintHorizontal_bias="0.503"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <include
+            android:id="@+id/spinnerLoading"
+            layout="@layout/loading_dialog"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="250dp"
+            android:layout_marginVertical="90dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

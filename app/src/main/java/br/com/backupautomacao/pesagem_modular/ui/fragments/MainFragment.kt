@@ -19,8 +19,10 @@ import br.com.backupautomacao.pesagem_modular.databinding.FragmentMainBinding
 import br.com.backupautomacao.pesagem_modular.permission.Permission
 import br.com.backupautomacao.pesagem_modular.permission.PermissionManager
 import br.com.backupautomacao.pesagem_modular.ui.viewmodel.MainViewModel
+import br.com.backupautomacao.pesagem_modular.utils.Formatter
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -41,7 +43,8 @@ class MainFragment : Fragment() {
 
 
   override fun onCreateView(
-    inflater: LayoutInflater, container: ViewGroup?,
+    inflater: LayoutInflater,
+    container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
 
@@ -59,7 +62,19 @@ class MainFragment : Fragment() {
     }.launchIn(lifecycleScope)
 
     mainViewModel.weight.onEach { weight ->
+      binding.apply {
+        val weightFormatted = Formatter.formatWeight(weight)
+        productWeight.text = weightFormatted
+      }
+    }.launchIn(lifecycleScope)
 
+    mainViewModel.mgvProductImpl.filterNotNull().onEach { product ->
+      binding.apply {
+        productCode.text = product.code
+        productDescription.text = product.description
+        productPrice.text = Formatter.formatPrice(product.price)
+        productTotalPrice.text = Formatter.formatPrice(product.totalPrice ?: 0.0)
+      }
     }.launchIn(lifecycleScope)
     return binding.root
   }

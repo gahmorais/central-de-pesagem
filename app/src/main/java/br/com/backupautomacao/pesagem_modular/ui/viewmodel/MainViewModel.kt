@@ -71,8 +71,8 @@ class MainViewModel(
   val labelType: LiveData<String> = _labelType
   val isFixed = MutableLiveData(false)
 
-  private val _mgvProductImpl: MutableLiveData<MgvProductImpl?> = MutableLiveData()
-  val mgvProductImpl: LiveData<MgvProductImpl?> = _mgvProductImpl
+  private val _mgvProductImpl = MutableStateFlow<MgvProductImpl?>(null)
+  val mgvProductImpl = _mgvProductImpl.asStateFlow()
 
   private val _statusMessage = MutableSharedFlow<String>()
   val statusMessage = _statusMessage.asSharedFlow()
@@ -150,7 +150,7 @@ class MainViewModel(
       val mgvPassword = configRepository.getServerPassword()
       val storeNumber = configRepository.getStoreNumber()
       val product = apiMgv.queryItem(mgvPassword, storeNumber, codItem)
-      _mgvProductImpl.postValue(product)
+      _mgvProductImpl.emit(product)
       _updateStatus.value = StatusApp.REALIZAR_PESAGEM
     } catch (e: NoRouteToHostException) {
       _statusMessage.emit(stringResourceProvider.getString(R.string.invalid_address_server))
