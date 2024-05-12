@@ -23,7 +23,7 @@ data class MgvProductImpl(
   override val batch: String,
   @SerializedName("PrecoPromocional")
   override val promotionalPrice: Double,
-  override var totalPrice: Double?,
+  override var totalPrice: Double = 0.0,
   var unit: Int?,
-  var weight: Double?
+  var weight: Double = 0.0
 ) : MgvProduct

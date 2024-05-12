@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.pesagem_modular.R
@@ -61,19 +62,24 @@ class MainFragment : Fragment() {
       }
     }.launchIn(lifecycleScope)
 
-    mainViewModel.weight.onEach { weight ->
-      binding.apply {
-        val weightFormatted = Formatter.formatWeight(weight)
-        productWeight.text = weightFormatted
-      }
-    }.launchIn(lifecycleScope)
-
-    mainViewModel.mgvProductImpl.filterNotNull().onEach { product ->
-      binding.apply {
-        productCode.text = product.code
-        productDescription.text = product.description
-        productPrice.text = Formatter.formatPrice(product.price)
-        productTotalPrice.text = Formatter.formatPrice(product.totalPrice ?: 0.0)
+    mainViewModel.mgvProductImpl.onEach { product ->
+      Log.i("MainFragment", "Preço total: ${product?.totalPrice} ")
+      if (product != null) {
+        binding.apply {
+          productWeight.text = Formatter.formatWeight(product.weight)
+          productCode.text = product.code
+          productDescription.text = product.description
+          productPrice.text = Formatter.formatPrice(product.price)
+          productTotalPrice.text = Formatter.formatPrice(product.totalPrice ?: 0.0)
+        }
+      } else {
+        binding.apply {
+          productWeight.text = ""
+          productCode.text = ""
+          productDescription.text = ""
+          productPrice.text = ""
+          productTotalPrice.text = ""
+        }
       }
     }.launchIn(lifecycleScope)
     return binding.root
@@ -123,7 +129,7 @@ class MainFragment : Fragment() {
   }
 
   private fun configureObservers() {
-    mainViewModel.labelsList.observe(viewLifecycleOwner) { labels ->
+    mainViewModel.labelsList.onEach { labels ->
       val spinnerAdapter = ArrayAdapter<String>(requireActivity(), R.layout.custom_item_spinner)
       spinnerAdapter.addAll(labels)
       binding.selectLabel.adapter = spinnerAdapter
@@ -141,7 +147,7 @@ class MainFragment : Fragment() {
           TODO("Not yet implemented")
         }
       }
-    }
+    }.launchIn(lifecycleScope)
   }
 
   private fun success(message: String) {
@@ -163,8 +169,8 @@ class MainFragment : Fragment() {
   }
 
   private fun blockProduct() {
-    mainViewModel.isFixed.value = mainViewModel.isFixed.value?.not()
-    mainViewModel.isFixed.value?.let { fixed ->
+    mainViewModel.isFixed.value = mainViewModel.isFixed.value.not()
+    mainViewModel.isFixed.value.let { fixed ->
       if (fixed) {
         mainViewModel.showMessage(getString(R.string.product_blocked))
         binding.buttonFixProduct.text = getString(R.string.release_product)
@@ -176,17 +182,9 @@ class MainFragment : Fragment() {
   }
 
   private fun print() {
-    permissionManager
-      .request(Permission.Storage)
-      .rationale(getString(R.string.message_to_access_storage))
-      .checkPermission { granted ->
-        if (granted) {
-          lifecycleScope.launch { mainViewModel.print() }
-        } else {
-          error(getString(R.string.fail_to_access_storage))
-        }
-      }
+    lifecycleScope.launch { mainViewModel.print() }
   }
+
 
   private fun handleButtons() {
     binding.apply {

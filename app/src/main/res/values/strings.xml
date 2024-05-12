@@ -74,4 +74,5 @@
     <string name="fail_to_connect_server">Falha ao conectar com o servidor</string>
     <string name="product_unblock">Produto liberado</string>
     <string name="product_blocked">Produto fixado</string>
+    <string name="text_button_unfix_product">Desfixar produto</string>
 </resources>

@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
@@ -64,21 +65,17 @@ class MainViewModel(
   private val apiMgv: ApiMgv
 ) : ViewModel() {
 
-  private val _labelsList = MutableLiveData<List<String>>(listOf())
-  val labelsList: LiveData<List<String>> = _labelsList
+  private val _labelsList = MutableStateFlow<List<String>>(listOf())
+  val labelsList = _labelsList.asStateFlow()
 
-  private val _labelType = MutableLiveData("")
-  val labelType: LiveData<String> = _labelType
-  val isFixed = MutableLiveData(false)
+  private val _labelType = MutableStateFlow("")
+  val isFixed = MutableStateFlow(false)
 
   private val _mgvProductImpl = MutableStateFlow<MgvProductImpl?>(null)
   val mgvProductImpl = _mgvProductImpl.asStateFlow()
 
   private val _statusMessage = MutableSharedFlow<String>()
   val statusMessage = _statusMessage.asSharedFlow()
-
-  private val _weight = MutableStateFlow(0.0)
-  val weight = _weight.asStateFlow()
 
   private val _isLoading = MutableStateFlow(false)
   val isLoading = _isLoading.asStateFlow()
@@ -90,6 +87,7 @@ class MainViewModel(
   private val _updateStatus = MutableStateFlow(StatusApp.INICIO)
 
   init {
+    clearAllWorks()
     updateLabelList()
     _updateStatus.onEach { status ->
       val automaticPrint = configRepository.getAutomaticPrint()
@@ -97,40 +95,47 @@ class MainViewModel(
         StatusApp.INICIO -> Log.i("MainFragmentViewModel", "Inicio: ")
         StatusApp.BUSCAR_PRODUTO -> Log.i("MainFragmentViewModel", "Buscando produto")
         StatusApp.GRAVAR_OPERACAO -> saveOperation()
+        StatusApp.REALIZAR_PESAGEM -> _activeDevice.value?.let { weighing(it) }
         StatusApp.REALIZAR_IMPRESSAO -> if (automaticPrint) print()
         else -> Log.i("MainFragmentViewModel", "Processo finalizado")
       }
     }.launchIn(viewModelScope)
   }
 
+  private fun clearAllWorks() {
+    workManager.pruneWork()
+  }
+
   private fun updateLabelList() {
 
-    _labelsList.postValue(labelBuild.listLabels())
-    _labelsList.value?.let {
+    _labelsList.value = labelBuild.listLabels()
+    _labelsList.value.let {
       if (it.isNotEmpty()) {
-        _labelType.postValue(labelsList.value?.get(0) ?: "")
+        _labelType.value = labelsList.value[0]
       }
-      _labelType.postValue("ET119")
+      _labelType.value = "ET119"
     }
   }
 
   fun updateLabelType(label: String) {
-    _labelType.postValue(label)
+    _labelType.value = label
   }
 
   private suspend fun updateWeightProduct(message: ByteArray) {
 
     val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
-    val updateProduct = _mgvProductImpl.value
-
-    updateProduct?.apply {
-      weight = newWeight
-      totalPrice = price.times(updateProduct.weight!!)
-      delay(100)
-      loadPrice(price)
+    val priceForKg = _mgvProductImpl.value?.price ?: 0.0
+    _mgvProductImpl.update {
+      it?.copy(
+        weight = newWeight,
+        totalPrice = priceForKg.times(newWeight)
+      )
     }
 
-    _mgvProductImpl.value = updateProduct
+    delay(100)
+    loadPrice(priceForKg)
+
+    Log.i("MainViewModel", "updateWeightProduct:Product ${_mgvProductImpl.value}")
     //Só grava a operação se o peso for maior que zero
     if (newWeight > 0.0) {
       _updateStatus.value = StatusApp.GRAVAR_OPERACAO
@@ -175,13 +180,30 @@ class MainViewModel(
       }
       val command = byteArrayOf(0x05)
       btConnected.write(command)
-//    updateWeightProduct("5000".toByteArray())
+//      viewModelScope.launch { updateWeightProduct("5000".toByteArray()) }
     } catch (e: ClosedSocketException) {
       e.message?.let { showMessage(it) }
     } catch (e: Exception) {
       e.message?.let { showMessage(it) }
     }
   }
+
+//  fun weighing() {
+//    try {
+//      Log.i("MainFragmentViewModel", "weighing: Realizando pesagem Mock")
+//      if (checkProductIsNullOrEmpty()) {
+//        showMessage(stringResourceProvider.getString(R.string.error_get_product))
+//        return
+//      }
+////      val command = byteArrayOf(0x05)
+////      btConnected.write(command)
+//      viewModelScope.launch { updateWeightProduct("5000".toByteArray()) }
+//    } catch (e: ClosedSocketException) {
+//      e.message?.let { showMessage(it) }
+//    } catch (e: Exception) {
+//      e.message?.let { showMessage(it) }
+//    }
+//  }
 
   suspend fun print() {
 
@@ -197,7 +219,7 @@ class MainViewModel(
 
     try {
       val printer = configRepository.getPrinterConfig()
-      val label = labelBuild.build(_labelType.value ?: "")
+      val label = labelBuild.build(_labelType.value)
       val newLabel = label.generateLabel(product).properties(1)
 
       val printTask = PrintWorker.createUniquePrintTask(
@@ -208,7 +230,7 @@ class MainViewModel(
 
       workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
       _updateStatus.value = StatusApp.FINALIZAR
-      if (isFixed.value == false) {
+      if (!isFixed.value) {
         clearFields()
       } else {
         updateWeightProduct("0.0".toByteArray())
@@ -299,8 +321,13 @@ class MainViewModel(
     showMessage("Buscando dispositivos disponíveis")
 
     devices.forEach { device ->
-      val socket = withContext(Dispatchers.IO) {
-        btHandler.connectToDevice(device)
+      val socket = try {
+        withContext(Dispatchers.IO) {
+          btHandler.connectToDevice(device)
+        }
+      } catch (e: Exception) {
+        showMessage("Erro ao conectar com dispositivo")
+        return
       }
       showMessage("Conectando ao dispositivo ${newDevices.size + 1}")
       newDevices.add(socket)
@@ -318,15 +345,16 @@ class MainViewModel(
 
   private fun saveOperation() {
     try {
-      val operation = _mgvProductImpl.value?.let { product ->
-        Operation(
-          weight = product.weight!!,
-          totalPrice = product.totalPrice!!,
-          pricePerKilogram = product.price,
-          username = Build.ID,
-          description = product.description
-        )
-      } ?: throw Exception(stringResourceProvider.getString(R.string.save_operation_error))
+      val product = _mgvProductImpl.value
+        ?: throw Exception("Não foi possível salvar a operação!\nProduto nulo")
+
+      val operation = Operation(
+        weight = product.weight,
+        totalPrice = product.totalPrice,
+        pricePerKilogram = product.price,
+        username = Build.ID,
+        description = product.description
+      )
 
       viewModelScope.launch(Dispatchers.IO) {
         operationRepository.save(operation)

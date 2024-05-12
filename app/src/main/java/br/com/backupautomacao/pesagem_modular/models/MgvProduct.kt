@@ -12,5 +12,5 @@ interface MgvProduct {
   val price: Double
   val batch: String
   val promotionalPrice: Double
-  var totalPrice: Double?
+  var totalPrice: Double
 }
