@@ -4,8 +4,6 @@ import android.bluetooth.BluetoothAdapter
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
@@ -22,7 +20,7 @@ import br.com.backupautomacao.pesagem_modular.data.repository.ConfigRepository
 import br.com.backupautomacao.pesagem_modular.data.repository.OperationRepository
 import br.com.backupautomacao.pesagem_modular.labels.LabelBuilder
 import br.com.backupautomacao.pesagem_modular.models.MgvProductImpl
-import br.com.backupautomacao.pesagem_modular.network.*
+import br.com.backupautomacao.pesagem_modular.network.ApiMgv
 import br.com.backupautomacao.pesagem_modular.utils.Formatter
 import br.com.backupautomacao.pesagem_modular.utils.StringResourceProvider
 import br.com.backupautomacao.pesagem_modular.utils.properties

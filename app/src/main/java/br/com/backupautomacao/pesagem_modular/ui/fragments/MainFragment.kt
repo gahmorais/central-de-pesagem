@@ -12,7 +12,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.pesagem_modular.R
@@ -23,7 +22,6 @@ import br.com.backupautomacao.pesagem_modular.ui.viewmodel.MainViewModel
 import br.com.backupautomacao.pesagem_modular.utils.Formatter
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -70,7 +68,7 @@ class MainFragment : Fragment() {
           productCode.text = product.code
           productDescription.text = product.description
           productPrice.text = Formatter.formatPrice(product.price)
-          productTotalPrice.text = Formatter.formatPrice(product.totalPrice ?: 0.0)
+          productTotalPrice.text = Formatter.formatPrice(product.totalPrice)
         }
       } else {
         binding.apply {
