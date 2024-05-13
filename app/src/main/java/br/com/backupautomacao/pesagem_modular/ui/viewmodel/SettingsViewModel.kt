@@ -47,9 +47,7 @@ class SettingsViewModel(
         configRepository.getAutomaticPrint()
       }
 
-      val demoMode = withContext(Dispatchers.IO) {
-        configRepository.getMode()
-      }
+      val demoMode = configRepository.getMode()
 
       _printerConfig.emit(printer)
       _enableDemoMode.emit(demoMode)

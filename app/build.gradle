@@ -29,10 +29,11 @@ android {
         applicationId "br.com.backupautomacao.pesagem_modular"
         minSdk 27
         targetSdk 34
-        versionCode 6
-        versionName "1.7.0"
+        versionCode 7
+        versionName "2.0.0"
         testApplicationId "br.com.backupautomacao.pesagem_modular"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        setProperty("archivesBaseName", "Pesagem-Modular-v${versionName}($versionCode)")
     }
 
     dataBinding {

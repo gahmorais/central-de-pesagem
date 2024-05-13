@@ -7,20 +7,16 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import br.com.backupautomacao.pesagem_modular.data.repository.ConfigRepository
 import br.com.backupautomacao.pesagem_modular.databinding.FragmentSettingsBinding
 import br.com.backupautomacao.pesagem_modular.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.pesagem_modular.utils.EventMask
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsFragment : Fragment() {
   private var _binding: FragmentSettingsBinding? = null
   private val binding get() = _binding!!
   private val viewModel: SettingsViewModel by viewModel()
-
-  private val configRepository: ConfigRepository by inject()
 
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
@@ -105,11 +101,15 @@ class SettingsFragment : Fragment() {
       val portAddress = viewModel.printerConfig.value.port
       val serverAddress = viewModel.serverAddress.value
       val storeNumber = viewModel.storeNumber.value
+      val demoModeIsEnabled = viewModel.enableDemoMode.value
+      val automaticPrintIsEnabled = viewModel.automaticPrintingEnable.value
       binding.apply {
         textInputServerAddress.setText(serverAddress)
         textInputPrinterPort.setText(portAddress.toString())
         textInputPrinterIp.setText(printerAddress)
         textInputMgvStoreNumber.setText(storeNumber.toString())
+        checkBoxMode.isChecked = demoModeIsEnabled
+        checkboxAutomaticPrint.isChecked = automaticPrintIsEnabled
       }
     }
   }
