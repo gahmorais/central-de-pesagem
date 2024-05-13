@@ -11,7 +11,7 @@ import br.com.backupautomacao.pesagem_modular.PrintWorker
 import br.com.backupautomacao.pesagem_modular.data.repository.ConfigRepository
 import br.com.backupautomacao.pesagem_modular.labels.LabelBuilder
 import br.com.backupautomacao.pesagem_modular.models.MgvProductImpl
-import br.com.backupautomacao.pesagem_modular.network.ApiMgv
+import br.com.backupautomacao.pesagem_modular.network.IApiMgv
 import br.com.backupautomacao.pesagem_modular.utils.properties
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -22,7 +22,7 @@ class SaleForUnitViewModel(
   private val configRepository: ConfigRepository,
   private val workManager: WorkManager,
   private val labelBuilder: LabelBuilder,
-  private val apiMgv: ApiMgv
+  private val apiMgv: IApiMgv
 ) : ViewModel(),
   KoinComponent {
   private val _mgvProduct = MutableLiveData<MgvProductImpl?>()

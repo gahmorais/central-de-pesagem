@@ -75,4 +75,7 @@
     <string name="product_unblock">Produto liberado</string>
     <string name="product_blocked">Produto fixado</string>
     <string name="text_button_unfix_product">Desfixar produto</string>
+    <string name="text_mode">Modo demonstração</string>
+    <string name="demo_mode_enable">Habilitando modo demonstração</string>
+    <string name="demo_mode_disable">Modo demonstração desabilitada</string>
 </resources>

@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import br.com.backupautomacao.pesagem_modular.databinding.FragmentSettingsBinding
 import br.com.backupautomacao.pesagem_modular.data.repository.ConfigRepository
+import br.com.backupautomacao.pesagem_modular.databinding.FragmentSettingsBinding
 import br.com.backupautomacao.pesagem_modular.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.pesagem_modular.utils.EventMask
 import kotlinx.coroutines.launch
@@ -28,7 +28,6 @@ class SettingsFragment : Fragment() {
   ): View {
     _binding = FragmentSettingsBinding.inflate(inflater)
     binding.lifecycleOwner = this
-    binding.viewModel = viewModel
 
     return binding.root
   }
@@ -86,6 +85,10 @@ class SettingsFragment : Fragment() {
     binding.checkboxAutomaticPrint.setOnCheckedChangeListener { _, isChecked ->
       lifecycleScope.launch { viewModel.enableAutomaticPrint(isChecked) }
     }
+
+    binding.checkBoxMode.setOnCheckedChangeListener { _, isChecked ->
+      lifecycleScope.launch { viewModel.enableDemoMode(isChecked) }
+    }
   }
 
   override fun onDestroyView() {
@@ -95,7 +98,7 @@ class SettingsFragment : Fragment() {
 
   override fun onResume() {
     super.onResume()
-    lifecycleScope.launch{
+    lifecycleScope.launch {
       binding.checkboxAutomaticPrint.isChecked = viewModel.automaticPrintingEnable.value
 
       val printerAddress = viewModel.printerConfig.value.address

@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import br.com.backupautomacao.pesagem_modular.R
 import br.com.backupautomacao.pesagem_modular.databinding.ActivityMainBinding
 import br.com.backupautomacao.pesagem_modular.ui.ScreenSlidePagerAdapter
+import br.com.backupautomacao.pesagem_modular.utils.UiUtils
 
 
 class MainActivity : AppCompatActivity() {
@@ -14,6 +15,7 @@ class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(binding.root)
+    UiUtils.hideSystemUi(window)
     val pagerAdapter = ScreenSlidePagerAdapter(this)
     binding.viewPager.adapter = pagerAdapter
 

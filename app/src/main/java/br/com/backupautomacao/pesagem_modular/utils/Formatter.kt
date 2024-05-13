@@ -10,7 +10,7 @@ class Formatter private constructor() {
     fun formatPrice(value: Double): String {
       return String.format(
         Locale.ENGLISH,
-        "%.2f",
+        "R$ %.2f",
         value
       ).replace(".", ",")
     }

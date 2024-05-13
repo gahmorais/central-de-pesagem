@@ -8,6 +8,7 @@ import br.com.backupautomacao.pesagem_modular.data.repository.ConfigRepository
 import br.com.backupautomacao.pesagem_modular.data.repository.OperationRepository
 import br.com.backupautomacao.pesagem_modular.labels.LabelBuilder
 import br.com.backupautomacao.pesagem_modular.network.ApiMgv
+import br.com.backupautomacao.pesagem_modular.network.mock.ApiMgvMock
 import br.com.backupautomacao.pesagem_modular.utils.StringResourceProvider
 import org.koin.dsl.module
 
@@ -17,7 +18,15 @@ val mainModule = module {
   single { BluetoothHandler() }
   single { LabelBuilder(get()) }
   single { StringResourceProvider(get()) }
-  single { ApiMgv(get()) }
+  single {
+    val configRepository: ConfigRepository by inject()
+    val demo = configRepository.getMode()
+    if (demo) {
+      ApiMgvMock()
+    } else {
+      ApiMgv(get())
+    }
+  }
   single {
     Room.databaseBuilder(
       get(),

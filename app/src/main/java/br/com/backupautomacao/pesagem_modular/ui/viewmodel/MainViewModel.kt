@@ -20,7 +20,7 @@ import br.com.backupautomacao.pesagem_modular.data.repository.ConfigRepository
 import br.com.backupautomacao.pesagem_modular.data.repository.OperationRepository
 import br.com.backupautomacao.pesagem_modular.labels.LabelBuilder
 import br.com.backupautomacao.pesagem_modular.models.MgvProductImpl
-import br.com.backupautomacao.pesagem_modular.network.ApiMgv
+import br.com.backupautomacao.pesagem_modular.network.IApiMgv
 import br.com.backupautomacao.pesagem_modular.utils.Formatter
 import br.com.backupautomacao.pesagem_modular.utils.StringResourceProvider
 import br.com.backupautomacao.pesagem_modular.utils.properties
@@ -60,7 +60,7 @@ class MainViewModel(
   private val btHandler: BluetoothHandler,
   private val labelBuild: LabelBuilder,
   private val stringResourceProvider: StringResourceProvider,
-  private val apiMgv: ApiMgv
+  private val apiMgv: IApiMgv
 ) : ViewModel() {
 
   private val _labelsList = MutableStateFlow<List<String>>(listOf())
@@ -178,30 +178,12 @@ class MainViewModel(
       }
       val command = byteArrayOf(0x05)
       btConnected.write(command)
-//      viewModelScope.launch { updateWeightProduct("5000".toByteArray()) }
     } catch (e: ClosedSocketException) {
       e.message?.let { showMessage(it) }
     } catch (e: Exception) {
       e.message?.let { showMessage(it) }
     }
   }
-
-//  fun weighing() {
-//    try {
-//      Log.i("MainFragmentViewModel", "weighing: Realizando pesagem Mock")
-//      if (checkProductIsNullOrEmpty()) {
-//        showMessage(stringResourceProvider.getString(R.string.error_get_product))
-//        return
-//      }
-////      val command = byteArrayOf(0x05)
-////      btConnected.write(command)
-//      viewModelScope.launch { updateWeightProduct("5000".toByteArray()) }
-//    } catch (e: ClosedSocketException) {
-//      e.message?.let { showMessage(it) }
-//    } catch (e: Exception) {
-//      e.message?.let { showMessage(it) }
-//    }
-//  }
 
   suspend fun print() {
 

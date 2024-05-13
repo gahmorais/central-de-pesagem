@@ -64,6 +64,17 @@ class ConfigRepository(private val database: AppDatabase) {
     throw e
   }
 
+  fun getMode() = runBlocking {
+    try {
+      val mode = withContext(Dispatchers.IO) {
+        database.configDao().getConfig(Constants.DEMO)
+      }
+      mode?.value == "1"
+    } catch (e: Exception) {
+      throw e
+    }
+  }
+
   suspend fun setPrinterConfig(address: String, port: Int) = try {
     val addressConfig = Config(Constants.PRINTER_IP, address)
     val portConfig = Config(Constants.PRINTER_PORT, port.toString())
@@ -73,6 +84,13 @@ class ConfigRepository(private val database: AppDatabase) {
     withContext(Dispatchers.IO) {
       database.configDao().setConfig(portConfig)
     }
+  } catch (e: Exception) {
+    throw e
+  }
+
+  suspend fun setDemoMode(active: Boolean) = try {
+    val demo = Config(Constants.DEMO, if (active) "1" else "0")
+    database.configDao().setConfig(demo)
   } catch (e: Exception) {
     throw e
   }
@@ -104,4 +122,5 @@ class ConfigRepository(private val database: AppDatabase) {
   } catch (e: Exception) {
     throw e
   }
+
 }

@@ -19,8 +19,12 @@ class SettingsViewModel(
   private val stringResourceProvider: StringResourceProvider
 ) : ViewModel() {
   private val _statusMessage = MutableLiveData<String>()
+
   private val _automaticPrintingEnable = MutableStateFlow(false)
   val automaticPrintingEnable = _automaticPrintingEnable.asStateFlow()
+
+  private val _enableDemoMode = MutableStateFlow(false)
+  val enableDemoMode = _enableDemoMode.asStateFlow()
 
   val statusMessage = _statusMessage
 
@@ -38,11 +42,17 @@ class SettingsViewModel(
       val printer = withContext(Dispatchers.IO) {
         configRepository.getPrinterConfig()
       }
+
       val automaticPrint = withContext(Dispatchers.IO) {
         configRepository.getAutomaticPrint()
       }
 
+      val demoMode = withContext(Dispatchers.IO) {
+        configRepository.getMode()
+      }
+
       _printerConfig.emit(printer)
+      _enableDemoMode.emit(demoMode)
       _automaticPrintingEnable.emit(automaticPrint)
     }
   }
@@ -97,7 +107,7 @@ class SettingsViewModel(
       return
     }
 
-    withContext(Dispatchers.IO){
+    withContext(Dispatchers.IO) {
       configRepository.setServerAddress(address)
     }
 
@@ -114,6 +124,19 @@ class SettingsViewModel(
         if (isEnable) stringResourceProvider.getString(R.string.automatic_print_enable) else stringResourceProvider.getString(
           R.string.automatic_print_disable
         )
+    }
+  }
+
+  suspend fun enableDemoMode(isEnable: Boolean) {
+    val currentValue = configRepository.getMode()
+    if (isEnable != currentValue) {
+      _enableDemoMode.value = isEnable
+      configRepository.setDemoMode(isEnable)
+      _statusMessage.value = if (isEnable) {
+        stringResourceProvider.getString(R.string.demo_mode_enable)
+      } else {
+        stringResourceProvider.getString(R.string.demo_mode_disable)
+      }
     }
   }
 }

@@ -4,18 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.fragments.SettingsFragment">
 
-    <data>
-
-        <variable
-            name="viewModel"
-            type="br.com.backupautomacao.pesagem_modular.ui.viewmodel.SettingsViewModel" />
-    </data>
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="@dimen/default_margin">
-
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -23,11 +15,11 @@
 
             <TextView
                 android:id="@+id/textView7"
-                android:fontFamily="@font/amplesoft_med"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_margin"
                 android:layout_marginTop="16dp"
+                android:fontFamily="@font/amplesoft_med"
                 android:text="@string/text_title_printer_config"
                 android:textColor="@color/black"
                 android:textSize="@dimen/big_font"
@@ -39,9 +31,9 @@
                 android:id="@+id/textView9"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/amplesoft_med"
                 android:layout_marginHorizontal="@dimen/default_margin"
-                android:layout_marginTop="@dimen/default_margin"
+                android:layout_marginTop="@dimen/extra_big_margin"
+                android:fontFamily="@font/amplesoft_med"
                 android:text="@string/text_title_mgv_config"
                 android:textColor="@color/black"
                 android:textSize="@dimen/big_font"
@@ -103,9 +95,9 @@
                     android:layout_marginStart="@dimen/small_margin"
                     android:layout_weight="1"
                     android:fontFamily="@font/amplesoft_med"
+                    android:text="@string/text_button_save"
                     android:textAllCaps="false"
-                    android:textSize="@dimen/big_font"
-                    android:text="@string/text_button_save" />
+                    android:textSize="@dimen/big_font" />
             </LinearLayout>
 
             <LinearLayout
@@ -137,8 +129,8 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginEnd="@dimen/small_margin"
                     android:layout_marginStart="@dimen/small_margin"
+                    android:layout_marginEnd="@dimen/small_margin"
                     android:layout_weight="1">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -156,9 +148,9 @@
                     android:layout_marginStart="@dimen/small_margin"
                     android:layout_weight="1"
                     android:fontFamily="@font/amplesoft_med"
+                    android:text="@string/text_button_save"
                     android:textAllCaps="false"
-                    android:textSize="@dimen/big_font"
-                    android:text="@string/text_button_save" />
+                    android:textSize="@dimen/big_font" />
 
             </LinearLayout>
 
@@ -193,11 +185,41 @@
                     android:id="@+id/buttonSaveServerAddress"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:fontFamily="@font/amplesoft_med"
-                    android:textAllCaps="false"
-                    android:textSize="@dimen/big_font"
                     android:layout_weight="1.47"
-                    android:text="@string/text_button_save" />
+                    android:fontFamily="@font/amplesoft_med"
+                    android:text="@string/text_button_save"
+                    android:textAllCaps="false"
+                    android:textSize="@dimen/big_font" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayout5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/default_margin"
+                android:layout_marginTop="60dp"
+                android:gravity="center"
+                android:weightSum="2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/amplesoft_med"
+                    android:gravity="center"
+                    android:text="@string/text_mode"
+                    android:textColor="@color/black"
+                    android:textSize="30sp" />
+
+                <CheckBox
+                    android:id="@+id/checkBoxMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -205,19 +227,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/default_margin"
-                android:layout_marginTop="@dimen/small_margin"
+                android:layout_marginTop="16dp"
                 android:gravity="center"
                 android:weightSum="2"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/amplesoft_med"
                     android:layout_weight="1"
+                    android:fontFamily="@font/amplesoft_med"
                     android:gravity="center"
                     android:text="@string/text_automatic_print"
                     android:textColor="@color/black"

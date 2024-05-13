@@ -2,14 +2,14 @@ package br.com.backupautomacao.pesagem_modular.network.mock
 
 import br.com.backupautomacao.pesagem_modular.models.MgvProductImpl
 
-fun getProduct(code: String) = listOf(
+fun getProductMock(code: String) = listOf(
   MgvProductImpl(
     nutrictionFacts = null,
     extraInfo = null,
     code = "1",
     description = "Produto Teste",
     codExtraInfo = null,
-    codNutrictionFacts = null,
+    codNutrictionFacts = 2,
     codTara = null,
     shelfLife = 6,
     price = 20.00,
@@ -17,7 +17,6 @@ fun getProduct(code: String) = listOf(
     promotionalPrice = 0.0,
     totalPrice = 0.0,
     unit = null,
-    weight = null
   ),
   MgvProductImpl(
     nutrictionFacts = null,
@@ -25,7 +24,7 @@ fun getProduct(code: String) = listOf(
     code = "2",
     description = "Produto Teste 2",
     codExtraInfo = null,
-    codNutrictionFacts = null,
+    codNutrictionFacts = 2,
     codTara = null,
     shelfLife = 6,
     price = 30.00,
@@ -33,7 +32,6 @@ fun getProduct(code: String) = listOf(
     promotionalPrice = 0.0,
     totalPrice = 0.0,
     unit = null,
-    weight = null
   ),
   MgvProductImpl(
     nutrictionFacts = null,
@@ -49,7 +47,6 @@ fun getProduct(code: String) = listOf(
     promotionalPrice = 0.0,
     totalPrice = 0.0,
     unit = null,
-    weight = null
   ),
   MgvProductImpl(
     nutrictionFacts = null,
@@ -65,7 +62,6 @@ fun getProduct(code: String) = listOf(
     promotionalPrice = 0.0,
     totalPrice = 0.0,
     unit = null,
-    weight = null
   ),
   MgvProductImpl(
     nutrictionFacts = null,
@@ -81,7 +77,6 @@ fun getProduct(code: String) = listOf(
     promotionalPrice = 0.0,
     totalPrice = 0.0,
     unit = null,
-    weight = null
   ),
   MgvProductImpl(
     nutrictionFacts = null,
@@ -97,7 +92,6 @@ fun getProduct(code: String) = listOf(
     promotionalPrice = 0.0,
     totalPrice = 0.0,
     unit = null,
-    weight = null
   ),
   MgvProductImpl(
     nutrictionFacts = null,
@@ -113,6 +107,5 @@ fun getProduct(code: String) = listOf(
     promotionalPrice = 0.0,
     totalPrice = 0.0,
     unit = null,
-    weight = null
   ),
 ).find { it.code == code }

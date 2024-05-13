@@ -13,6 +13,7 @@ object Constants {
   const val PRINTER_PORT = "printer_port"
   const val PASSWORD_MGV = "password_mgv"
   const val STORE_NUMBER = "store_number"
+  const val DEMO = "demo_mode"
   const val UNSTABLE_WEIGHT = "IIIII"
   const val NEGATIVE_WEIGHT = "NNNNN"
   const val OVERWEIGHT = "SSSSS"
