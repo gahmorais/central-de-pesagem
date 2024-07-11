@@ -10,12 +10,16 @@ import br.com.backupautomacao.pesagem_modular.utils.UiUtils
 
 
 class MainActivity : AppCompatActivity() {
-  private val binding: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
+
+  private val binding: ActivityMainBinding by lazy {
+    ActivityMainBinding.inflate(layoutInflater)
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(binding.root)
     UiUtils.hideSystemUi(window)
+
     val pagerAdapter = ScreenSlidePagerAdapter(this)
     binding.viewPager.adapter = pagerAdapter
 

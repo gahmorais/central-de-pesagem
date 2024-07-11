@@ -1,5 +1,6 @@
 package br.com.backupautomacao.pesagem_modular.permission
 
+import android.app.Activity
 import android.content.pm.PackageManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -21,6 +22,7 @@ class PermissionManager private constructor(private val fragment: WeakReference<
 
   companion object {
     fun from(fragment: Fragment) = PermissionManager(WeakReference(fragment))
+
   }
 
   fun rationale(description: String): PermissionManager {

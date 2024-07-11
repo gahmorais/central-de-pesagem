@@ -15,28 +15,26 @@
 
             <TextView
                 android:id="@+id/textView7"
+                style="@style/ItemTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_margin"
                 android:layout_marginTop="16dp"
                 android:fontFamily="@font/amplesoft_med"
                 android:text="@string/text_title_printer_config"
-                android:textColor="@color/black"
-                android:textSize="@dimen/big_font"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/textView9"
+                style="@style/ItemTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/default_margin"
                 android:layout_marginTop="@dimen/extra_big_margin"
                 android:fontFamily="@font/amplesoft_med"
                 android:text="@string/text_title_mgv_config"
-                android:textColor="@color/black"
-                android:textSize="@dimen/big_font"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout4" />
@@ -56,12 +54,12 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textContainerIpAddress"
+                    style="@style/textHintAppearance"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginEnd="@dimen/small_margin"
                     android:layout_weight="1"
                     android:gravity="center">
-
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/textInputPrinterIp"
@@ -69,11 +67,13 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:hint="@string/placeholder_printer_address"
-                        android:inputType="number" />
+                        android:inputType="number"
+                        tools:text="TESTE" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textContainerPortAddress"
+                    style="@style/textHintAppearance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/small_margin"
@@ -85,19 +85,20 @@
                         android:layout_height="match_parent"
                         android:gravity="start"
                         android:hint="@string/placeholder_printer_port"
-                        android:inputType="number" />
+                        android:inputType="number"
+                        tools:text="TESTE" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Button
                     android:id="@+id/buttonSavePrinterAddress"
+                    style="@style/BlueButton"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="@dimen/small_margin"
                     android:layout_weight="1"
                     android:fontFamily="@font/amplesoft_med"
                     android:text="@string/text_button_save"
-                    android:textAllCaps="false"
-                    android:textSize="@dimen/big_font" />
+                    android:textAllCaps="false" />
             </LinearLayout>
 
             <LinearLayout
@@ -113,6 +114,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/textView9">
 
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/textHintAppearance"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginEnd="@dimen/small_margin"
@@ -123,7 +125,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/placeholder_password"
-                        android:inputType="textPassword" />
+                        android:inputType="textPassword"
+                        tools:text="TESTE" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -131,7 +134,8 @@
                     android:layout_height="match_parent"
                     android:layout_marginStart="@dimen/small_margin"
                     android:layout_marginEnd="@dimen/small_margin"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    style="@style/textHintAppearance">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/textInputMgvStoreNumber"
@@ -143,14 +147,14 @@
 
                 <Button
                     android:id="@+id/buttonSaveMgvConfig"
+                    style="@style/BlueButton"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginStart="@dimen/small_margin"
                     android:layout_weight="1"
                     android:fontFamily="@font/amplesoft_med"
                     android:text="@string/text_button_save"
-                    android:textAllCaps="false"
-                    android:textSize="@dimen/big_font" />
+                    android:textAllCaps="false" />
 
             </LinearLayout>
 
@@ -172,24 +176,26 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="@dimen/default_margin"
                     android:layout_weight="0.7"
+                    style="@style/textHintAppearance"
                     android:gravity="center">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/textInputServerAddress"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/placeholder_server_address" />
+                        android:hint="@string/placeholder_server_address"
+                        tools:text="TESTE"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Button
                     android:id="@+id/buttonSaveServerAddress"
+                    style="@style/BlueButton"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1.47"
                     android:fontFamily="@font/amplesoft_med"
                     android:text="@string/text_button_save"
-                    android:textAllCaps="false"
-                    android:textSize="@dimen/big_font" />
+                    android:textAllCaps="false" />
             </LinearLayout>
 
             <LinearLayout
@@ -205,14 +211,13 @@
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
                 <TextView
+                    style="@style/ItemTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/amplesoft_med"
                     android:gravity="center"
-                    android:text="@string/text_mode"
-                    android:textColor="@color/black"
-                    android:textSize="30sp" />
+                    android:text="@string/text_mode" />
 
                 <CheckBox
                     android:id="@+id/checkBoxMode"
@@ -235,14 +240,13 @@
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout">
 
                 <TextView
+                    style="@style/ItemTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/amplesoft_med"
                     android:gravity="center"
-                    android:text="@string/text_automatic_print"
-                    android:textColor="@color/black"
-                    android:textSize="30sp" />
+                    android:text="@string/text_automatic_print" />
 
                 <CheckBox
                     android:id="@+id/checkboxAutomaticPrint"

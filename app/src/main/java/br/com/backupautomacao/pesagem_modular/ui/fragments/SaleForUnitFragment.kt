@@ -23,8 +23,9 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SaleForUnitFragment : Fragment() {
-  private var _binding: FragmentSaleForUnitBinding? = null
-  private val binding get() = _binding!!
+  private val binding: FragmentSaleForUnitBinding by lazy {
+    FragmentSaleForUnitBinding.inflate(layoutInflater)
+  }
   private lateinit var workManager: WorkManager
   private val viewModel: SaleForUnitViewModel by viewModel()
 
@@ -33,7 +34,6 @@ class SaleForUnitFragment : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
-    _binding = FragmentSaleForUnitBinding.inflate(inflater)
     binding.lifecycleOwner = this
     workManager = (requireActivity().application as AppApplication).workManager
     configureListeners()

@@ -30,14 +30,13 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/mainScreen"
-            android:visibility="visible"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#ccc">
-
+            android:visibility="visible">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout2"
+                style="@style/textHintAppearance"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/big_margin"
@@ -50,15 +49,17 @@
                     android:id="@+id/etProductCode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/custom_layout_spinner"
+                    android:background="?attr/card_item_unit"
                     android:hint="@string/placeholder_input_text"
                     android:imeOptions="actionDone"
                     android:inputType="numberDecimal"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    tools:text="TESTE" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout3"
+                style="@style/textHintAppearance"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/big_margin"
@@ -71,14 +72,16 @@
                     android:id="@+id/etLabelQuantity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/custom_layout_spinner"
+                    android:background="?attr/card_item_unit"
                     android:hint="@string/insert_label_quantity"
                     android:inputType="numberDecimal"
+                    tools:text="TESTE"
                     android:textSize="20sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout5"
+                style="@style/textHintAppearance"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/big_margin"
@@ -91,30 +94,34 @@
                     android:id="@+id/etProductQuantity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/custom_layout_spinner"
+                    android:background="?attr/card_item_unit"
                     android:digits="0123456789.,"
                     android:hint="@string/insert_product_quantity"
                     android:imeOptions="actionDone"
                     android:inputType="numberDecimal"
-                    android:textSize="20sp" />
+                    android:textSize="20sp"
+                    tools:text="TESTE" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="110dp"
+                android:layout_marginTop="108dp"
                 android:layout_marginEnd="@dimen/big_margin"
-                android:background="@drawable/custom_layout_spinner"
+                android:background="?attr/card_item_unit"
                 android:paddingHorizontal="@dimen/small_margin"
                 android:paddingVertical="@dimen/big_margin"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/guideline3"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/textView12"
                     style="@style/TitleTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/small_margin"
                     android:text="@string/text_title_barcode"
                     app:layout_constraintBaseline_toBaselineOf="@+id/tvProductCode"
@@ -123,6 +130,8 @@
                 <TextView
                     android:id="@+id/textView13"
                     style="@style/TitleTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/small_margin"
                     android:text="@string/text_title_description"
                     app:layout_constraintBaseline_toBaselineOf="@+id/tvProductDescription"
@@ -131,6 +140,8 @@
                 <TextView
                     android:id="@+id/textView14"
                     style="@style/TitleTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/small_margin"
                     android:text="@string/text_title_price"
                     app:layout_constraintBaseline_toBaselineOf="@+id/tvProductPrice"
@@ -139,44 +150,55 @@
                 <TextView
                     android:id="@+id/tvProductCode"
                     style="@style/ItemTextView"
-                    android:layout_marginStart="50dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:ellipsize="marquee"
                     android:text="@{viewModel.mgvProduct.code}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/textView12"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="TESTESTESTESTES" />
 
                 <TextView
                     android:id="@+id/tvProductDescription"
                     style="@style/ItemTextView"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginHorizontal="5dp"
                     android:layout_marginTop="60dp"
                     android:maxEms="10"
                     android:text="@{viewModel.mgvProduct.description}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/textView13"
-                    app:layout_constraintTop_toBottomOf="@+id/tvProductCode" />
+                    app:layout_constraintTop_toBottomOf="@+id/tvProductCode"
+                    tools:text="TESTESTESTEST" />
 
                 <TextView
                     android:id="@+id/tvProductPrice"
                     style="@style/ItemTextView"
-                    android:layout_marginStart="75dp"
-                    android:layout_marginTop="60dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    android:layout_marginTop="56dp"
+                    android:ellipsize="marquee"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.539"
                     app:layout_constraintStart_toEndOf="@+id/textView14"
                     app:layout_constraintTop_toBottomOf="@+id/tvProductDescription"
-                    app:productPrice="@{viewModel.mgvProduct.price}" />
+                    app:productPrice="@{viewModel.mgvProduct.price}"
+                    tools:text="R$ 999,99" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <Button
                 android:id="@+id/printButton"
+                style="@style/BlueButton"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_marginHorizontal="@dimen/big_margin"
                 android:layout_marginTop="@dimen/default_margin"
                 android:text="@string/text_button_print"
-                android:textSize="@dimen/big_font"
                 app:layout_constraintEnd_toStartOf="@+id/guideline3"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textInputLayout3" />

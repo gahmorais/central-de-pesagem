@@ -38,7 +38,8 @@
         <activity
             android:name="br.com.backupautomacao.pesagem_modular.ui.activities.MainActivity"
             android:exported="true"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.PesagemModular">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

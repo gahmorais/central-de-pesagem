@@ -12,8 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/fragment_report_title"
-        android:textColor="@color/black"
-        android:textSize="35sp"
+        style="@style/TitleTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

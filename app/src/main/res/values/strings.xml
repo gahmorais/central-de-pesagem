@@ -78,4 +78,11 @@
     <string name="text_mode">Modo demonstração</string>
     <string name="demo_mode_enable">Habilitando modo demonstração</string>
     <string name="demo_mode_disable">Modo demonstração desabilitada</string>
+    <string name="product_description_placeholder">BACON MANTA RIO SUL</string>
+    <string name="price_placeholder">1,000 Kg</string>
+    <string name="placeholder_report_user">Usuário:</string>
+    <string name="placeholder_report_weight">Peso:</string>
+    <string name="placeholder_total_price_report">Preço Total:</string>
+    <string name="placeholder_price_per_kg_report">Preço/Kg:</string>
+    <string name="placeholder_date">Data:</string>
 </resources>

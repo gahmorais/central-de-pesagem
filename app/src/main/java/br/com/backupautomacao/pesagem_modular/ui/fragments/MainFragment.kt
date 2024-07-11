@@ -25,6 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainFragment : Fragment() {
@@ -33,13 +34,12 @@ class MainFragment : Fragment() {
     FragmentMainBinding.inflate(layoutInflater)
   }
 
-  private val mainViewModel: MainViewModel by viewModel()
+  private val mainViewModel: MainViewModel by activityViewModel()
   private val permissionManager = PermissionManager.from(this)
   private val btAdapter by lazy {
     val btManager = activity?.getSystemService(BluetoothManager::class.java) as BluetoothManager
     btManager.adapter
   }
-
 
   override fun onCreateView(
     inflater: LayoutInflater,

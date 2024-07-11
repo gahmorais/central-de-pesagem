@@ -2,39 +2,43 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_margin="@dimen/default_margin"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/default_margin">
 
     <TextView
         android:id="@+id/tvDescription"
+        style="@style/report_big_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="@tools:sample/lorem"
-        android:textSize="20sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@tools:sample/lorem" />
 
     <TextView
         android:id="@+id/textView2"
+        style="@style/report_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Peso: "
+        android:text="@string/placeholder_report_weight"
         app:layout_constraintBaseline_toBaselineOf="@+id/tvWeight"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/textView8"
+        style="@style/report_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Usuário: "
+        android:text="@string/placeholder_report_user"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvDescription" />
 
     <TextView
         android:id="@+id/tvUsername"
+        style="@style/report_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:paddingHorizontal="5dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toEndOf="@+id/textView8"
         app:layout_constraintTop_toBottomOf="@+id/tvDescription"
@@ -42,63 +46,73 @@
 
     <TextView
         android:id="@+id/tvWeight"
+        style="@style/report_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:hint="0,00Kg"
+        android:paddingHorizontal="5dp"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toEndOf="@+id/textView2"
-        app:layout_constraintTop_toBottomOf="@+id/tvDescription" />
+        app:layout_constraintTop_toBottomOf="@+id/tvDescription"
+        tools:text="0,00Kg" />
 
     <TextView
         android:id="@+id/tvTotalPrice"
+        style="@style/report_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="0,00"
+        android:paddingHorizontal="5dp"
         app:layout_constraintBottom_toBottomOf="@+id/textView3"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toTopOf="@+id/textView3" />
+        app:layout_constraintTop_toTopOf="@+id/textView3"
+        tools:text="0,00" />
 
     <TextView
         android:id="@+id/textView3"
+        style="@style/report_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-
-        android:text="Preço Total: "
+        android:text="@string/placeholder_total_price_report"
         app:layout_constraintStart_toEndOf="@+id/tvPricePerKg"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvWeight" />
 
     <TextView
         android:id="@+id/textView6"
+        style="@style/report_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Preço/Kg: "
+        android:text="@string/placeholder_price_per_kg_report"
         app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toBottomOf="@+id/tvDescription" />
 
     <TextView
         android:id="@+id/productTotalPrice"
+        style="@style/report_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Data: "
         app:layout_constraintStart_toStartOf="@+id/guideline2"
-        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+        app:layout_constraintTop_toBottomOf="@+id/textView6"
+        android:text="@string/placeholder_date" />
 
     <TextView
         android:id="@+id/tvPricePerKg"
+        style="@style/report_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="0,00"
+        android:paddingHorizontal="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView6"
-        app:layout_constraintTop_toBottomOf="@+id/tvDescription" />
+        app:layout_constraintTop_toBottomOf="@+id/tvDescription"
+        tools:text="0,00" />
 
     <TextView
         android:id="@+id/tvDate"
+        style="@style/report_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:paddingHorizontal="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/productTotalPrice"
         app:layout_constraintTop_toBottomOf="@+id/tvPricePerKg"

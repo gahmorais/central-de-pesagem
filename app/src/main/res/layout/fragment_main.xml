@@ -232,7 +232,7 @@
 
             <Spinner
                 android:id="@+id/selectLabel"
-                android:background="@drawable/custom_layout_spinner"
+                android:background="@drawable/custom_layout_spinner_light"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="40dp"
