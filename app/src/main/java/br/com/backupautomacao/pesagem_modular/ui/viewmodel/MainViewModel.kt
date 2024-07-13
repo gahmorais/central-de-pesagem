@@ -109,9 +109,8 @@ class MainViewModel(
     _labelsList.value = labelBuild.listLabels()
     _labelsList.value.let {
       if (it.isNotEmpty()) {
-        _labelType.value = labelsList.value[0]
+        _labelType.value = "verdemar"
       }
-      _labelType.value = "ET119"
     }
   }
 
