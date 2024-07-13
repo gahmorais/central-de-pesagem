@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     val pagerAdapter = ScreenSlidePagerAdapter(this)
     binding.viewPager.adapter = pagerAdapter
 
+
+
     binding.toolbar.apply {
       title = getString(R.string.app_name)
       setTitleTextColor(Color.WHITE)

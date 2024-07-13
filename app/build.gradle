@@ -8,7 +8,17 @@ def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+def room_version="2.4.3"
+def work_version="2.7.1"
+def lifecycle_version="2.3.1"
+def ktor_version="2.2.4"
+def slf4j_version="2.0.6"
+def koin_version="3.2.2"
+def koin_android_version="3.3.0"
+def timber_version="5.0.1"
+
 android {
+
     signingConfigs {
         release {
             storeFile file(keystoreProperties['release_storeFile'])
@@ -17,6 +27,7 @@ android {
             keyPassword keystoreProperties['release_keyPassword']
         }
     }
+
     testOptions {
         unitTests {
             includeAndroidResources = true
@@ -64,6 +75,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
 }
 
 dependencies {
@@ -81,20 +93,17 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:4.1.0"
 
     //Room
-    def roomVersion = "2.4.3"
-    implementation "androidx.room:room-ktx:$roomVersion"
-    kapt "androidx.room:room-compiler:$roomVersion"
-    androidTestImplementation "androidx.room:room-testing:$roomVersion"
+    implementation "androidx.room:room-ktx:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    androidTestImplementation "androidx.room:room-testing:$room_version"
 
     //WorkManager
-    def work_version = "2.7.1"
     implementation("androidx.work:work-runtime-ktx:$work_version")
 
     //Lifecycle
-    def lifecycleVersion = "2.3.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
     //Network
     implementation("com.google.code.gson:gson:2.10")
@@ -103,25 +112,24 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
     //Ktor Client
-    def ktor_version = "2.2.4"
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
     implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("io.ktor:ktor-serialization-gson:$ktor_version")
     implementation("io.ktor:ktor-client-logging:$ktor_version")
-    def slf4j_version = "2.0.6"
     implementation("org.slf4j:slf4j-simple:$slf4j_version")
 
     //Dependecies Injection
-    def koin_version = "3.2.2"
-    def koin_android_version = "3.3.0"
     implementation "io.insert-koin:koin-android:$koin_android_version"
     implementation "io.insert-koin:koin-core:$koin_version"
     testImplementation "io.insert-koin:koin-test:$koin_version"
     testImplementation "io.insert-koin:koin-test-junit4:$koin_version"
 
+    //Logger
+    implementation "com.jakewharton.timber:timber:$timber_version"
+
     //Test
-//    testImplementation 'junit:junit:4.13.2'
+    //testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

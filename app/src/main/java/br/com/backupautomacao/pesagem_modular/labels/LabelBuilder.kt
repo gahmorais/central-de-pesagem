@@ -9,6 +9,7 @@ class LabelBuilder(private val context: Context) {
     return when (label) {
       "ET119" -> ET119(context, label)
       "ET313" -> ET313(context, label)
+      "verdemar" -> Verdemar(context, label)
       else -> throw Exception("Modelo de etiqueta não encontrado")
     }
   }
