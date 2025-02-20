@@ -24,7 +24,7 @@ class Label(context: Context) {
   fun generateLabelBase(mgvProduct: MgvProduct, labelName: String?): String {
 
     var labelBase: String = try {
-      fileController.readFileFromAssets(labelName ?: "etiqueta_base.prn")
+      fileController.readFileFromAssets(labelName ?: "etiqueta_modelo_grande.prn")
     } catch (e: FileNotFoundException) {
       throw e
     }

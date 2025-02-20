@@ -1,15 +1,27 @@
 package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 
+
 import android.app.Application
+import android.app.PendingIntent
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbDeviceConnection
+import android.hardware.usb.UsbManager
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
+import androidx.work.WorkManager
 import br.com.backupautomacao.centraldepesagem.AppApplication
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.R
@@ -19,19 +31,24 @@ import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectingThread
 import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
+import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
+import br.com.backupautomacao.centraldepesagem.services.PrinterUsb
 import br.com.backupautomacao.centraldepesagem.ui.UiHandler
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import br.com.backupautomacao.centraldepesagem.utils.Label
+import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
 import br.com.backupautomacao.centraldepesagem.utils.Util
 import br.com.backupautomacao.centraldepesagem.utils.findItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.gotev.speech.Speech
@@ -52,18 +69,17 @@ enum class StatusApp {
   FINALIZAR
 }
 
-class MainFragmentViewModel(application: Application) :
-  AndroidViewModel(application),
+class MainFragmentViewModel(
+  private val printerUsb: PrinterUsb,
+  private val configRepository: ConfigRepository,
+  private val operationRepository: OperationRepository,
+  private val workManager: WorkManager,
+  private val bluetoothAdapter: BluetoothAdapter,
+  private val resourceProvider: ResourceProvider,
+  private val label: Label
+
+) : ViewModel(),
   SpeechDelegate, BluetoothListener {
-
-  private val configRepository by lazy { getApplication<AppApplication>().configRepository }
-  private val operationRepository by lazy { getApplication<AppApplication>().operationRepository }
-  private val workManager by lazy { getApplication<AppApplication>().workManager }
-
-  private val bluetoothAdapter by lazy {
-    val bm = getApplication<AppApplication>().getSystemService(BluetoothManager::class.java)
-    bm.adapter
-  }
 
   private val retrofitInstance by lazy {
     val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
@@ -79,6 +95,9 @@ class MainFragmentViewModel(application: Application) :
   private val _scale: MutableStateFlow<Int?> = MutableStateFlow(null)
   val scale: StateFlow<Int?> = _scale
 
+  private val _usbDevice: MutableStateFlow<UsbDevice?> = MutableStateFlow(null)
+  val usbDevice = _usbDevice.asStateFlow()
+
   private val _connectedThreads: MutableLiveData<ArrayList<ConnectedThread>> =
     MutableLiveData(ArrayList())
   val connectedThreads: LiveData<ArrayList<ConnectedThread>> = _connectedThreads
@@ -86,7 +105,22 @@ class MainFragmentViewModel(application: Application) :
   private val _updateStatus: MutableStateFlow<StatusApp> = MutableStateFlow(StatusApp.INICIO)
 
   init {
+//    val filter = IntentFilter(ACTION_USB_PERMISSION)
+//    context.registerReceiver(usbReceiver, filter)
     applicationMonitor()
+  }
+
+  fun openConnectionUSB(context: Context){
+    printerUsb.openConnection(context)
+  }
+
+  fun connecToDevice(){
+    val device = printerUsb.connectToDevice()
+    _usbDevice.update { device }
+  }
+
+  fun requestPermissionUSB(context: Context){
+    _usbDevice.value?.let { printerUsb.requestPermission(it, context) }
   }
 
   private fun applicationMonitor() {
@@ -127,7 +161,7 @@ class MainFragmentViewModel(application: Application) :
     val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
     val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
     if (codItem.isEmpty()) {
-      showMessage(getApplication<AppApplication>().getString(R.string.barcode_error))
+      showMessage(resourceProvider.getString(R.string.barcode_error))
       return
     }
     _updateStatus.value = StatusApp.BUSCAR_PRODUTO
@@ -144,10 +178,10 @@ class MainFragmentViewModel(application: Application) :
         mgvError?.let { error ->
           Log.i("MainFragmentViewModel", "fetchItem: $error")
           showMessage(
-            getApplication<AppApplication>().getString(
+            resourceProvider.getString(
               R.string.error_responde_mgv,
-              error.message,
-              error.code
+//              error.message,
+//              error.code
             )
           )
         }
@@ -162,11 +196,12 @@ class MainFragmentViewModel(application: Application) :
           _mgvProduct.value = product
           _updateStatus.value = StatusApp.REALIZAR_PESAGEM
         }
+
       } catch (e: IllegalArgumentException) {
-        showMessage(getString(R.string.invalid_address_server))
+        showMessage(resourceProvider.getString(R.string.invalid_address_server))
         Log.e("MainFragmentViewModel", "fetchItem: ", e)
       } catch (e: Exception) {
-        showMessage(getString(R.string.request_error))
+        showMessage(resourceProvider.getString(R.string.request_error))
         Log.e("MainFragmentViewModel", "fetchItem: ", e)
       }
     }
@@ -207,7 +242,7 @@ class MainFragmentViewModel(application: Application) :
   fun weighing() {
     Log.i("MainFragmentViewModel", "weighing: Realizando pesagem")
     if (checkProductIsNullOrEmpty()) {
-      showMessage(getString(R.string.error_get_product))
+      showMessage(resourceProvider.getString(R.string.error_get_product))
       return
     }
     val command = byteArrayOf(0x05)
@@ -217,7 +252,7 @@ class MainFragmentViewModel(application: Application) :
   fun print() {
 
     if (checkProductIsNullOrEmpty()) {
-      showMessage(getString(R.string.error_to_get_product))
+      showMessage(resourceProvider.getString(R.string.error_to_get_product))
       return
     }
     try {
@@ -225,15 +260,16 @@ class MainFragmentViewModel(application: Application) :
       val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
       val product = _mgvProduct.value!!
       if (product.weight == null || product.weight == 0.0) {
-        showMessage(getString(R.string.make_weighing))
+        showMessage(resourceProvider.getString(R.string.make_weighing))
         return
       }
-      val label = Label(getApplication())
+      
       val newLabel = label.generateLabelBase(product, null)
       val printTask = PrintWorker.createUniquePrintTask(
         printerAddress = printerIp,
         printerPort = printerPort,
-        label = newLabel
+        label = newLabel,
+        usbPrinterName = "Honeywell PC42tp-203-FP"
       )
 
       workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
@@ -241,7 +277,7 @@ class MainFragmentViewModel(application: Application) :
       _updateStatus.value = StatusApp.FINALIZAR
       clearFields()
     } catch (e: FileNotFoundException) {
-      showMessage(getString(R.string.file_not_found_error))
+      showMessage(resourceProvider.getString(R.string.file_not_found_error))
     } catch (e: InvalidParameterException) {
       showMessage("Porta ou endereço ip inválidos")
     } catch (e: Exception) {
@@ -305,7 +341,7 @@ class MainFragmentViewModel(application: Application) :
           username = Build.ID,
           description = product.description
         )
-      } ?: throw Exception(getString(R.string.save_operation_error))
+      } ?: throw Exception(resourceProvider.getString(R.string.save_operation_error))
 
       viewModelScope.launch {
         operationRepository.save(operation)
@@ -321,7 +357,7 @@ class MainFragmentViewModel(application: Application) :
   }
 
   override fun onStartOfSpeech() {
-    showMessage(getString(R.string.listening))
+    showMessage(resourceProvider.getString(R.string.listening))
   }
 
   override fun onSpeechRmsChanged(value: Float) {
@@ -360,11 +396,11 @@ class MainFragmentViewModel(application: Application) :
       Log.i("MainFragmentViewModel", "executeTask: Produto -> $product")
       Log.i("MainFragmentViewModel", "executeTask: Código -> $code")
       if (scaleNumber < 0) {
-        showMessage(getString(R.string.error_to_set_scale))
+        showMessage(resourceProvider.getString(R.string.error_to_set_scale))
         return
       }
       if (code == 0) {
-        showMessage(getString(R.string.product_not_found))
+        showMessage(resourceProvider.getString(R.string.product_not_found))
         return
       }
       _scale.value = scaleNumber
@@ -375,10 +411,6 @@ class MainFragmentViewModel(application: Application) :
     }
   }
 
-  private fun getString(stringRes: Int, vararg inputs: Any): String {
-
-    return getApplication<AppApplication>().getString(stringRes, inputs)
-  }
 
   override fun onCleared() {
     super.onCleared()
@@ -392,14 +424,14 @@ class MainFragmentViewModel(application: Application) :
     val msgString = String(data, StandardCharsets.UTF_8)
     Log.i("MainFragmentViewModel", "onBluetoothRead: Recebendo peso")
     if (Formatter.removeNonAlphaCharacters(msgString) == "IIIII") {
-      showMessage(getString(R.string.unstable_weight))
+      showMessage(resourceProvider.getString(R.string.unstable_weight))
     } else {
       updateWeightProduct(data)
     }
   }
 
   override fun onBluetoothConnecting() {
-    showMessage(getString(R.string.connecting))
+    showMessage(resourceProvider.getString(R.string.connecting))
   }
 
   override fun onBluetoothConnected(device: ConnectedThread) {
@@ -411,9 +443,9 @@ class MainFragmentViewModel(application: Application) :
     val scaleNumber = connectedThreads.value?.size
 
     showMessage(
-      getApplication<AppApplication>().getString(
+      resourceProvider.getString(
         R.string.message_scale_connected,
-        scaleNumber
+//        scaleNumber
       )
     )
   }
@@ -422,4 +454,3 @@ class MainFragmentViewModel(application: Application) :
     showMessage(message)
   }
 }
-

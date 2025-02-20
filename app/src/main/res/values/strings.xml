@@ -67,4 +67,21 @@
     <string name="text_description_img_close">Botão para fechar a aplicação</string>
     <string name="insert_label_quantity">Insira a quantidade de etiquetas</string>
     <string name="insert_label_weight">Insira o peso do produto</string>
+    <string name="status_impressora_usb">Status da impressora USB</string>
+    <string name="tipo_de_conexao_da_impressora">Escolha o tipo de conexão da impressora</string>
+    <string name="tipo_rede">Rede</string>
+    <string name="tipo_usb">USB</string>
+    <string name="ip_da_impressora">IP da Impressora</string>
+    <string name="porta_da_impressora">Porta da Impressora</string>
+    <string name="nome_da_impressora_usb">Nome da Impressora USB</string>
+    <string name="impressao_autom_tica">Impressão Automática</string>
+    <string name="salvar_configurao">Salvar Configuração teste</string>
+    <string name="printer_network">printer_network</string>
+    <string name="printer_usb">printer_usb</string>
+    <string name="status_da_impressora">Status da impressora</string>
+    <string name="printer_connection_failed">conexão falhou</string>
+    //TESTE
+    <string name="sucessfully_save_printer_type">Tipo de impressora salvo com sucesso</string>
+    <string name="no_usb_endpoint">Sem USB</string>
+    <string name="no_usb_permission">Sem permissão USB</string>
 </resources>

@@ -13,11 +13,11 @@ sealed class Permission(vararg val permissions: String) {
   object Bluetooth : Permission(BLUETOOTH, BLUETOOTH_ADMIN)
   object Record : Permission(RECORD_AUDIO)
   @RequiresApi(Build.VERSION_CODES.R)
-  object Storage : Permission(WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE)
+  object Storage : Permission(WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE)
 
   companion object {
     fun from(permission: String) = when (permission) {
-      WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE -> Storage
+      WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE -> Storage
       RECORD_AUDIO -> Record
       BLUETOOTH, BLUETOOTH_CONNECT, BLUETOOTH_ADMIN -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         BluetoothAndroidS

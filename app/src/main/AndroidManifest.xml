@@ -4,6 +4,7 @@
     package="br.com.backupautomacao.centraldepesagem">
 
 
+
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,10 +14,13 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.USB_PERMISSION" />
 
     <uses-feature
         android:name="android.hardware.bluetooth"
         android:required="true" />
+
+    <uses-feature android:name="android.hardware.usb.host" />
 
     <application
         android:name=".AppApplication"
@@ -32,6 +36,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HowWorksWithViewModel"
         tools:targetApi="31">
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
         <activity
             android:name="br.com.backupautomacao.centraldepesagem.ui.activities.MainActivity"
             android:exported="true"
@@ -40,6 +53,12 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
         </activity>
     </application>
 

@@ -25,11 +25,14 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mainScreen"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/mainScreen"
-            android:visibility="visible">
+            android:visibility="visible"
+            tools:layout_editor_absoluteX="104dp"
+            tools:layout_editor_absoluteY="0dp">
 
 
             <TextView
@@ -133,8 +136,8 @@
             <Button
                 android:id="@+id/buttonWeighing"
                 style="@style/BlueButton"
-                android:layout_marginTop="@dimen/small_margin"
                 android:layout_marginStart="@dimen/big_margin"
+                android:layout_marginTop="@dimen/small_margin"
                 android:layout_marginEnd="@dimen/extra_big_margin"
                 android:text="@string/text_button_weighing"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -145,8 +148,8 @@
             <Button
                 android:id="@+id/buttonPrint"
                 style="@style/BlueButton"
-                android:layout_marginTop="@dimen/extra_small_margin"
                 android:layout_marginStart="@dimen/big_margin"
+                android:layout_marginTop="@dimen/extra_small_margin"
                 android:layout_marginEnd="@dimen/extra_big_margin"
                 android:text="@string/text_button_print"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -184,8 +187,8 @@
             <Button
                 android:id="@+id/buttonRecord"
                 style="@style/BlueButton"
-                android:layout_marginTop="@dimen/small_margin"
                 android:layout_marginHorizontal="@dimen/big_margin"
+                android:layout_marginTop="@dimen/small_margin"
                 android:text="@string/text_button_listening"
                 app:layout_constraintEnd_toStartOf="@+id/guideline2"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -195,8 +198,8 @@
             <Button
                 android:id="@+id/buttonLoadPrice"
                 style="@style/BlueButton"
-                android:layout_marginTop="@dimen/extra_small_margin"
                 android:layout_marginHorizontal="@dimen/big_margin"
+                android:layout_marginTop="@dimen/extra_small_margin"
                 android:text="@string/text_button_load_price"
                 app:layout_constraintEnd_toStartOf="@+id/guideline2"
                 app:layout_constraintHorizontal_bias="0.0"

@@ -1,6 +1,9 @@
 package br.com.backupautomacao.centraldepesagem.ui.fragments
 
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.graphics.Color
+import android.hardware.usb.UsbManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -20,19 +23,40 @@ import br.com.backupautomacao.centraldepesagem.AppApplication
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentMainBinding
+import br.com.backupautomacao.centraldepesagem.db.AppDatabase
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 import br.com.backupautomacao.centraldepesagem.permission.Permission
 import br.com.backupautomacao.centraldepesagem.permission.PermissionManager
+import br.com.backupautomacao.centraldepesagem.services.PrinterUsb
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainFragmentViewModel
+import br.com.backupautomacao.centraldepesagem.ui.viewmodel.factory.MainViewModelFactory
+import br.com.backupautomacao.centraldepesagem.utils.Label
+import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 class MainFragment : Fragment() {
 
   private var _binding: FragmentMainBinding? = null
   private val binding get() = _binding!!
-  private val mainViewModel: MainFragmentViewModel by viewModels()
+//  private val mainViewModel: MainFragmentViewModel by viewModels()
+  private val mainViewModel: MainFragmentViewModel by viewModels{
+    val usbManager = activity?.getSystemService(Context.USB_SERVICE) as UsbManager
+    val printerUsb = PrinterUsb(usbManager)
+    val configRepository = ConfigRepository(requireActivity())
+    val appDataBase = AppDatabase.getDatabase(requireActivity())
+    val operationRepository = OperationRepository(appDataBase.operationDao())
+    val workManager = WorkManager.getInstance(requireActivity())
+    val bluetoothManager = activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    val bluetoothAdapter = bluetoothManager.adapter
+    val resourceProvider = ResourceProvider(requireActivity())
+    val label = Label(requireActivity())
+    MainViewModelFactory(
+      printerUsb, configRepository, operationRepository, workManager,
+      bluetoothAdapter, resourceProvider, label
+    )
+  }
   private val permissionManager = PermissionManager.from(this)
   private lateinit var workManager: WorkManager
   override fun onCreateView(
@@ -71,7 +95,7 @@ class MainFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    bluetoothPermission()
+     bluetoothPermission()
     handleMessages()
     handleButtons()
     configureSpinner()
@@ -159,7 +183,8 @@ class MainFragment : Fragment() {
       .request(Permission.Storage)
       .rationale(getString(R.string.message_to_access_storage))
       .checkPermission { granted ->
-        if (granted) {
+        Log.d("StoragePermission", "Granted:$granted")
+        if (!granted) {
           binding.viewModel!!.print()
           monitoringPrint()
         } else {

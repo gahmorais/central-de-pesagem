@@ -19,12 +19,12 @@ android {
             keyPassword = 'gabu_171'
         }
     }
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "br.com.backupautomacao.howworkswithviewmodel"
         minSdk 23
-        targetSdk 32
+        targetSdk 33
         versionCode 4
         versionName "1.5.3"
 
@@ -101,5 +101,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
+    //usb
+    implementation "com.github.EmHaseeb:ThermalPrinterESCPOS:1.0.2"
 
 }

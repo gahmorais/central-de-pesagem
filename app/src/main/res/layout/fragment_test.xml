@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context="br.com.backupautomacao.centraldepesagem.ui.fragments.SettingsFragment">
+
+<!--    <TextView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@string/tipo_de_conexao_da_impressora"/>-->
+
+<!--    <RadioGroup-->
+<!--        android:id="@+id/radioGroupConnectionType"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="horizontal">-->
+
+<!--        <RadioButton-->
+<!--            android:id="@+id/radioNetworkPrinter"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/tipo_rede"-->
+<!--            android:checked="true"/>-->
+
+<!--        <RadioButton-->
+<!--            android:id="@+id/radioUsbPrinter"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/tipo_usb"/>-->
+<!--    </RadioGroup>-->
+
+<!--    <LinearLayout-->
+<!--        android:id="@+id/networkPrinterLayout"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="vertical">-->
+
+<!--        <EditText-->
+<!--            android:id="@+id/textInputPrinterIpTest"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:autofillHints=""-->
+<!--            android:hint="@string/ip_da_impressora"-->
+<!--            android:inputType="number" />-->
+
+<!--        <EditText-->
+<!--            android:id="@+id/textInputPrinterPortTest"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:autofillHints="name"-->
+<!--            android:hint="@string/porta_da_impressora"-->
+<!--            android:inputType="number" />-->
+<!--    </LinearLayout>-->
+
+<!--    <LinearLayout-->
+<!--        android:id="@+id/usbPrinterLayout"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="vertical"-->
+<!--        android:visibility="gone">-->
+
+<!--        <EditText-->
+<!--            android:id="@+id/textInputUsbPrinterName"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:autofillHints="name"-->
+<!--            android:hint="@string/nome_da_impressora_usb"-->
+<!--            android:inputType="number" />-->
+<!--    </LinearLayout>-->
+
+<!--    <CheckBox-->
+<!--        android:id="@+id/checkboxAutomaticPrint"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@string/impressao_autom_tica"/>-->
+
+<!--    <Button-->
+<!--        android:id="@+id/buttonSavePrinterAddress"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@string/salvar_configurao"/>-->
+</LinearLayout>
+
+
+
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<layout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    tools:context=".ui.fragments.SettingsFragment">-->
+
+<!--    <data>-->
+<!--        <variable-->
+<!--            name="viewModel"-->
+<!--            type="br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel" />-->
+<!--    </data>-->
+
+<!--    <ScrollView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_marginBottom="@dimen/default_margin">-->
+
+<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/textView7"-->
+<!--                android:fontFamily="@font/amplesoft_med"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_margin="@dimen/default_margin"-->
+<!--                android:layout_marginTop="16dp"-->
+<!--                android:text="@string/text_title_printer_config"-->
+<!--                android:textColor="@color/black"-->
+<!--                android:textSize="20sp"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent" />-->
+
+<!--            <RadioGroup-->
+<!--                android:id="@+id/radioGroupPrinterType"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="horizontal"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/textView7">-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/radioButtonNetwork"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="@string/printer_network" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/radioButtonUSB"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="@string/printer_usb" />-->
+<!--            </RadioGroup>-->
+
+<!--            <LinearLayout-->
+<!--                android:id="@+id/linearLayoutNetworkPrinter"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="@dimen/default_margin"-->
+<!--                android:visibility="gone"-->
+<!--                android:orientation="horizontal"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/radioGroupPrinterType">-->
+
+<!--                <com.google.android.material.textfield.TextInputLayout-->
+<!--                    android:id="@+id/textContainerIpAddress"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:layout_weight="1">-->
+<!--                    <com.google.android.material.textfield.TextInputEditText-->
+<!--                        android:id="@+id/textInputPrinterIp"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:hint="@string/placeholder_printer_address"-->
+<!--                        android:inputType="number" />-->
+<!--                </com.google.android.material.textfield.TextInputLayout>-->
+
+<!--                <com.google.android.material.textfield.TextInputLayout-->
+<!--                    android:id="@+id/textContainerPortAddress"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1">-->
+<!--                    <com.google.android.material.textfield.TextInputEditText-->
+<!--                        android:id="@+id/textInputPrinterPort"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:hint="@string/placeholder_printer_port"-->
+<!--                        android:inputType="number" />-->
+<!--                </com.google.android.material.textfield.TextInputLayout>-->
+<!--            </LinearLayout>-->
+
+<!--            <Button-->
+<!--                android:id="@+id/buttonSavePrinterAddress"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="@dimen/small_margin"-->
+<!--                android:text="@string/text_button_save"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/linearLayoutNetworkPrinter" />-->
+
+<!--            <LinearLayout-->
+<!--                android:id="@+id/linearLayoutUSBPrinter"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginTop="@dimen/default_margin"-->
+<!--                android:visibility="gone"-->
+<!--                android:orientation="horizontal"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/radioGroupPrinterType">-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/status_impressora"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="@string/status_impressora_usb"-->
+<!--                    android:textSize="18sp" />-->
+<!--            </LinearLayout>-->
+<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+<!--    </ScrollView>-->
+<!--</layout>-->
