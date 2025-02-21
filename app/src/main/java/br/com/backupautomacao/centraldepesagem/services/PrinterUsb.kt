@@ -45,7 +45,7 @@ class PrinterUsb(private val usbManager: UsbManager) {
         }
     }
 
-     fun requestPermission(device: UsbDevice, context: Context) {
+    fun requestPermission(device: UsbDevice, context: Context) {
         val permissionIntent = PendingIntent.getBroadcast(
             context, 0, Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE
         )

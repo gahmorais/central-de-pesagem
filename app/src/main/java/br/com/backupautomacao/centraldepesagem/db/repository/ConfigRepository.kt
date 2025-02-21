@@ -6,353 +6,81 @@ import android.content.SharedPreferences
 private const val NOME_ARQUIVO = "configuracoes"
 
 class ConfigRepository(context: Context) {
-  private val preferencias: SharedPreferences by lazy {
-    context.getSharedPreferences(NOME_ARQUIVO, Context.MODE_PRIVATE)
-  }
-  private val editor: SharedPreferences.Editor by lazy {
-    preferencias.edit()
-  }
+    private val preferencias: SharedPreferences by lazy {
+        context.getSharedPreferences(NOME_ARQUIVO, Context.MODE_PRIVATE)
+    }
+    private val editor: SharedPreferences.Editor by lazy {
+        preferencias.edit()
+    }
 
-  companion object {
-    const val PRINTER_IP = "ip"
-    const val AUTOMATIC_PRINT = "automatic_print"
-    const val SERVER_ADDRESS = "server"
-    const val PRINTER_PORT = "printer_port"
-    const val PASSWORD_MGV = "password_mgv"
-    const val STORE_NUMBER = "store_number"
-    const val PRINTER_TYPE = "printer_type"
-    const val USB_PRINTER_NAME = "usb_printer_name"
-  }
+    companion object {
+        const val PRINTER_IP = "ip"
+        const val AUTOMATIC_PRINT = "automatic_print"
+        const val SERVER_ADDRESS = "server"
+        const val PRINTER_PORT = "printer_port"
+        const val PASSWORD_MGV = "password_mgv"
+        const val STORE_NUMBER = "store_number"
+        const val PRINTER_TYPE = "printer_type"
+        const val USB_PRINTER_NAME = "usb_printer_name"
+    }
 
-  fun setTextConfig(key: String, value: String) {
-    editor.putString(key, value).apply()
-  }
+    fun setTextConfig(key: String, value: String) {
+        editor.putString(key, value).apply()
+    }
 
-  fun getTextConfig(key: String): String? {
-    return preferencias.getString(key, null)
-  }
+    fun getTextConfig(key: String): String? {
+        return preferencias.getString(key, null)
+    }
 
-  fun setBooleanConfig(key: String, value: Boolean) {
-    editor.putBoolean(key, value).apply()
-  }
+    fun setBooleanConfig(key: String, value: Boolean) {
+        editor.putBoolean(key, value).apply()
+    }
 
-  fun getBooleanConfig(key: String): Boolean {
-    return preferencias.getBoolean(key, false)
-  }
+    fun getBooleanConfig(key: String): Boolean {
+        return preferencias.getBoolean(key, false)
+    }
 
-  fun getConfig(key: String): String? {
-    return preferencias.getString(key, "")
-  }
+    fun getConfig(key: String): String? {
+        return preferencias.getString(key, "")
+    }
 
-  fun setIntConfig(key: String, value: Int) {
-    editor.putInt(key, value).apply()
-  }
+    fun setIntConfig(key: String, value: Int) {
+        editor.putInt(key, value).apply()
+    }
 
-  fun getIntConfig(key: String): Int {
-    return preferencias.getInt(key, 0)
-  }
+    fun getIntConfig(key: String): Int {
+        return preferencias.getInt(key, 0)
+    }
 
-  fun setPrinterType(printerType: String) {
-    editor.putString(PRINTER_TYPE, printerType).apply()
-  }
+    fun setPrinterType(printerType: String) {
+        editor.putString(PRINTER_TYPE, printerType).apply()
+    }
 
-  fun getPrinterType(): String {
-    return preferencias.getString(PRINTER_TYPE, "USB") ?: "USB"
-  }
+    fun getPrinterType(): String {
+        return preferencias.getString(PRINTER_TYPE, "USB") ?: "USB"
+    }
 
-  fun isUsbPrinterSelected(): Boolean {
-    return getPrinterType().equals("USB", ignoreCase = true)
-  }
+    fun isUsbPrinterSelected(): Boolean {
+        return getPrinterType().equals("USB", ignoreCase = true)
+    }
 
-  fun isNetworkPrinterSelected(): Boolean {
-    return getPrinterType().equals("NETWORK", ignoreCase = true)
-  }
+    fun isNetworkPrinterSelected(): Boolean {
+        return getPrinterType().equals("NETWORK", ignoreCase = true)
+    }
 
-  fun getUsbPrinterName(): String? {
-    return preferencias.getString(USB_PRINTER_NAME, null)
-  }
-  fun setUsbPrinterName(key: String, value: String) {
-    editor.putString(key, value).apply()
-  }
+    fun getUsbPrinterName(): String? {
+        return preferencias.getString(USB_PRINTER_NAME, null)
+    }
 
-  fun getPrinterIp(): String? {
-    return preferencias.getString(PRINTER_IP, null)
-  }
+    fun setUsbPrinterName(key: String, value: String) {
+        editor.putString(key, value).apply()
+    }
 
-  fun getPrinterPort(): Int {
-    return preferencias.getInt(PRINTER_PORT, 9100)
-  }
+    fun getPrinterIp(): String? {
+        return preferencias.getString(PRINTER_IP, null)
+    }
+
+    fun getPrinterPort(): Int {
+        return preferencias.getInt(PRINTER_PORT, 9100)
+    }
 }
-
-
-
-
-
-
-/*
-import android.content.Context
-import android.content.SharedPreferences
-
-private const val NOME_ARQUIVO = "configuracoes"
-
-class ConfigRepository(context: Context) {
-  private val preferencias: SharedPreferences by lazy {
-    context.getSharedPreferences(NOME_ARQUIVO, Context.MODE_PRIVATE)
-  }
-  private val editor: SharedPreferences.Editor by lazy {
-    preferencias.edit()
-  }
-
-  companion object {
-    const val PRINTER_IP = "ip"
-    const val AUTOMATIC_PRINT = "automatic_print"
-    const val SERVER_ADDRESS = "server"
-    const val PRINTER_PORT = "printer_port"
-    const val PASSWORD_MGV = "password_mgv"
-    const val STORE_NUMBER = "store_number"
-    const val PRINTER_TYPE = "printer_type"
-    const val USB_PRINTER_NAME = "usb_printer_name"
-  }
-
-  fun setTextConfig(key: String, value: String) {
-    editor.putString(key, value).apply()
-  }
-
-  fun setBooleanConfig(key: String, value: Boolean) {
-    editor.putBoolean(key, value).apply()
-  }
-
-  fun getBooleanConfig(key: String): Boolean {
-    return preferencias.getBoolean(key, false)
-  }
-
-  fun getConfig(key: String): String? {
-    return preferencias.getString(key, "")
-  }
-
-  fun setIntConfig(key: String, value: Int) {
-    editor.putInt(key, value).apply()
-  }
-
-  fun getIntConfig(key: String): Int {
-    return preferencias.getInt(key, 0)
-  }
-
-  fun setPrinterType(printerType: String) {
-    editor.putString(PRINTER_TYPE, printerType).apply()
-  }
-
-  fun getPrinterType(): String {
-    return preferencias.getString(PRINTER_TYPE, "USB") ?: "USB"
-  }
-
-  fun isUsbPrinterSelected(): Boolean {
-    return getPrinterType().equals("USB", ignoreCase = true)
-  }
-
-  fun isNetworkPrinterSelected(): Boolean {
-    return getPrinterType().equals("NETWORK", ignoreCase = true)
-  }
-
-  fun getUsbPrinterName(): String? {
-    return preferencias.getString(USB_PRINTER_NAME, null)
-  }
-
-  fun getPrinterIp(): String? {
-    return preferencias.getString(PRINTER_IP, null)
-  }
-
-  fun getPrinterPort(): Int {
-    return preferencias.getInt(PRINTER_PORT, 9100)
-  }
-}
-
- */
-
-
-
-
-/*
-import android.content.Context
-import android.content.SharedPreferences
-
-private const val NOME_ARQUIVO = "configuracoes"
-
-class ConfigRepository(context: Context) {
-  private val preferencias: SharedPreferences by lazy {
-    context.getSharedPreferences(NOME_ARQUIVO, Context.MODE_PRIVATE)
-  }
-  private val editor: SharedPreferences.Editor by lazy {
-    preferencias.edit()
-  }
-
-  companion object {
-    const val PRINTER_IP = "ip"
-    const val AUTOMATIC_PRINT = "automatic_print"
-    const val SERVER_ADDRESS = "server"
-    const val PRINTER_PORT = "printer_port"
-    const val PASSWORD_MGV = "password_mgv"
-    const val STORE_NUMBER = "store_number"
-    const val PRINTER_TYPE = "printer_type"
-  }
-
-  fun setTextConfig(key: String, value: String) {
-    editor.putString(key, value)
-    editor.apply()
-  }
-
-  fun setBooleanConfig(key: String, value: Boolean) {
-    editor.putBoolean(key, value)
-    editor.apply()
-  }
-
-  fun getBooleanConfig(key: String): Boolean {
-    return preferencias.getBoolean(key, false)
-  }
-
-  fun getConfig(key: String): String? {
-    return preferencias.getString(key, "")
-  }
-
-  fun setIntConfig(key: String, value: Int) {
-    editor.putInt(key, value)
-    editor.apply()
-  }
-
-  fun getIntConfig(key: String): Int {
-    return preferencias.getInt(key, 0)
-  }
-  fun isUsbPrinterSelected(): Boolean {
-    return getPrinterType() == "USB"
-  }
-
-  fun setPrinterType(printerType: String) {
-    editor.putString(PRINTER_TYPE, printerType)
-    editor.apply()
-  }
-
-  fun getPrinterType(): String? {
-    return preferencias.getString(PRINTER_TYPE, "USB")
-  }
-}
-
- */
-
-
-
-
-//CÓDIGO SEM MGV
-/*
-import android.content.Context
-import android.content.SharedPreferences
-
-
-private const val NOME_ARQUIVO = "configuracoes"
-
-class ConfigRepository(context: Context) {
-  private val preferencias: SharedPreferences by lazy {
-    context.getSharedPreferences(NOME_ARQUIVO, Context.MODE_PRIVATE)
-  }
-  private val editor: SharedPreferences.Editor by lazy {
-    preferencias.edit()
-  }
-
-  companion object {
-    const val PRINTER_IP = "ip"
-    const val AUTOMATIC_PRINT = "automatic_print"
-    const val SERVER_ADDRESS = "server"
-    const val PRINTER_PORT = "printer_port"
-    const val PASSWORD_MGV = "password_mgv"
-    const val STORE_NUMBER = "store_number"
-    const val USB_PRINTER_NAME = "usb_printer_name"
-  }
-
-  fun setTextConfig(key: String, value: String) {
-    editor.putString(key, value)
-    editor.commit()
-  }
-
-  fun setBooleanConfig(key: String, value: Boolean) {
-    editor.putBoolean(key, value)
-    editor.commit()
-  }
-
-  fun getBooleanConfig(key: String): Boolean {
-    return preferencias.getBoolean(key, false)
-  }
-
-  fun getConfig(key: String): String? {
-    return preferencias.getString(key, "")
-  }
-
-  fun setIntConfig(key: String, value: Int) {
-    editor.putInt(key, value)
-    editor.commit()
-  }
-
-  fun getIntConfig(key: String): Int {
-    return preferencias.getInt(key, 0)
-  }
-
-  fun isUsbPrinterSelected(): Boolean {
-    val usbPrinterName = getConfig(USB_PRINTER_NAME)
-    return usbPrinterName?.isNotEmpty() ?: false
-  }
-}
-
-
- */
-
-
-/*
-import android.content.Context
-import android.content.SharedPreferences
-
-private const val NOME_ARQUIVO = "configuracoes"
-
-class ConfigRepository(context: Context) {
-  private val preferencias: SharedPreferences by lazy {
-    context.getSharedPreferences(NOME_ARQUIVO, Context.MODE_PRIVATE)
-  }
-  private val editor: SharedPreferences.Editor by lazy {
-    preferencias.edit()
-  }
-
-  companion object {
-    const val PRINTER_IP = "ip"
-    const val AUTOMATIC_PRINT = "automatic_print"
-    const val SERVER_ADDRESS = "server"
-    const val PRINTER_PORT = "printer_port"
-    const val PASSWORD_MGV = "password_mgv"
-    const val STORE_NUMBER = "store_number"
-  }
-
-  fun setTextConfig(key: String, value: String) {
-    editor.putString(key, value)
-    editor.commit()
-  }
-
-  fun setBooleanConfig(key: String, value: Boolean) {
-    editor.putBoolean(key, value)
-    editor.commit()
-  }
-
-  fun getBooleanConfig(key: String): Boolean {
-    return preferencias.getBoolean(key, false)
-  }
-
-  fun getConfig(key: String): String? {
-    return preferencias.getString(key, "")
-  }
-
-  fun setIntConfig(key: String, value: Int) {
-    editor.putInt(key, value)
-    editor.commit()
-  }
-
-  fun getIntConfig(key: String): Int {
-    return preferencias.getInt(key, 0)
-  }
-}
-
- */

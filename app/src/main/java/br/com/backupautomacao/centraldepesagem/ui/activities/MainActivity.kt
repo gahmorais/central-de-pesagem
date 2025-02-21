@@ -54,8 +54,6 @@ class MainActivity : AppCompatActivity() {
 
     try {
       viewModel.requestPermissionUSB(this)
-      viewModel.connecToDevice()
-      viewModel.openConnectionUSB(this)
     }catch (e: Exception){
       e.message?.let { showMessage(it) }
     }
@@ -92,23 +90,24 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
-
-//  private val usbReceiver = object : BroadcastReceiver() {
-//    override fun onReceive(context: Context, intent: Intent) {
-//      when (intent.action) {
-//        ACTION_USB_PERMISSION -> {
-//          synchronized(this) {
-//            val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
-//            if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-//              device?.let { viewModel.connecToDevice() }
-//            } else {
-//              showMessage("Permissão negada para o dispositivo USB.")
-//            }
-//          }
-//        }
-//      }
-//    }
-//  }
+/*
+  private val usbReceiver = object : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+      when (intent.action) {
+        ACTION_USB_PERMISSION -> {
+          synchronized(this) {
+            val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+            if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+              device?.let { viewModel.connecToDevice() }
+            } else {
+              showMessage("Permissão negada para o dispositivo USB.")
+            }
+          }
+        }
+      }
+    }
+  }
+*/
 
   private fun showMessage(text: String){
     Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
@@ -127,48 +126,3 @@ class MainActivity : AppCompatActivity() {
     }
   }
 }
-
-
-
-
-
-//private fun showMessage(text: String){
-//    Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
-//  }
-
-/*
-class MainActivity : AppCompatActivity() {
-  private val binding: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContentView(binding.root)
-    val pagerAdapter = ScreenSlidePagerAdapter(this)
-    binding.viewPager.adapter = pagerAdapter
-
-    binding.toolbar.apply {
-      title = getString(R.string.app_name)
-      setTitleTextColor(Color.WHITE)
-      setSupportActionBar(this)
-    }
-
-    binding.imgClose.setOnClickListener {
-      closeApplication()
-    }
-  }
-
-  private fun closeApplication() {
-    finish()
-  }
-
-  override fun onBackPressed() {
-    val viewPager = binding.viewPager
-    if (viewPager.currentItem == 0) {
-      super.onBackPressed()
-    } else {
-      viewPager.currentItem--
-    }
-  }
-}
-
- */

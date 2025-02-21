@@ -27,6 +27,4 @@ sealed class Permission(vararg val permissions: String) {
       else -> throw IllegalArgumentException("Unknow permission: $permission")
     }
   }
-
-
 }
