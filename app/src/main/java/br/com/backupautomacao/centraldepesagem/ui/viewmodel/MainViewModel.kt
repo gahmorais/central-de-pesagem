@@ -250,27 +250,41 @@ class MainFragmentViewModel(
   }
 
   fun print() {
-
     if (checkProductIsNullOrEmpty()) {
       showMessage(resourceProvider.getString(R.string.error_to_get_product))
       return
     }
+
+    val product = _mgvProduct.value
+    if (product?.weight == null || product.weight == 0.0) {
+      showMessage(resourceProvider.getString(R.string.make_weighing))
+      return
+    }
+
     try {
-      val printerIp: String? = configRepository.getConfig(PRINTER_IP)
-      val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
-      val product = _mgvProduct.value!!
-      if (product.weight == null || product.weight == 0.0) {
-        showMessage(resourceProvider.getString(R.string.make_weighing))
-        return
-      }
-      
+      val printerIp = configRepository.getConfig(PRINTER_IP)
+      val printerPort = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
+      val usbPrinterName = configRepository.getUsbPrinterName()
+      val printerType = configRepository.getPrinterType()
       val newLabel = label.generateLabelBase(product, null)
-      val printTask = PrintWorker.createUniquePrintTask(
-        printerAddress = printerIp,
-        printerPort = printerPort,
-        label = newLabel,
-        usbPrinterName = "Honeywell PC42tp-203-FP"
-      )
+
+      Log.i("PrinterType", "Type: $printerType")
+      Log.i("PrinterUSB", "USB Name: $usbPrinterName")
+
+      val printTask = when {
+        printerType.equals("USB", ignoreCase = true) -> PrintWorker.createUniquePrintTask(
+          printerAddress = null,
+          printerPort = 0,
+          label = newLabel,
+          usbPrinterName = usbPrinterName
+        )
+        else -> PrintWorker.createUniquePrintTask(
+          printerAddress = printerIp,
+          printerPort = printerPort,
+          label = newLabel,
+          usbPrinterName = null
+        )
+      }
 
       workManager.enqueueUniqueWork(PrintWorker.PRINT_TASK, ExistingWorkPolicy.REPLACE, printTask)
       _scale.value = null
@@ -279,12 +293,12 @@ class MainFragmentViewModel(
     } catch (e: FileNotFoundException) {
       showMessage(resourceProvider.getString(R.string.file_not_found_error))
     } catch (e: InvalidParameterException) {
-      showMessage("Porta ou endereço ip inválidos")
+      showMessage(resourceProvider.getString(R.string.invalid_printer_config))
     } catch (e: Exception) {
-      showMessage("Erro não esperado")
+      showMessage("${resourceProvider.getString(R.string.unexpected_error)}: ${e.localizedMessage}")
     }
   }
-
+  
   private fun checkProductIsNullOrEmpty(): Boolean {
     return _mgvProduct.value?.run {
       code.isEmpty()
@@ -440,7 +454,7 @@ class MainFragmentViewModel(
       val firstDevice = 0
       setActiveThread(firstDevice)
     }
-    val scaleNumber = connectedThreads.value?.size
+    val  scaleNumber = connectedThreads.value?.size
 
     showMessage(
       resourceProvider.getString(

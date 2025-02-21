@@ -3,9 +3,11 @@ package br.com.backupautomacao.centraldepesagem.ui.fragments
 import android.content.Context
 import android.hardware.usb.UsbManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -21,7 +23,7 @@ class SettingsFragment : Fragment() {
   private var _binding: FragmentSettingsBinding? = null
   private val binding get() = _binding!!
   private val viewModel: SettingsViewModel by viewModels()
-
+  private val printerName = ""
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
     savedInstanceState: Bundle?
@@ -74,6 +76,8 @@ class SettingsFragment : Fragment() {
     val printerIp: String = binding.textInputPrinterIp.text.toString()
     val printerPort: String = binding.textInputPrinterPort.text.toString()
     viewModel.savePrinterAddress(printerIp, printerPort)
+    viewModel.savePrinterConfig("USB")
+    viewModel.savePrinterName(printerName)
   }
 
   private fun handleMessages() {
@@ -94,12 +98,12 @@ class SettingsFragment : Fragment() {
         R.id.radioButtonNetwork -> {
           binding.linearLayoutNetworkPrinter.visibility = View.VISIBLE
           binding.linearLayoutUSBPrinter.visibility = View.GONE
-          viewModel.savePrinterType("Network")
+          viewModel.savePrinterConfig("Network")
         }
         R.id.radioButtonUSB -> {
           binding.linearLayoutNetworkPrinter.visibility = View.GONE
           binding.linearLayoutUSBPrinter.visibility = View.VISIBLE
-          viewModel.savePrinterType("USB")
+
           detectUsbPrinter()
         }
       }
@@ -111,12 +115,25 @@ class SettingsFragment : Fragment() {
     val deviceList = usbManager.deviceList.values
 
     if (deviceList.isNotEmpty()) {
-      val deviceNames = deviceList.map { it.deviceName }
+      val deviceNames = deviceList.map { it.productName }
       val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, deviceNames)
       adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
       binding.spinnerUsbDevices.adapter = adapter
 
       binding.statusImpressora.text = "Impressora USB detectada!"
+      val itemListener = object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, i: Int, p3: Long) {
+          val printerName = adapterView?.getItemAtPosition(i).toString()
+          if (printerName.isNotEmpty())
+          viewModel.savePrinterName(printerName)
+          Log.i("SettingsFragment", "onItemSelected: $printerName")
+        }
+
+        override fun onNothingSelected(p0: AdapterView<*>?) {
+
+        }
+      }
+      binding.spinnerUsbDevices.onItemSelectedListener = itemListener
     } else {
       binding.statusImpressora.text = "Nenhuma impressora USB detectada."
       Toast.makeText(requireContext(), "Nenhuma impressora USB encontrada.", Toast.LENGTH_SHORT).show()

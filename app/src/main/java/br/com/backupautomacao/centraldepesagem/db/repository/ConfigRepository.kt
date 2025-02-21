@@ -71,6 +71,9 @@ class ConfigRepository(context: Context) {
   fun getUsbPrinterName(): String? {
     return preferencias.getString(USB_PRINTER_NAME, null)
   }
+  fun setUsbPrinterName(key: String, value: String) {
+    editor.putString(key, value).apply()
+  }
 
   fun getPrinterIp(): String? {
     return preferencias.getString(PRINTER_IP, null)

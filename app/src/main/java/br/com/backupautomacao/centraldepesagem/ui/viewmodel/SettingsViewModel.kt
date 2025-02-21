@@ -82,11 +82,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
   }
 
-  fun savePrinterType(printerType: String) {
+  fun savePrinterName(printerName: String) {
+    configRepository.setUsbPrinterName(ConfigRepository.USB_PRINTER_NAME, printerName)
+  }
+
+  fun savePrinterConfig(printerType: String) {
     if (printerType != "USB" && printerType != "Network") return
 
-    configRepository.setTextConfig(ConfigRepository.PRINTER_TYPE, printerType)
-    _printerTypeLiveData.value = printerType
+    configRepository.setPrinterType(printerType)
+//    _printerTypeLiveData.value = printerType
     _statusMessage.value = getApplication<AppApplication>().getString(R.string.sucessfully_save_printer_type)
   }
 

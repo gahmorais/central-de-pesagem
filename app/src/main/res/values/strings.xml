@@ -84,4 +84,6 @@
     <string name="sucessfully_save_printer_type">Tipo de impressora salvo com sucesso</string>
     <string name="no_usb_endpoint">Sem USB</string>
     <string name="no_usb_permission">Sem permissão USB</string>
+    <string name="unexpected_error">Erro tente novamente</string>
+    <string name="invalid_printer_config">Nenhuma opção de impressora selecionada</string>
 </resources>
