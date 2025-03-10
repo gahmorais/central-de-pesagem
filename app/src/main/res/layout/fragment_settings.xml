@@ -117,14 +117,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="20dp"
-                        android:text="@string/printer_network" />
+                        android:text="@string/Impressora_via_rede" />
 
                     <RadioButton
                         android:id="@+id/radioButtonUSB"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="20dp"
-                        android:text="@string/printer_usb" />
+                        android:text="@string/Impressora_via_USB" />
                 </RadioGroup>
 
                 <Button

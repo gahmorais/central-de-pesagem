@@ -8,14 +8,15 @@ import kotlinx.coroutines.flow.Flow
 
 class OperationRepository(private val operationDao: OperationDao) {
 
-  val allOperations: Flow<List<Operation>> = operationDao.getAll()
+    val allOperations: Flow<List<Operation>> = operationDao.getAll()
 
-  @WorkerThread
-  suspend fun save(operation: Operation) {
-    operationDao.save(operation)
-  }
+    @WorkerThread
+    suspend fun save(operation: Operation) {
+        operationDao.save(operation)
+    }
 
-  @Delete
-  fun deleteAll(){}
+    @Delete
+    fun deleteAll() {
+    }
 
 }

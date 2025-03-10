@@ -11,5 +11,5 @@ import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 import kotlinx.coroutines.flow.Flow
 
 class ReportViewModel(operationRepository: OperationRepository) : ViewModel() {
-  val allOperations: Flow<List<Operation>> = operationRepository.allOperations
+    val allOperations: Flow<List<Operation>> = operationRepository.allOperations
 }

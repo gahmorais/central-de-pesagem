@@ -7,9 +7,9 @@ import br.com.backupautomacao.centraldepesagem.db.model.Label
 
 @Dao
 interface LabelDao {
-  @Insert
-  suspend fun insert(label: Label)
+    @Insert
+    suspend fun insert(label: Label)
 
-  @Query("SELECT * FROM labels WHERE name LIKE :name LIMIT 1")
-  suspend fun getLabelByName(name: String): Label
+    @Query("SELECT * FROM labels WHERE name LIKE :name LIMIT 1")
+    suspend fun getLabelByName(name: String): Label
 }

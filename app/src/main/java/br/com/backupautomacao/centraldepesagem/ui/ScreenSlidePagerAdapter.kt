@@ -11,16 +11,16 @@ import br.com.backupautomacao.centraldepesagem.ui.fragments.SettingsFragment
 private const val NUM_PAGES = 4
 
 class ScreenSlidePagerAdapter(fragmentActivity: FragmentActivity) :
-  FragmentStateAdapter(fragmentActivity) {
+    FragmentStateAdapter(fragmentActivity) {
 
-  override fun getItemCount(): Int = NUM_PAGES
+    override fun getItemCount(): Int = NUM_PAGES
 
-  override fun createFragment(position: Int): Fragment {
-    return when (position) {
-      0 -> MainFragment()
-      1 -> MassProductionFragment()
-      2 -> ReportFragment()
-      else -> SettingsFragment()
+    override fun createFragment(position: Int): Fragment {
+        return when (position) {
+            0 -> MainFragment()
+            1 -> MassProductionFragment()
+            2 -> ReportFragment()
+            else -> SettingsFragment()
+        }
     }
-  }
 }

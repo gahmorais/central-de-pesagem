@@ -1,89 +1,105 @@
 <resources>
     <string name="app_name">Pesagem Modular</string>
+
+    //Balança
+    <string name="text_title_select_scale">Balança selecionada:</string>
+    <string name="message_scale_connected">"Balança %1$d conectada"</string>
+    <string name="error_to_set_scale">Não foi possíve definir a balança</string>
+
+    //MGV
+    <string name="text_title_mgv_config">Configuração MGV</string>
+    <string name="sucessfully_save_mgv_config">Configuração do MGV salva com sucesso!</string>
+
+    //Impressão
+    <string name="printing_done">Impressão realizada</string>
+    <string name="printing_error">Falha ao realizar impressão</string>
+    <string name="printing">Imprimindo</string>
+    <string name="impressao_autom_tica">Impressão Automática</string>
+    <string name="text_automatic_print">Impressão Automática</string>
+    <string name="automatic_print_enable">Impressão automática habilitada</string>
+    <string name="automatic_print_disable">Impressão automática desabilitada</string>
+    <string name="printing_cancelled">Impressão cancelada</string>
+
+    //Impressora
+    <string name="text_title_printer_config">Configuração impressora</string>
+    <string name="placeholder_printer_address">Digite o IP da impressora</string>
+    <string name="placeholder_printer_port">Digite a porta da impressora</string>
+    <string name="printer_ip_not_found">IP da impressora não encontrado</string>
+    <string name="printer_not_found">Falha ao buscar impressora</string>
+    <string name="tipo_de_conexao_da_impressora">Escolha o tipo de conexão da impressora</string>
+    <string name="printer_network">printer_network</string>
+    <string name="printer_usb">printer_usb</string>
+    <string name="status_da_impressora">Status da impressora</string>
+    <string name="save_printer_success">Configuração da impressora salva com sucesso!</string>
+    <string name="tipo_rede">Rede</string>
+    <string name="tipo_usb">USB</string>
+    <string name="Impressora_via_rede">Impressora via rede</string>
+    <string name="Impressora_via_USB">Impressora via USB</string>
+    <string name="ip_da_impressora">IP da Impressora</string>
+    <string name="porta_da_impressora">Porta da Impressora</string>
+    <string name="nome_da_impressora_usb">Nome da Impressora USB</string>
+    <string name="invalid_printer_config">Nenhuma opção de impressora selecionada</string>
+    <string name="sucessfully_save_printer_type">Tipo de impressora salvo com sucesso</string>
+    <string name="status_impressora_usb">Status da impressora USB</string>
+
+    //Informações
     <string name="text_button_search">Busca produto</string>
     <string name="text_button_weighing">Pesar</string>
     <string name="text_button_print">Imprimir</string>
     <string name="text_button_listening">Ouvir</string>
     <string name="text_button_load_price">Carregar preço</string>
-    <string name="text_title_select_scale">Balança selecionada:</string>
     <string name="text_title_description">Descrição:</string>
     <string name="text_title_price_per_kilo">Preço / Kg:</string>
     <string name="text_title_weight">Peso:</string>
     <string name="text_title_barcode">Código:</string>
     <string name="text_button_save">Salvar</string>
-    <string name="text_title_printer_config">Configuração impressora</string>
-    <string name="text_title_mgv_config">Configuração MGV</string>
-    <string name="placeholder_printer_address">Digite o IP da impressora</string>
-    <string name="placeholder_input_text">Digite o código do produto</string>
     <string name="placeholder_server_address">Endereço do servidor</string>
-    <string name="placeholder_printer_port">Digite a porta da impressora</string>
+    <string name="listening">Ouvindo…</string>
     <string name="placeholder_password">Palavra chave</string>
     <string name="placeholder_store_number">Número da loja</string>
-    <string name="invalid_ip">IP Inválido</string>
-    <string name="invalid_port">Porta inválida</string>
-    <string name="text_automatic_print">Impressão Automática</string>
     <string name="text_title_price">Preço:</string>
     <string name="fragment_report_title">Relatório</string>
-    <string name="dialog_permission_title">Permissão necessária</string>
     <string name="dialog_permission_default_message">Mensagem padrão</string>
     <string name="dialog_permission_button_positive">OK</string>
+    <string name="sucessfully_save_server_address">Endereço do servidor salvo com sucesso</string>
+    <string name="connecting">Conectando…</string>
+    <string name="insert_label_quantity">Insira a quantidade de etiquetas</string>
+    <string name="insert_label_weight">Insira o peso do produto</string>
+    <string name="cancel">Cancelar</string>
+    <string name="text_description_img_close">Botão para fechar a aplicação</string>
+    <string name="salvar_configurao">Salvar Configuração teste</string>
+
+    //Permissões
+    <string name="dialog_permission_title">Permissão necessária</string>
+    <string name="no_usb_permission">Sem permissão USB</string>
     <string name="fail_to_access_storage">Não foi possível acessar o armazenamento</string>
     <string name="message_to_access_storage">Por favor autorize o acesso ao armazenamento</string>
     <string name="message_to_access_bluetooth">Necessário acesso ao bluetooth</string>
     <string name="error_to_access_bluetooth">Não foi possível acessar o bluetooth</string>
     <string name="message_to_access_microphone">Por favor autorize o acesso ao microfone</string>
     <string name="fail_to_access_microphone">Não foi possível acessar o microfone</string>
+    <string name="file_not_found_error">Arquivo não encontrado / Permissão negada</string>
+
+    //Erros
     <string name="ip_not_setted">IP do equipamento não configurado</string>
     <string name="error_to_get_product">Busque o produto antes de fazer a impressão</string>
     <string name="make_weighing">Realize a pesagem</string>
     <string name="product_not_found">Produto não encontrado!</string>
     <string name="unstable_weight">Peso instável, realize a pesagem novamente</string>
-    <string name="listening">Ouvindo…</string>
     <string name="request_error">Erro ao fazer requisição</string>
-    <string name="save_printer_success">Configuração da impressora salva com sucesso!</string>
     <string name="fill_keyword_field">Por favor, preencha o campo da palavra chave</string>
     <string name="stronger_password_error">Por favor, utilize uma senha mais forte</string>
     <string name="invalid_store_number">O número da loja inválido</string>
-    <string name="sucessfully_save_mgv_config">Configuração do MGV salva com sucesso!</string>
     <string name="invalid_address_server">Endereço do servidor inválido</string>
-    <string name="sucessfully_save_server_address">Endereço do servidor salvo com sucesso</string>
-    <string name="automatic_print_enable">Impressão automática habilitada</string>
-    <string name="automatic_print_disable">Impressão automática desabilitada</string>
-    <string name="error_to_set_scale">Não foi possíve definir a balança</string>
-    <string name="connecting">Conectando…</string>
-    <string name="barcode_error">Por favor, digite o código do item</string>
-    <string name="error_responde_mgv">%1$s Código: %2$s</string>
-    <string name="message_scale_connected">"Balança %1$d conectada"</string>
-    <string name="error_get_product">Busque o produto antes de fazer a pesagem</string>
-    <string name="printing_done">Impressão realizada</string>
-    <string name="printing_error">Falha ao realizar impressão</string>
-    <string name="file_not_found_error">Arquivo não encontrado / Permissão negada</string>
-    <string name="printing_cancelled">Impressão cancelada</string>
-    <string name="cancel">Cancelar</string>
-    <string name="printer_not_found">Falha ao buscar impressora</string>
-    <string name="printing">Imprimindo</string>
-    <string name="printer_ip_not_found">IP da impressora não encontrado</string>
-    <string name="save_operation_error">Erro ao salvar operação</string>
-    <string name="text_description_img_close">Botão para fechar a aplicação</string>
-    <string name="insert_label_quantity">Insira a quantidade de etiquetas</string>
-    <string name="insert_label_weight">Insira o peso do produto</string>
-    <string name="status_impressora_usb">Status da impressora USB</string>
-    <string name="tipo_de_conexao_da_impressora">Escolha o tipo de conexão da impressora</string>
-    <string name="tipo_rede">Rede</string>
-    <string name="tipo_usb">USB</string>
-    <string name="ip_da_impressora">IP da Impressora</string>
-    <string name="porta_da_impressora">Porta da Impressora</string>
-    <string name="nome_da_impressora_usb">Nome da Impressora USB</string>
-    <string name="impressao_autom_tica">Impressão Automática</string>
-    <string name="salvar_configurao">Salvar Configuração teste</string>
-    <string name="printer_network">printer_network</string>
-    <string name="printer_usb">printer_usb</string>
-    <string name="status_da_impressora">Status da impressora</string>
+    <string name="placeholder_input_text">Digite o código do produto</string>
+    <string name="invalid_ip">IP Inválido</string>
+    <string name="invalid_port">Porta inválida</string>
     <string name="printer_connection_failed">conexão falhou</string>
-    //TESTE
-    <string name="sucessfully_save_printer_type">Tipo de impressora salvo com sucesso</string>
     <string name="no_usb_endpoint">Sem USB</string>
-    <string name="no_usb_permission">Sem permissão USB</string>
+    <string name="error_responde_mgv">%1$s Código: %2$s</string>
+    <string name="error_get_product">Busque o produto antes de fazer a pesagem</string>
+    <string name="save_operation_error">Erro ao salvar operação</string>
+    <string name="barcode_error">Por favor, digite o código do item</string>
     <string name="unexpected_error">Erro tente novamente</string>
-    <string name="invalid_printer_config">Nenhuma opção de impressora selecionada</string>
+
 </resources>

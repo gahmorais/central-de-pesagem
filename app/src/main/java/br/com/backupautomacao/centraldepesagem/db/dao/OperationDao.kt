@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface OperationDao {
 
-  @Query("SELECT * FROM operacoes")
-  fun getAll() : Flow<List<Operation>>
+    @Query("SELECT * FROM operacoes")
+    fun getAll(): Flow<List<Operation>>
 
-  @Insert
-  suspend fun save(operation: Operation)
+    @Insert
+    suspend fun save(operation: Operation)
 }
