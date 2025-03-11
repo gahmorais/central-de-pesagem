@@ -19,12 +19,13 @@ android {
             keyPassword = 'gabu_171'
         }
     }
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
-        applicationId "br.com.backupautomacao.howworkswithviewmodel"
-        minSdk 23
-        targetSdk 33
+        namespace "br.com.backupautomacao.centraldepesagem"
+        applicationId "br.com.backupautomacao.centraldepesagem"
+        minSdk 24
+        targetSdk 34
         versionCode 5
         versionName "2.5.3"
 
@@ -65,13 +66,13 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.5.4'
 
     //Room
-    def roomVersion = "2.4.3"
+    def roomVersion = "2.6.1"
     implementation "androidx.room:room-ktx:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
 
     //WorkManager
-    def work_version = "2.7.1"
+    def work_version = "2.9.1"
     implementation("androidx.work:work-runtime-ktx:$work_version")
 
     //Lifecycle
@@ -95,11 +96,14 @@ dependencies {
 
     //Speech Recognizer
     implementation 'net.gotev:speech:1.6.2'
+    implementation 'com.jakewharton.timber:timber:5.0.1'
 
     //Test
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    implementation project(path: ':bluetooth')
 
     //usb
     implementation "com.github.EmHaseeb:ThermalPrinterESCPOS:1.0.2"

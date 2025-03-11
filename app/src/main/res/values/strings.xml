@@ -102,4 +102,7 @@
     <string name="barcode_error">Por favor, digite o código do item</string>
     <string name="unexpected_error">Erro tente novamente</string>
 
+    //Database
+    <string name="database_name">app_database</string>
+
 </resources>

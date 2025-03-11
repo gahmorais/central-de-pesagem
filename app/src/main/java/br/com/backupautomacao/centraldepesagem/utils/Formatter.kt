@@ -19,6 +19,11 @@ class Formatter private constructor() {
             return String.format(Locale.ENGLISH, "%.3f Kg", value).replace(".", ",")
         }
 
+//        fun String.removeNonAlphaCharacters(): String {
+//            val regex = "[^a-zA-Z0-9.]".toRegex()
+//            return replace(regex, "")
+//        }
+
         fun formatFromToledoProtocolP05(data: ByteArray): Double {
             val s = convertByteArrayToString(data)
             val number = removeNonAlphaCharacters(s).toDouble()
