@@ -3,6 +3,7 @@ package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
 import br.com.backupautomacao.centraldepesagem.utils.Validate
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,20 +95,14 @@ class SettingsViewModel(
     }
   }
 
-  fun savePrinterName(printerName: String) {
+  fun savePrinterUsbName(printerName: String) {
     configRepository.setUsbPrinterName(ConfigRepository.USB_PRINTER_NAME, printerName)
   }
 
-  fun savePrinterConfig(printerType: String) {
-    if (printerType != "USB" && printerType != "Network") return
-
-    configRepository.setPrinterType(printerType)
+  fun savePrinterConfig(printerType: PrinterType) {
+    configRepository.setPrinterType(printerType.toString())
     _statusMessage.value =
       resourceProvider.getString(R.string.sucessfully_save_printer_type)
   }
 
-  fun getPrinterType() {
-    _printerTypeLiveData.value =
-      configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE) ?: "Network"
-  }
 }

@@ -10,6 +10,7 @@ import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.utils.Label
+import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -77,13 +78,15 @@ class MassProductionViewModel(
       val newLabel =
         label.generateLabelWithQuantity(product, "etiqueta_base.prn", quantity.toInt())
 
-      if (configRepository.isUsbPrinterSelected()) {
+      if (configRepository.getPrinterType() == PrinterType.USB) {
         Timber.i("Impressora USB selecionada")
       } else {
         val printerIp: String? = configRepository.getConfig(ConfigRepository.PRINTER_IP)
         val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
         val usbPrinterName: String? = configRepository.getConfig(USB_PRINTER_NAME)
+        val printerType = configRepository.getPrinterType()
         val printTask = PrintWorker.createUniquePrintTask(
+          printerType = printerType,
           printerAddress = printerIp,
           printerPort = printerPort,
           label = newLabel,

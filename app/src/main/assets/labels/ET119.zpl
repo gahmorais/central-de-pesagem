@@ -1,5 +1,7 @@
 ^XA
-^MMT
+^MMC
+^MTD
+^MNN
 ^PW480
 ^LL320
 ^LS0

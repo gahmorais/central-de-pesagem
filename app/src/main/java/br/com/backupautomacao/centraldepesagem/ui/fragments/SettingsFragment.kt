@@ -15,6 +15,7 @@ import br.com.backupautomacao.centraldepesagem.databinding.FragmentSettingsBindi
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.centraldepesagem.utils.EventMask
+import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 import kotlinx.coroutines.flow.onEach
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
@@ -44,8 +45,34 @@ class SettingsFragment : Fragment() {
     binding.textInputPrinterIp.addTextChangedListener(eventMask)
   }
 
+  private fun getSelectedRadioButton(radioButton: Int): PrinterType {
+    return when (radioButton) {
+      R.id.radioButtonNetwork -> PrinterType.NETWORK
+      R.id.radioButtonUSB -> PrinterType.USB
+      else -> throw Exception("Opção inválida")
+    }
+  }
+
+  private fun getPrinterTypeId(printerType: String): Int {
+    return when (printerType) {
+      "USB" -> R.id.radioButtonUSB
+      else -> R.id.radioButtonNetwork
+//      else -> throw Exception("Opção inválida")
+    }
+  }
+
   private fun handleButtons() {
-    binding.buttonSavePrinterAddress.setOnClickListener {
+    binding.buttonSavePrinterConfig.setOnClickListener {
+      val idRadioButton = binding.radioGroupPrinterType.checkedRadioButtonId
+      val selectedPrinter = getSelectedRadioButton(idRadioButton)
+
+      viewModel.savePrinterConfig(selectedPrinter)
+      Toast.makeText(
+        requireContext(),
+        "Configuração de impressora salva!",
+        Toast.LENGTH_SHORT
+      ).show()
+
       savePrinterConfig()
     }
 
@@ -68,13 +95,9 @@ class SettingsFragment : Fragment() {
   }
 
   private fun savePrinterConfig() {
-    val selectedPrinterType = when (binding.radioGroupPrinterType.checkedRadioButtonId) {
-      R.id.radioButtonUSB -> "USB"
-      R.id.radioButtonNetwork -> "Network"
-      else -> null
-    }
-
-    if (selectedPrinterType == "Network") {
+    val idRadioButton = binding.radioGroupPrinterType.checkedRadioButtonId
+    val selectedPrinterType = getSelectedRadioButton(idRadioButton)
+    if (selectedPrinterType == PrinterType.NETWORK) {
       val ipAddress = binding.textInputPrinterIp.text.toString().trim()
       val port = binding.textInputPrinterPort.text.toString().trim()
 
@@ -90,7 +113,7 @@ class SettingsFragment : Fragment() {
       if (port.isEmpty()) {
         Toast.makeText(
           requireContext(),
-          "A porta não pode estar vazia",
+          "O número da porta não pode estar vazio",
           Toast.LENGTH_SHORT
         ).show()
         return
@@ -98,19 +121,6 @@ class SettingsFragment : Fragment() {
 
       viewModel.savePrinterAddress(ipAddress, port)
     }
-
-    selectedPrinterType?.let {
-      viewModel.savePrinterConfig(it)
-      Toast.makeText(
-        requireContext(),
-        "Configuração de impressora salva!",
-        Toast.LENGTH_SHORT
-      ).show()
-    } ?: Toast.makeText(
-      requireContext(),
-      "Selecione um tipo de impressora.",
-      Toast.LENGTH_SHORT
-    ).show()
   }
 
   private fun handleMessages() {
@@ -129,63 +139,67 @@ class SettingsFragment : Fragment() {
     binding.radioGroupPrinterType.setOnCheckedChangeListener { _, checkedId ->
       when (checkedId) {
         R.id.radioButtonNetwork -> {
-          binding.linearLayoutNetworkPrinter.visibility = View.VISIBLE
-          binding.linearLayoutUsb.visibility = View.GONE
-          viewModel.savePrinterConfig("Network")
+          binding.containerNetworkOptions.visibility = View.VISIBLE
+          binding.containerUsbOptions.visibility = View.GONE
         }
 
         R.id.radioButtonUSB -> {
-          binding.linearLayoutNetworkPrinter.visibility = View.GONE
-          binding.linearLayoutUsb.visibility = View.VISIBLE
-          viewModel.savePrinterConfig("USB")
+          binding.containerNetworkOptions.visibility = View.GONE
+          binding.containerUsbOptions.visibility = View.VISIBLE
           detectUsbPrinter()
         }
       }
     }
   }
 
-  private fun detectUsbPrinter() {
-    val usbManager = requireContext().getSystemService(Context.USB_SERVICE) as? UsbManager
-      ?: return
+  private fun getUsbPrinterListAdapter(devices: List<String>): ArrayAdapter<String> {
+    return ArrayAdapter(
+      requireContext(),
+      android.R.layout.simple_spinner_item,
+      devices
+    ).apply {
+      setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    }
+  }
 
+  private fun handleSpinnerUsbList() {
+    binding.spinnerUsbDevices.onItemSelectedListener =
+      object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(
+          adapterView: AdapterView<*>?,
+          p1: View?,
+          position: Int,
+          p3: Long
+        ) {
+          val printerName = adapterView
+            ?.getItemAtPosition(position)
+            ?.toString()
+            ?.takeIf { it.isNotEmpty() }
+
+          if (!printerName.isNullOrEmpty()) {
+            viewModel.savePrinterUsbName(printerName)
+            Timber.i("Impressora selecionada: $printerName")
+          }
+        }
+
+        override fun onNothingSelected(p0: AdapterView<*>?) {}
+      }
+  }
+
+  private fun detectUsbPrinter() {
+    val usbManager = requireContext().getSystemService(Context.USB_SERVICE) as UsbManager
     val deviceList = usbManager.deviceList.values
     if (deviceList.isNotEmpty()) {
       val deviceNames = deviceList.mapNotNull { it.productName }
-
-      val adapter = ArrayAdapter(
-        requireContext(),
-        android.R.layout.simple_spinner_item,
-        deviceNames
-      ).apply {
-        setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-      }
+      val adapter = getUsbPrinterListAdapter(deviceNames)
 
       with(binding) {
         spinnerUsbDevices.adapter = adapter
         statusImpressora.text = "Impressora USB detectada!"
-
-        spinnerUsbDevices.onItemSelectedListener =
-          object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-              adapterView: AdapterView<*>?,
-              p1: View?,
-              i: Int,
-              p3: Long
-            ) {
-              adapterView?.getItemAtPosition(i)?.toString()
-                ?.takeIf { it.isNotEmpty() }?.let { printerName ->
-                  viewModel?.savePrinterName(printerName)
-                  Timber.i("Impressora selecionada: $printerName")
-                }
-            }
-
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
-          }
+        handleSpinnerUsbList()
       }
     } else {
-      with(binding) {
-        statusImpressora.text = "Nenhuma impressora USB detectada."
-      }
+      binding.statusImpressora.text = "Nenhuma impressora USB detectada."
       Toast.makeText(
         requireContext(),
         "Nenhuma impressora USB encontrada.",
@@ -193,39 +207,6 @@ class SettingsFragment : Fragment() {
       ).show()
     }
   }
-
-  /*
-  private fun detectUsbPrinter() {
-    val usbManager = requireContext().getSystemService(Context.USB_SERVICE) as UsbManager
-    val deviceList = usbManager.deviceList.values
-
-    if (deviceList.isNotEmpty()) {
-      val deviceNames = deviceList.map { it.productName }
-      val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, deviceNames)
-      adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-      binding.spinnerUsbDevices.adapter = adapter
-
-      binding.statusImpressora.text = "Impressora USB detectada!"
-      val itemListener = object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, i: Int, p3: Long) {
-          val printerName = adapterView?.getItemAtPosition(i).toString()
-          if (printerName.isNotEmpty())
-          viewModel.savePrinterName(printerName)
-          Log.i("SettingsFragment", "onItemSelected: $printerName")
-        }
-
-        override fun onNothingSelected(p0: AdapterView<*>?) {
-
-        }
-      }
-      binding.spinnerUsbDevices.onItemSelectedListener = itemListener
-    } else {
-      binding.statusImpressora.text = "Nenhuma impressora USB detectada."
-      Toast.makeText(requireContext(), "Nenhuma impressora USB encontrada.", Toast.LENGTH_SHORT).show()
-    }
-  }
-
-   */
 
   override fun onResume() {
     super.onResume()
@@ -235,7 +216,10 @@ class SettingsFragment : Fragment() {
     val printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP)
     val portAddress = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
     val store = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER)
+    val printerType = configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE) ?: "Network"
     binding.apply {
+      val selectedPrinter = getPrinterTypeId(printerType)
+      radioGroupPrinterType.check(selectedPrinter)
       textInputServerAddress.setText(serverAddress)
       textInputPrinterPort.setText(portAddress.toString())
       textInputPrinterIp.setText(printerAddress)

@@ -33,8 +33,8 @@
     <string name="save_printer_success">Configuração da impressora salva com sucesso!</string>
     <string name="tipo_rede">Rede</string>
     <string name="tipo_usb">USB</string>
-    <string name="Impressora_via_rede">Impressora via rede</string>
-    <string name="Impressora_via_USB">Impressora via USB</string>
+    <string name="network_printing">Impressão via rede</string>
+    <string name="usb_printing">Impressão via Usb</string>
     <string name="ip_da_impressora">IP da Impressora</string>
     <string name="porta_da_impressora">Porta da Impressora</string>
     <string name="nome_da_impressora_usb">Nome da Impressora USB</string>

@@ -175,14 +175,14 @@ class MainFragment : Fragment() {
         val devices = mainViewModel.devices.value
         val devicesName = devices.mapIndexed { index, _ -> "Balança ${index + 1}" }
 //      val devices = deviceList.mapIndexed { i, _ -> "Balança ${i + 1}" }
-      ArrayAdapter(
-        requireActivity(),
-        android.R.layout.simple_spinner_item,
-        devicesName
-      ).also { adapter ->
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerScale.adapter = adapter
-      }
+        ArrayAdapter(
+          requireActivity(),
+          android.R.layout.simple_spinner_item,
+          devicesName
+        ).also { adapter ->
+          adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+          binding.spinnerScale.adapter = adapter
+        }
         mainViewModel.setActiveDevice(devices[i])
       }
 
@@ -258,10 +258,8 @@ class MainFragment : Fragment() {
       }
 
       buttonWeighing.setOnClickListener {
-        lifecycleScope.launch {
-          val connectedDevice = mainViewModel.activeDevice.value
-          connectedDevice?.let { mainViewModel.weighining(it) }
-        }
+        val connectedDevice = mainViewModel.activeDevice.value
+        connectedDevice?.let { mainViewModel.weighining(it) }
       }
 
       buttonRecord.setOnClickListener {

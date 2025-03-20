@@ -15,7 +15,6 @@ import br.com.backupautomacao.bluetooth.BluetoothHandler
 import br.com.backupautomacao.bluetooth.exceptions.ClosedSocketException
 import br.com.backupautomacao.centraldepesagem.PrintWorker
 import br.com.backupautomacao.centraldepesagem.R
-import br.com.backupautomacao.centraldepesagem.bluetooth.ConnectedThread
 import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
@@ -29,10 +28,12 @@ import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.removeNonAlphaCharacters
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
+import br.com.backupautomacao.centraldepesagem.utils.ScaleStatus
 import br.com.backupautomacao.centraldepesagem.utils.StatusApp
 import br.com.backupautomacao.centraldepesagem.utils.Util
 import br.com.backupautomacao.centraldepesagem.utils.findItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.gotev.speech.Speech
 import net.gotev.speech.SpeechDelegate
 import timber.log.Timber
 import java.io.FileNotFoundException
@@ -71,15 +71,7 @@ class MainViewModel(
   private val _scale: MutableStateFlow<Int?> = MutableStateFlow(null)
   val scale: StateFlow<Int?> = _scale
 
-  private val _weight = MutableStateFlow(0.0)
-  val weight = _weight.asStateFlow()
-
   private val _usbDevice: MutableStateFlow<UsbDevice?> = MutableStateFlow(null)
-
-  private val _connectedThreads: MutableLiveData<ArrayList<ConnectedThread>> =
-    MutableLiveData(ArrayList())
-  val connectedThreads: LiveData<ArrayList<ConnectedThread>> = _connectedThreads
-
   private val _updateStatus: MutableStateFlow<StatusApp> = MutableStateFlow(StatusApp.INICIO)
 
   private val _devices = MutableStateFlow<List<BluetoothConnected>>(listOf())
@@ -87,6 +79,8 @@ class MainViewModel(
 
   private val _activeDevice = MutableStateFlow<BluetoothConnected?>(null)
   val activeDevice = _activeDevice.asStateFlow()
+
+  private val jobsRunning = mutableListOf<Job>()
 
   init {
     applicationMonitor()
@@ -99,7 +93,7 @@ class MainViewModel(
       when (status) {
         StatusApp.INICIO -> Timber.i("Inicio: ")
         StatusApp.BUSCAR_PRODUTO -> Timber.i("Buscando produto")
-        StatusApp.REALIZAR_PESAGEM -> activeDevice.value?.let { weighining(it) }  //weighing()
+        StatusApp.REALIZAR_PESAGEM -> activeDevice.value?.let { weighining(it) }
         StatusApp.GRAVAR_OPERACAO -> saveOperation()
         StatusApp.REALIZAR_IMPRESSAO -> if (automaticPrint) print()
         else -> Timber.i("Processo finalizado")
@@ -115,7 +109,7 @@ class MainViewModel(
     workManager.cancelUniqueWork(PrintWorker.PRINT_TASK)
   }
 
-  suspend fun weighining(btConnected: BluetoothConnected) {
+  fun weighining(btConnected: BluetoothConnected) {
     Timber.i("weighing: Realizando pesagem")
     if (checkProductIsNullOrEmpty()) {
       showMessage(resourceProvider.getString(R.string.error_get_product))
@@ -131,29 +125,44 @@ class MainViewModel(
     }
   }
 
-  private fun startCollectData(device: BluetoothConnected) = device.read()
-    .onEach { bytes ->
+  private fun startCollectData(device: BluetoothConnected) {
+
+    val job = device.read().onEach { bytes ->
       val rawData = String(bytes, StandardCharsets.UTF_8)
       Timber.i("Peso: ${String(bytes, StandardCharsets.UTF_8)}")
+
       when (removeNonAlphaCharacters(rawData)) {
-        "IIIII" -> emitMessage("Peso instável, faça a pesagem novamente")
-        "NNNNN" -> emitMessage("Nenhum peso na balança, realize a pesagem novamente")
-        "SSSSS" -> emitMessage("Balança em sobrecarga, remove o peso extra")
-        else -> {
-//          val weight = data.toDouble() / 1000
-          updateWeightProduct(bytes)
-        }
+        ScaleStatus.UNSTABLE.value -> emitMessage("Peso instável, faça a pesagem novamente")
+        ScaleStatus.NO_WEIGHT.value -> emitMessage("Nenhum peso na balança, realize a pesagem novamente")
+        ScaleStatus.OVERWEIGHT.value -> emitMessage("Balança em sobrecarga, remove o peso extra")
+        else -> updateWeightProduct(bytes)
       }
     }.launchIn(viewModelScope)
+
+    jobsRunning.add(job)
+  }
+
+  private fun cancelAllJobs() {
+    jobsRunning.forEach { job ->
+      job.cancel()
+    }
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    cancelAllJobs()
+  }
 
   suspend fun connectToDevices(btAdapter: BluetoothAdapter) {
     val devices = bluetoothHandler.getAvailableDevices(btAdapter)
     val newDevices = mutableListOf<BluetoothConnected>()
     emitMessage("Buscando dispositivos disponíveis")
     devices.forEach { device ->
+
       val socket = withContext(Dispatchers.IO) {
         bluetoothHandler.connectToDevice(device)
       }
+
       emitMessage("Conectando ao dispositivo ${newDevices.size + 1}")
       newDevices.add(socket)
       startCollectData(socket)
@@ -172,8 +181,6 @@ class MainViewModel(
     }
   }
 
-  private val _currentDeviceConnected: MutableLiveData<ConnectedThread> = MutableLiveData()
-
   val statusPrint = workManager.getWorkInfosForUniqueWorkFlow(PrintWorker.PRINT_TASK)
 
   private fun updateWeightProduct(message: ByteArray) {
@@ -187,15 +194,7 @@ class MainViewModel(
       totalPrice = currentProduct.price.times(newWeight)
     )
     currentProduct?.let { loadPrice(it.price) }
-//    Timber.i("Novo Peso: $newWeight")
-//    updateProduct.apply {
-//      weight = newWeight
-//      totalPrice = price.times(updateProduct.weight!!)
-//      loadPrice(price)
-//    }
     _mgvProduct.value = updatedProduct
-    Timber.i("Produto: $updatedProduct")
-//    _mgvProduct.value = updateProduct
     _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
   }
 
@@ -222,8 +221,8 @@ class MainViewModel(
           )
         }
 
-        mgvError?.let { error ->
-          Timber.i("fetchItem: $error")
+        if (mgvError != null) {
+          Timber.i("fetchItem: ${mgvError.message}")
           showMessage(
             resourceProvider.getString(
               R.string.error_responde_mgv,
@@ -231,7 +230,9 @@ class MainViewModel(
 //              error.code
             )
           )
+          return@launch
         }
+
 
         item?.also { product ->
           product.extraInfo = item.codExtraInfo?.let { code ->
@@ -286,16 +287,6 @@ class MainViewModel(
     }
   }
 
-//  fun weighing() {
-//    Timber.i("weighing: Realizando pesagem")
-//    if (checkProductIsNullOrEmpty()) {
-//      showMessage(resourceProvider.getString(R.string.error_get_product))
-//      return
-//    }
-//    val command = byteArrayOf(0x05)
-//    _currentDeviceConnected.value?.write(command)
-//  }
-
   fun print() {
     if (checkProductIsNullOrEmpty()) {
       showMessage(resourceProvider.getString(R.string.error_to_get_product))
@@ -315,24 +306,29 @@ class MainViewModel(
       val printerType = configRepository.getPrinterType()
       val newLabel = label.generateLabelBase(product, null)
 
-      Timber.i("Type: $printerType")
-      Timber.i("USB Name: $usbPrinterName")
-
-      val printTask = when {
-        printerType.equals("USB", ignoreCase = true) -> PrintWorker.createUniquePrintTask(
-          printerAddress = null,
-          printerPort = 0,
-          label = newLabel,
-          usbPrinterName = usbPrinterName
-        )
-
-        else -> PrintWorker.createUniquePrintTask(
-          printerAddress = printerIp,
-          printerPort = printerPort,
-          label = newLabel,
-          usbPrinterName = null
-        )
-      }
+      val printTask = PrintWorker.createUniquePrintTask(
+        printerType = printerType,
+        printerAddress = printerIp,
+        printerPort = printerPort,
+        label = newLabel,
+        usbPrinterName = usbPrinterName
+      )
+//      val printTask = when(printerType) {
+//        PrinterType.USB -> PrintWorker.createUniquePrintTask(
+//          printerType = printerType,
+//          printerAddress = printerIp,
+//          printerPort = port,
+//          label = newLabel,
+//          usbPrinterName = usbPrinterName
+//        )
+//
+//        PrinterType.NETWORK -> PrintWorker.createUniquePrintTask(
+//          printerAddress = printerIp,
+//          printerPort = printerPort,
+//          label = newLabel,
+//          usbPrinterName = usbPrinterName
+//        )
+//      }
 
       workManager.enqueueUniqueWork(
         PrintWorker.PRINT_TASK,
@@ -357,45 +353,18 @@ class MainViewModel(
     } ?: true
   }
 
-//  @Throws(SecurityException::class)
-//  fun getAvailableDevices(): LiveData<List<BluetoothDevice>> {
-//    val devices = bluetoothAdapter.bondedDevices
-//      .filter { it.name.contains("BT_URA") || it.name.contains("BKP") }
-//      .sortedByDescending { it.address }
-//
-//    return MutableLiveData(devices)
-//  }
-
-  fun setActiveThread(currentThread: Int) {
-    _connectedThreads.value.let { devicesConnected ->
-      devicesConnected?.let {
-        _currentDeviceConnected.value = it[currentThread]
-      }
-    }
-  }
-
   fun showMessage(message: String = "") {
     emitMessage(message)
   }
 
   private fun loadPrice(value: Double) {
     val priceByteArray = Formatter.formatDataToLoadPriceToledo(value)
-    _currentDeviceConnected.value?.write(priceByteArray)
+    _activeDevice.value?.write(priceByteArray)
   }
 
   private fun clearFields() {
     _mgvProduct.value = MgvProduct()
   }
-
-//  fun connectToDevices(devices: List<BluetoothDevice>) {
-//    val uiHandler = UiHandler(this)
-//    devices.forEach { device ->
-//      val executor = Executors.newSingleThreadExecutor()
-//      val newThread = ConnectingThread(bluetoothAdapter, device.address, uiHandler)
-//      executor.execute(newThread)
-//      executor.shutdown()
-//    }
-//  }
 
   private fun saveOperation() {
     try {
@@ -471,52 +440,7 @@ class MainViewModel(
       }
       _scale.value = scaleNumber
       Timber.i("executeTask: Indice Balança ${_scale.value}")
-      _connectedThreads.value?.let { setActiveThread(scaleNumber) }
-
       fetchItem(codItem = code.toString())
     }
   }
-
-
-  override fun onCleared() {
-    super.onCleared()
-    Speech.getInstance().shutdown()
-    _connectedThreads.value?.run {
-      forEach { it.cancel() }
-    }
-  }
-//
-//  override fun onBluetoothRead(data: ByteArray) {
-//    val msgString = String(data, StandardCharsets.UTF_8)
-//    Timber.i("onBluetoothRead: Recebendo peso")
-//    if (removeNonAlphaCharacters(msgString) == "IIIII") {
-//      showMessage(resourceProvider.getString(R.string.unstable_weight))
-//    } else {
-//      updateWeightProduct(data)
-//    }
-//  }
-//
-//  override fun onBluetoothConnecting() {
-//    showMessage(resourceProvider.getString(R.string.connecting))
-//  }
-//
-//  override fun onBluetoothConnected(device: ConnectedThread) {
-//    _connectedThreads.value?.add(device)
-//    if (_connectedThreads.value?.size == 1) {
-//      val firstDevice = 0
-//      setActiveThread(firstDevice)
-//    }
-//    val scaleNumber = connectedThreads.value?.size
-//
-//    showMessage(
-//      resourceProvider.getString(
-//        R.string.message_scale_connected,
-////        scaleNumber
-//      )
-//    )
-//  }
-//
-//  override fun onBluetoothError(message: String) {
-//    showMessage(message)
-//  }
 }
