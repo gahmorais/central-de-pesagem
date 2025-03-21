@@ -151,18 +151,6 @@ class MainFragment : Fragment() {
         binding.spinnerScale.adapter = adapter
       }
     }.launchIn(lifecycleScope)
-//    mainViewModel.getAvailableDevices().observe(viewLifecycleOwner) { deviceList ->
-//      mainViewModel.connectToDevices(deviceList)
-//      val devices = deviceList.mapIndexed { i, _ -> "Balança ${i + 1}" }
-//      ArrayAdapter(
-//        requireActivity(),
-//        android.R.layout.simple_spinner_item,
-//        devices
-//      ).also { adapter ->
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-//        binding.spinnerScale.adapter = adapter
-//      }
-//    }
   }
 
   private fun configureSpinner() {

@@ -86,7 +86,7 @@ class MassProductionViewModel(
         val usbPrinterName: String? = configRepository.getConfig(USB_PRINTER_NAME)
         val printerType = configRepository.getPrinterType()
         val printTask = PrintWorker.createUniquePrintTask(
-          printerType = printerType,
+          printerType = printerType.name,
           printerAddress = printerIp,
           printerPort = printerPort,
           label = newLabel,

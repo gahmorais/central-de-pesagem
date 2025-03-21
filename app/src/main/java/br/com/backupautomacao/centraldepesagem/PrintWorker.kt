@@ -5,13 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbManager
-import android.util.Log
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import br.com.backupautomacao.centraldepesagem.utils.PrinterType
+import timber.log.Timber
 import java.io.PrintWriter
 import java.net.Socket
 
@@ -28,18 +27,19 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
     const val PRINT_TASK = "print_task"
 
     fun createUniquePrintTask(
-      printerType: PrinterType,
+      printerType: String,
       printerAddress: String?,
       printerPort: Int,
       usbPrinterName: String?,
       label: String
     ): OneTimeWorkRequest {
-      val data: Data = if (printerType == PrinterType.USB && !usbPrinterName.isNullOrEmpty()) {
+      Timber.i("PrinterWorker - IP: $printerAddress PORT: $printerPort")
+      val data: Data = if (printerType == "Usb" && !usbPrinterName.isNullOrEmpty()) {
         Data.Builder()
           .putString(PRINT_LABEL, label)
           .putString(USB_PRINTER_NAME, usbPrinterName)
           .build()
-      } else if (printerType == PrinterType.NETWORK && !printerAddress.isNullOrEmpty()) {
+      } else if (printerType == "Network" && !printerAddress.isNullOrEmpty()) {
         Data.Builder()
           .putString(PRINT_LABEL, label)
           .putString(PRINTER_ADDRESS, printerAddress)
@@ -79,33 +79,27 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
       val usbManager = applicationContext.getSystemService(Context.USB_SERVICE) as UsbManager
       val deviceList = usbManager.deviceList.values
 
-      Log.i("PrintWorker", "Dispositivos USB encontrados: ${deviceList.size}")
+      Timber.i("Dispositivos USB encontrados: " + deviceList.size)
 
       if (deviceList.isEmpty()) {
-        Log.e("PrintWorker", "Nenhum dispositivo USB encontrado.")
+        Timber.e("Nenhum dispositivo USB encontrado.")
         return Result.failure(createDataMessage(applicationContext.getString(R.string.printer_not_found)))
       }
 
-      Log.i("PrintWorker", "Procurando impressora com nome: $usbPrinterName")
+      Timber.i("Procurando impressora com nome: $usbPrinterName")
 
       val usbDevice = deviceList.find { device ->
-        Log.i(
-          "PrintWorker",
-          "Dispositivo encontrado: ${device.deviceName}, Produto: ${device.productName}"
-        )
+        Timber.i("Dispositivo encontrado: ${device.deviceName}, Produto: ${device.productName}")
         device.productName == usbPrinterName
       } ?: run {
-        Log.e("PrintWorker", "Impressora USB não encontrada.")
+        Timber.e("Impressora USB não encontrada.")
         return Result.failure(createDataMessage(applicationContext.getString(R.string.printer_not_found)))
       }
 
-      Log.i("PrintWorker", "Impressora encontrada: ${usbDevice.deviceName}")
+      Timber.i("Impressora encontrada: " + usbDevice.deviceName)
 
       if (!usbManager.hasPermission(usbDevice)) {
-        Log.e(
-          "PrintWorker",
-          "Permissão negada para o dispositivo USB: ${usbDevice.deviceName}"
-        )
+        Timber.e("Permissão negada para o dispositivo USB: " + usbDevice.deviceName)
         val intent = Intent(INTENT_ACTION_GRANT_USB)
         val pendingIntent = PendingIntent.getBroadcast(
           applicationContext, 0, intent, PendingIntent.FLAG_IMMUTABLE
@@ -114,12 +108,12 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
         return Result.failure(createDataMessage("Permissão USB negada. Tente novamente"))
       }
 
-      Log.i("PrintWorker", "Permissão concedida, tentando conectar...")
+      Timber.i("Permissão concedida, tentando conectar...")
 
       val connection = usbManager.openDevice(usbDevice)
         ?: return Result.failure(createDataMessage(applicationContext.getString(R.string.printer_connection_failed)))
 
-      Log.i("PrintWorker", "Conexão com impressora estabelecida.")
+      Timber.i("Conexão com impressora estabelecida.")
 
       val interfaceIndex = 0
       val usbInterface = usbDevice.getInterface(interfaceIndex)
@@ -128,11 +122,11 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
         .firstOrNull { it.type == UsbConstants.USB_ENDPOINT_XFER_BULK && it.direction == UsbConstants.USB_DIR_OUT }
         ?: return Result.failure(createDataMessage(applicationContext.getString(R.string.no_usb_endpoint)))
 
-      Log.i("PrintWorker", "Endpoint de saída identificado. Enviando dados...")
+      Timber.i("Endpoint de saída identificado. Enviando dados...")
 
       connection.claimInterface(usbInterface, true)
 
-      Log.i("PrintWorker", "LabelTeste{$label}")
+      Timber.i("LabelTeste{$label}")
       val dataToSend = label.toByteArray(Charsets.UTF_8)
       val sentBytes = connection.bulkTransfer(endpointOut, dataToSend, dataToSend.size, 5000)
 
@@ -140,14 +134,14 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
       connection.close()
 
       return if (sentBytes > 0) {
-        Log.i("PrintWorker", "Impressão realizada com sucesso.")
+        Timber.i("Impressão realizada com sucesso.")
         Result.success(createDataMessage(applicationContext.getString(R.string.printing_done)))
       } else {
-        Log.e("PrintWorker", "Erro ao imprimir, bytes enviados: $sentBytes")
+        Timber.e("Erro ao imprimir, bytes enviados: $sentBytes")
         Result.failure(createDataMessage(applicationContext.getString(R.string.printing_error)))
       }
     } catch (e: Exception) {
-      Log.e("PrintWorker", "Erro ao imprimir via USB", e)
+      Timber.e(e, "Erro ao imprimir via USB")
       return Result.failure(createDataMessage(applicationContext.getString(R.string.printing_error)))
     }
   }
@@ -162,7 +156,7 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
       }
       Result.success(createDataMessage(applicationContext.getString(R.string.printing_done)))
     } catch (e: Exception) {
-      Log.e("PrintWorker", "Erro ao imprimir via rede", e)
+      Timber.e(e, "Erro ao imprimir via rede")
       Result.failure(createDataMessage(applicationContext.getString(R.string.printer_not_found)))
     }
   }
@@ -173,6 +167,6 @@ class PrintWorker(appContext: Context, workerParameters: WorkerParameters) :
 
   override fun onStopped() {
     super.onStopped()
-    Log.i("PrintWorker", "onStopped: Trabalho encerrado")
+    Timber.i("onStopped: Trabalho encerrado")
   }
 }

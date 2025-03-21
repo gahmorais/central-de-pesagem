@@ -307,37 +307,23 @@ class MainViewModel(
       val newLabel = label.generateLabelBase(product, null)
 
       val printTask = PrintWorker.createUniquePrintTask(
-        printerType = printerType,
+        printerType = printerType.name,
         printerAddress = printerIp,
         printerPort = printerPort,
         label = newLabel,
         usbPrinterName = usbPrinterName
       )
-//      val printTask = when(printerType) {
-//        PrinterType.USB -> PrintWorker.createUniquePrintTask(
-//          printerType = printerType,
-//          printerAddress = printerIp,
-//          printerPort = port,
-//          label = newLabel,
-//          usbPrinterName = usbPrinterName
-//        )
-//
-//        PrinterType.NETWORK -> PrintWorker.createUniquePrintTask(
-//          printerAddress = printerIp,
-//          printerPort = printerPort,
-//          label = newLabel,
-//          usbPrinterName = usbPrinterName
-//        )
-//      }
 
       workManager.enqueueUniqueWork(
         PrintWorker.PRINT_TASK,
         ExistingWorkPolicy.REPLACE,
         printTask
       )
+
       _scale.value = null
       _updateStatus.update { StatusApp.FINALIZAR }
       clearFields()
+
     } catch (e: FileNotFoundException) {
       showMessage(resourceProvider.getString(R.string.file_not_found_error))
     } catch (e: InvalidParameterException) {
