@@ -71,6 +71,7 @@ class MainActivity : AppCompatActivity() {
     finish()
   }
 
+  @Deprecated("Deprecated in Java")
   override fun onBackPressed() {
     val viewPager = binding.viewPager
     if (viewPager.currentItem == 0) {

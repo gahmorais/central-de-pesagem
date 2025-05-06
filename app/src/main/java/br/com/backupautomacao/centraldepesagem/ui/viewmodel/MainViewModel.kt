@@ -277,7 +277,6 @@ class MainViewModel(
     codItem: Int
   ): ExtraInfo? {
 
-
     val responseExtraInfo = withContext(Dispatchers.Default) {
       mgvService.queryExtraInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
     }

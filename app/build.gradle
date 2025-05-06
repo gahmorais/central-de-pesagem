@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.kapt' apply true
+    id 'com.google.devtools.ksp'
 }
 
 android {
@@ -19,13 +20,13 @@ android {
             keyPassword = 'gabu_171'
         }
     }
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         namespace "br.com.backupautomacao.centraldepesagem"
         applicationId "br.com.backupautomacao.centraldepesagem"
         minSdk 24
-        targetSdk 34
+        targetSdk 35
         versionCode 5
         versionName "2.5.3"
 
@@ -68,11 +69,12 @@ dependencies {
     //Room
     def roomVersion = "2.6.1"
     implementation "androidx.room:room-ktx:$roomVersion"
-    kapt "androidx.room:room-compiler:$roomVersion"
+//    kapt "androidx.room:room-compiler:$roomVersion"
+    ksp "androidx.room:room-compiler:$roomVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
 
     //WorkManager
-    def work_version = "2.9.1"
+    def work_version = "2.10.1"
     implementation("androidx.work:work-runtime-ktx:$work_version")
 
     //Lifecycle
@@ -110,5 +112,7 @@ dependencies {
 
     //Vazamento de memória
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
+
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
 
 }
