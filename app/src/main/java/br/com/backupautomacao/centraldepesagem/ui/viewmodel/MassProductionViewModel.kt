@@ -4,13 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
-import br.com.backupautomacao.centraldepesagem.PrintWorker
-import br.com.backupautomacao.centraldepesagem.PrintWorker.Companion.USB_PRINTER_NAME
+import br.com.backupautomacao.centraldepesagem.workers.NetworkWorker
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.PrinterType
+import br.com.backupautomacao.centraldepesagem.workers.PRINT_TASK
+import br.com.backupautomacao.centraldepesagem.workers.UsbWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -32,7 +33,7 @@ class MassProductionViewModel(
     MgvApi.retrofitService(serverAddress)
   }
 
-  val statusPrint = workManager.getWorkInfosForUniqueWorkFlow(PrintWorker.PRINT_TASK)
+  val statusPrint = workManager.getWorkInfosForUniqueWorkFlow(PRINT_TASK)
 
   fun fetchItem(code: String) {
     val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
@@ -83,17 +84,13 @@ class MassProductionViewModel(
       } else {
         val printerIp: String? = configRepository.getConfig(ConfigRepository.PRINTER_IP)
         val printerPort: Int = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
-        val usbPrinterName: String? = configRepository.getConfig(USB_PRINTER_NAME)
-        val printerType = configRepository.getPrinterType()
-        val printTask = PrintWorker.createUniquePrintTask(
-          printerType = printerType.name,
+        val printTask = NetworkWorker.createUniquePrintTask(
           printerAddress = printerIp,
           printerPort = printerPort,
           label = newLabel,
-          usbPrinterName = usbPrinterName
         )
         workManager.enqueueUniqueWork(
-          PrintWorker.PRINT_TASK,
+          PRINT_TASK,
           ExistingWorkPolicy.REPLACE,
           printTask
         )
