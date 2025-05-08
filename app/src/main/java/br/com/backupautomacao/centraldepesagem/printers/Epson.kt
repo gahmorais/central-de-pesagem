@@ -1,115 +1,199 @@
 package br.com.backupautomacao.centraldepesagem.printers
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
+import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
+import br.com.backupautomacao.centraldepesagem.network.MgvProduct
+import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import com.epson.epos2.discovery.DeviceInfo
 import com.epson.epos2.discovery.Discovery
 import com.epson.epos2.discovery.DiscoveryListener
 import com.epson.epos2.discovery.FilterOption
 import com.epson.epos2.printer.Printer
+import timber.log.Timber
+import java.util.Locale
+import kotlin.random.Random
 
-class Epson : DiscoveryListener {
+class Epson(
+  private val usbManager: UsbManager,
+  private val context: Context
+) : DiscoveryListener {
   private lateinit var printer: Printer
   private lateinit var printerPort: String
   private lateinit var printerName: String
-  fun initializePrinter() {
+  private val ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION"
 
+  fun initializePrinter(usbConfig: String) {
+    val (printerName, printerPort) = usbConfig.split(";")
+    val printerModel = getPrinterModel(printerName)
+    this.printerPort = printerPort
+    printer = Printer(printerModel, Printer.LANG_EN, context)
   }
 
-  private fun createReceiptData(): Boolean {
-    var method: String
-//    val logoData = BitmapFactory.decodeResource(getResources(), R.drawable.store)
+  private fun createDescription(description: String): String {
     val textData = StringBuilder()
-    val barcodeWidth = 2
-    val barcodeHeight = 100
+    textData.append("$description\n")
+    textData.append("------------------------------\n")
+    return textData.toString()
+  }
+
+  private fun createWeight(weight: Double): String {
+    val textData = StringBuilder()
+    val weightFormatted = Formatter.formatWeight(weight)
+    val weightWithPadding = weightFormatted.padStart(30, ' ')
+    textData.append("Peso: $weightWithPadding\n")
+    return textData.toString()
+  }
+
+  private fun createPricePerKg(price: Double): String {
+    val textData = StringBuilder()
+    val pricePerKg = Formatter.formatPrice(price)
+    val priceText = "Preço/Kg"
+    val priceWithPadding = "R$ $pricePerKg".padStart(30, ' ')
+    textData.append("$priceText$priceWithPadding\n")
+
+    return textData.toString()
+  }
+
+  private fun formatBoldText() {
+    printer.addTextFont(Printer.FONT_B)
+    printer.addTextSize(2, 2)
+  }
+
+  private fun formatDefaultText() {
+    printer.addTextFont(Printer.FONT_A)
+    printer.addTextSize(1, 1)
+  }
+
+  private fun createTotalPrice(price: Double, weight: Double): String {
+    val textData = StringBuilder()
+    val totalPrice = weight.times(price)
+    val totalPriceFormatted = Formatter.formatPrice(totalPrice)
+    val totalPriceText = "TOTAL R$"
+    val totalPricePadding = "$totalPriceText $totalPriceFormatted".padStart(10, ' ')
+    textData.append("$totalPricePadding\n")
+    return textData.toString()
+  }
+
+  private fun createBarcode(productCode: String, productWeight: Double): String {
+    val code = productCode.padStart(6, '0')
+    val weight = productWeight.times(1000)
+    val weightString = String.format(Locale.ENGLISH, "%.0f", weight).padStart(5, '0')
+    return "2$code$weightString"
+  }
+
+  private fun createNutriction(nutrition: MgvInformacoesNutricionais): String {
+    val textData = StringBuilder()
+
+    val valorEnergetico = randomValue()
+    val carboidratosTotais = randomValue()
+    val acucaresTotais = randomValue()
+    val acucaresAdicionados = randomValue()
+    val proteinas = randomValue()
+    val gordurasTotais = randomValue()
+    val gordurasSaturadas = randomValue()
+    val gordurasTrans = randomValue()
+    val fibraAlimentar = randomValue()
+    val sodio = randomValue()
+
+    textData.append("Valor Energético............$valorEnergetico\n")
+    textData.append("Carboidratos............$carboidratosTotais\n")
+    textData.append("Acucares totais.........$acucaresTotais\n")
+    textData.append("Acucares adicionados....$acucaresAdicionados\n")
+    textData.append("Proteínas............$proteinas\n")
+    textData.append("Gorduras totais............$gordurasTotais\n")
+    textData.append("Gorduras saturadas.........$gordurasSaturadas\n")
+    textData.append("Gorduras trans............$gordurasTrans\n")
+    textData.append("Fibra Alimentar............$fibraAlimentar\n")
+    textData.append("Sódio............$sodio\n")
+
+    return textData.toString()
+  }
+
+  private fun randomValue(): String {
+    val value = Random.nextDouble(from = 0.0, until = 99.9)
+    val valueFormatted = String.format(Locale.ENGLISH, "%.2f", value)
+    return valueFormatted
+  }
+
+  private fun createDescription(): String {
+    val textData = StringBuilder()
+    val infoDescription = "---INFORMAÇÃO NUTRICIONAL---\n"
+    textData.append(infoDescription)
+    textData.append("------------------------------\n")
+    return textData.toString()
+  }
+
+  fun createReceiptData(product: MgvProduct): Boolean {
 
     try {
 
-      method = "addTextAlign"
+      Timber.i("Produto: $product")
+
       printer.addTextAlign(Printer.ALIGN_CENTER)
-
-      method = "addFeedLine"
-      printer.addFeedLine(1)
-      textData.append("THE STORE 123 (555) 555 – 5555\n")
-      textData.append("STORE DIRECTOR – John Smith\n")
-      textData.append("\n")
-      textData.append("7/01/07 16:58 6153 05 0191 134\n")
-      textData.append("ST# 21 OP# 001 TE# 01 TR# 747\n")
-      textData.append("------------------------------\n")
-      method = "addText"
-      printer.addText(textData.toString())
-      textData.delete(0, textData.length)
-
-      textData.append("400 OHEIDA 3PK SPRINGF  9.99 R\n")
-      textData.append("410 3 CUP BLK TEAPOT    9.99 R\n")
-      textData.append("445 EMERIL GRIDDLE/PAN 17.99 R\n")
-      textData.append("438 CANDYMAKER ASSORT   4.99 R\n")
-      textData.append("474 TRIPOD              8.99 R\n")
-      textData.append("433 BLK LOGO PRNTED ZO  7.99 R\n")
-      textData.append("458 AQUA MICROTERRY SC  6.99 R\n")
-      textData.append("493 30L BLK FF DRESS   16.99 R\n")
-      textData.append("407 LEVITATING DESKTOP  7.99 R\n")
-      textData.append("441 **Blue Overprint P  2.99 R\n")
-      textData.append("476 REPOSE 4PCPM CHOC   5.49 R\n")
-      textData.append("461 WESTGATE BLACK 25  59.99 R\n")
-      textData.append("------------------------------\n")
-      method = "addText"
-      printer.addText(textData.toString())
-      textData.delete(0, textData.length)
-
-      textData.append("SUBTOTAL                160.38\n")
-      textData.append("TAX                      14.43\n")
-      method = "addText"
-      printer.addText(textData.toString())
-      textData.delete(0, textData.length)
-
-      method = "addTextSize"
-      printer.addTextSize(2, 2)
-      method = "addText"
-      printer.addText("TOTAL    174.81\n")
-      method = "addTextSize"
-      printer.addTextSize(1, 1)
-      method = "addFeedLine"
       printer.addFeedLine(1)
 
-      textData.append("CASH                    200.00\n")
-      textData.append("CHANGE                   25.19\n")
-      textData.append("------------------------------\n")
-      method = "addText"
-      printer.addText(textData.toString())
-      textData.delete(0, textData.length)
-
-      textData.append("Purchased item total number\n")
-      textData.append("Sign Up and Save !\n")
-      textData.append("With Preferred Saving Card\n")
-      method = "addText"
-      printer.addText(textData.toString())
-      textData.delete(0, textData.length)
-      method = "addFeedLine"
+      val description = createDescription(product.description)
+      printer.addText(description)
       printer.addFeedLine(2)
 
-      method = "addBarcode"
+      val weightPerKg = createWeight(product.weight!!)
+      printer.addText(weightPerKg)
+
+      val pricePerKg = createPricePerKg(product.price)
+      printer.addText(pricePerKg)
+      printer.addFeedLine(3)
+
+      val totalPrice = createTotalPrice(product.price, product.weight!!)
+      formatBoldText()
+      printer.addText(totalPrice)
+      printer.addFeedLine(2)
+
+      if (product.nutrictionFacts != null) {
+        val titleNutriction = createDescription()
+        printer.addText(titleNutriction)
+        val infoNutritional = createNutriction(product.nutrictionFacts!!)
+        formatDefaultText()
+        printer.addText(infoNutritional)
+        printer.addFeedLine(2)
+      }
+
+      val barcode = createBarcode(product.code, product.weight!!)
+      val barcodeWidth = 3
+      val barcodeHeight = 100
+
       printer.addBarcode(
-        "01209457",
-        Printer.BARCODE_CODE39,
+        barcode,
+        Printer.BARCODE_EAN13,
         Printer.HRI_BELOW,
         Printer.FONT_A,
         barcodeWidth,
         barcodeHeight
       )
 
-      method = "addCut"
+      printer.addFeedLine(5)
       printer.addCut(Printer.CUT_FEED)
+
     } catch (e: Exception) {
       e.printStackTrace()
       printer.clearCommandBuffer()
-
       return false
     }
 
     return true
   }
 
-  fun discoveryPrinter(context: Context) {
+  fun requestPermission(device: UsbDevice, context: Context) {
+    val permissionIntent = PendingIntent.getBroadcast(
+      context, 0, Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE
+    )
+    usbManager.requestPermission(device, permissionIntent)
+  }
+
+  fun discoveryPrinter() {
     val filterOptions = FilterOption()
     filterOptions.deviceType = Discovery.TYPE_PRINTER
     filterOptions.epsonFilter = Discovery.FILTER_NAME
@@ -117,10 +201,10 @@ class Epson : DiscoveryListener {
     Discovery.start(context, filterOptions, this)
   }
 
-  private fun connectPrinter(): Boolean {
+  fun connectPrinter(): Boolean {
 
     try {
-      printer.connect(printerPort, Printer.PARAM_DEFAULT)
+      printer.connect("USB:", Printer.PARAM_DEFAULT)
     } catch (e: Exception) {
       return false
     }
@@ -128,14 +212,18 @@ class Epson : DiscoveryListener {
     return true
   }
 
-  private fun printData(): Boolean {
+  fun printData(): Boolean {
+
+    Timber.i("Realizando impressão USB")
 
     if (!connectPrinter()) {
+      Timber.i("Falha na conexão usb")
       printer.clearCommandBuffer()
       return false
     }
 
     try {
+      Timber.i("Enviando dados")
       printer.sendData(Printer.PARAM_DEFAULT)
     } catch (e: Exception) {
       printer.clearCommandBuffer()
@@ -148,6 +236,13 @@ class Epson : DiscoveryListener {
       return false
     }
     return true
+  }
+
+  private fun getPrinterModel(name: String): Int {
+    return when (name) {
+      "TM-L100" -> Printer.TM_L100
+      else -> 0
+    }
   }
 
   override fun onDiscovery(deviceInfo: DeviceInfo) {

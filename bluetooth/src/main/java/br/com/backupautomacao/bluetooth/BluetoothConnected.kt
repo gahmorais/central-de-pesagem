@@ -41,7 +41,9 @@ class BluetoothConnected(private val socket: BluetoothSocket) {
           delay(100)
           numBytes = socket.inputStream.read(buffer)
           val data = buffer.copyOf(numBytes)
-          emit(data)
+          if (data.size > 1){
+            emit(data)
+          }
         }
       }
     }.catch { e ->

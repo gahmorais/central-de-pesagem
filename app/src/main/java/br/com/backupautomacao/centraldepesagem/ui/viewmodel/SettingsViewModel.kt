@@ -96,7 +96,7 @@ class SettingsViewModel(
     }
 
     fun savePrinterUsbName(printerName: String) {
-        configRepository.setUsbPrinterName(ConfigRepository.USB_PRINTER_NAME, printerName)
+        configRepository.setUsbConfig(ConfigRepository.USB_PRINTER_NAME, printerName)
     }
 
     fun savePrinterConfig(printerType: PrinterType) {

@@ -61,16 +61,16 @@ class ConfigRepository(context: Context) {
     val printerType = preferencias.getString(PRINTER_TYPE, "USB") ?: "USB"
     return when (printerType) {
       "USB" -> PrinterType.USB
-      "Network" -> PrinterType.NETWORK
+      "NETWORK" -> PrinterType.NETWORK
       else -> throw Exception("Nenhuma impressora selecionada")
     }
   }
 
-  fun getUsbPrinterName(): String? {
+  fun getUsbConfig(): String? {
     return preferencias.getString(USB_PRINTER_NAME, null)
   }
 
-  fun setUsbPrinterName(key: String, value: String) {
+  fun setUsbConfig(key: String, value: String) {
     editor.putString(key, value).apply()
   }
 

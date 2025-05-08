@@ -11,7 +11,7 @@ import br.com.backupautomacao.centraldepesagem.db.migrations.MIGRATION_1_2
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
-import br.com.backupautomacao.centraldepesagem.services.PrinterUsb
+import br.com.backupautomacao.centraldepesagem.printers.Epson
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
 import org.koin.dsl.module
@@ -23,8 +23,9 @@ val mainModule = module {
   single { ResourceProvider(get()) }
   single {
     val usbManager = get<Context>().getSystemService(Context.USB_SERVICE) as UsbManager
-    PrinterUsb(usbManager)
+    Epson(usbManager, get())
   }
+
   single { Label(get()) }
   single { BluetoothHandler() }
   single {

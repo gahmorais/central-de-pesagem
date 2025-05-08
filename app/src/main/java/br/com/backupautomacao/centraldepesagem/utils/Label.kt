@@ -1,7 +1,14 @@
 package br.com.backupautomacao.centraldepesagem.utils
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import br.com.backupautomacao.centraldepesagem.FileController
+import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
@@ -9,13 +16,14 @@ import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatB
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatNutriction
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatPrice
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatWeight
+import timber.log.Timber
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.*
 
 private const val ONE_DAY_MILLIS = 60 * 60 * 24 * 1000
 
-class Label(context: Context) {
+class Label(private val context: Context) {
 
     private val fileController = FileController(context)
     private val BASE_LENGTH = "200"
