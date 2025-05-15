@@ -13,6 +13,8 @@ import com.epson.epos2.discovery.Discovery
 import com.epson.epos2.discovery.DiscoveryListener
 import com.epson.epos2.discovery.FilterOption
 import com.epson.epos2.printer.Printer
+import com.epson.epos2.printer.PrinterStatusInfo
+import com.epson.epos2.printer.ReceiveListener
 import timber.log.Timber
 import java.util.Locale
 import kotlin.random.Random
@@ -20,8 +22,8 @@ import kotlin.random.Random
 class Epson(
   private val usbManager: UsbManager,
   private val context: Context
-) : DiscoveryListener {
-  private lateinit var printer: Printer
+) : DiscoveryListener, ReceiveListener {
+  private var printer: Printer? = null
   private lateinit var printerPort: String
   private lateinit var printerName: String
   private val ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION"
@@ -31,6 +33,12 @@ class Epson(
     val printerModel = getPrinterModel(printerName)
     this.printerPort = printerPort
     printer = Printer(printerModel, Printer.LANG_EN, context)
+    printer?.setReceiveEventListener(this)
+  }
+
+  fun finalizePrinter() {
+    printer?.setReceiveEventListener(null)
+    printer = null
   }
 
   private fun createDescription(description: String): String {
@@ -59,13 +67,13 @@ class Epson(
   }
 
   private fun formatBoldText() {
-    printer.addTextFont(Printer.FONT_B)
-    printer.addTextSize(2, 2)
+    printer?.addTextFont(Printer.FONT_B)
+    printer?.addTextSize(2, 2)
   }
 
   private fun formatDefaultText() {
-    printer.addTextFont(Printer.FONT_A)
-    printer.addTextSize(1, 1)
+    printer?.addTextFont(Printer.FONT_A)
+    printer?.addTextSize(1, 1)
   }
 
   private fun createTotalPrice(price: Double, weight: Double): String {
@@ -99,16 +107,16 @@ class Epson(
     val fibraAlimentar = randomValue()
     val sodio = randomValue()
 
-    textData.append("Valor Energético............$valorEnergetico\n")
+    textData.append("Valor Energético........$valorEnergetico\n")
     textData.append("Carboidratos............$carboidratosTotais\n")
     textData.append("Acucares totais.........$acucaresTotais\n")
-    textData.append("Acucares adicionados....$acucaresAdicionados\n")
-    textData.append("Proteínas............$proteinas\n")
-    textData.append("Gorduras totais............$gordurasTotais\n")
-    textData.append("Gorduras saturadas.........$gordurasSaturadas\n")
-    textData.append("Gorduras trans............$gordurasTrans\n")
-    textData.append("Fibra Alimentar............$fibraAlimentar\n")
-    textData.append("Sódio............$sodio\n")
+    textData.append(" Acucares adicionados...$acucaresAdicionados\n")
+    textData.append("Proteínas...............$proteinas\n")
+    textData.append("Gorduras totais.........$gordurasTotais\n")
+    textData.append(" Gorduras saturadas.....$gordurasSaturadas\n")
+    textData.append(" Gorduras trans.........$gordurasTrans\n")
+    textData.append("Fibra Alimentar.........$fibraAlimentar\n")
+    textData.append("Sódio...................$sodio\n")
 
     return textData.toString()
   }
@@ -116,6 +124,7 @@ class Epson(
   private fun randomValue(): String {
     val value = Random.nextDouble(from = 0.0, until = 99.9)
     val valueFormatted = String.format(Locale.ENGLISH, "%.2f", value)
+      .replace(".", ",")
     return valueFormatted
   }
 
@@ -133,39 +142,39 @@ class Epson(
 
       Timber.i("Produto: $product")
 
-      printer.addTextAlign(Printer.ALIGN_CENTER)
-      printer.addFeedLine(1)
+      printer?.addTextAlign(Printer.ALIGN_CENTER)
+      printer?.addFeedLine(1)
 
       val description = createDescription(product.description)
-      printer.addText(description)
-      printer.addFeedLine(2)
+      printer?.addText(description)
+      printer?.addFeedLine(2)
 
       val weightPerKg = createWeight(product.weight!!)
-      printer.addText(weightPerKg)
+      printer?.addText(weightPerKg)
 
       val pricePerKg = createPricePerKg(product.price)
-      printer.addText(pricePerKg)
-      printer.addFeedLine(3)
+      printer?.addText(pricePerKg)
+      printer?.addFeedLine(3)
 
       val totalPrice = createTotalPrice(product.price, product.weight!!)
       formatBoldText()
-      printer.addText(totalPrice)
-      printer.addFeedLine(2)
+      printer?.addText(totalPrice)
+      printer?.addFeedLine(2)
 
       if (product.nutrictionFacts != null) {
         val titleNutriction = createDescription()
-        printer.addText(titleNutriction)
+        printer?.addText(titleNutriction)
         val infoNutritional = createNutriction(product.nutrictionFacts!!)
         formatDefaultText()
-        printer.addText(infoNutritional)
-        printer.addFeedLine(2)
+        printer?.addText(infoNutritional)
+        printer?.addFeedLine(2)
       }
 
       val barcode = createBarcode(product.code, product.weight!!)
       val barcodeWidth = 3
       val barcodeHeight = 100
 
-      printer.addBarcode(
+      printer?.addBarcode(
         barcode,
         Printer.BARCODE_EAN13,
         Printer.HRI_BELOW,
@@ -174,12 +183,14 @@ class Epson(
         barcodeHeight
       )
 
-      printer.addFeedLine(5)
-      printer.addCut(Printer.CUT_FEED)
+      printer?.addFeedLine(5)
+
+      
+      printer?.addCut(Printer.CUT_FEED)
 
     } catch (e: Exception) {
       e.printStackTrace()
-      printer.clearCommandBuffer()
+      printer?.clearCommandBuffer()
       return false
     }
 
@@ -201,16 +212,20 @@ class Epson(
     Discovery.start(context, filterOptions, this)
   }
 
-  fun connectPrinter(): Boolean {
+  private fun connectPrinter(): Boolean {
 
-    try {
-      printer.connect("USB:", Printer.PARAM_DEFAULT)
-    } catch (e: Exception) {
+    if (printer == null) {
+      Timber.i("Impressora não definida")
       return false
     }
-
-    return true
+    try {
+      printer?.connect("USB:", Printer.PARAM_DEFAULT)
+      return true
+    } catch (e: Exception) {
+      throw e
+    }
   }
+
 
   fun printData(): Boolean {
 
@@ -218,19 +233,20 @@ class Epson(
 
     if (!connectPrinter()) {
       Timber.i("Falha na conexão usb")
-      printer.clearCommandBuffer()
+      printer?.clearCommandBuffer()
       return false
     }
 
     try {
       Timber.i("Enviando dados")
-      printer.sendData(Printer.PARAM_DEFAULT)
+      printer?.sendData(Printer.PARAM_DEFAULT)
     } catch (e: Exception) {
-      printer.clearCommandBuffer()
-
+      printer?.clearCommandBuffer()
+      e.printStackTrace()
       try {
-        printer.disconnect()
+        printer?.disconnect()
       } catch (ex: Exception) {
+        ex.printStackTrace()
         // Do nothing
       }
       return false
@@ -248,5 +264,21 @@ class Epson(
   override fun onDiscovery(deviceInfo: DeviceInfo) {
     printerName = deviceInfo.deviceName
     printerPort = deviceInfo.target
+  }
+
+  override fun onPtrReceive(printer: Printer?, p1: Int, status: PrinterStatusInfo?, p3: String?) {
+    disconnect()
+  }
+
+  private fun disconnect() {
+    if (printer == null) {
+      return
+    }
+    try {
+      printer?.disconnect()
+      printer?.clearCommandBuffer()
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
   }
 }

@@ -27,8 +27,8 @@ android {
         applicationId "br.com.backupautomacao.centraldepesagem"
         minSdk 24
         targetSdk 35
-        versionCode 5
-        versionName "2.5.3"
+        versionCode 6
+        versionName "2.6.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -90,8 +90,8 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
 
     //Dependecies Injection
-    def koin_version = "3.2.2"
-    def koin_android_version= "3.3.0"
+    def koin_version = "3.5.6"
+    def koin_android_version= "3.5.6"
     implementation "io.insert-koin:koin-android:$koin_android_version"
     implementation "io.insert-koin:koin-core:$koin_version"
     testImplementation "io.insert-koin:koin-test:$koin_version"

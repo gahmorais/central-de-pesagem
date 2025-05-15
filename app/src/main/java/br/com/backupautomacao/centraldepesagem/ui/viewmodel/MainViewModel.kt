@@ -8,13 +8,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import br.com.backupautomacao.bluetooth.BluetoothConnected
 import br.com.backupautomacao.bluetooth.BluetoothHandler
 import br.com.backupautomacao.bluetooth.exceptions.ClosedSocketException
-import br.com.backupautomacao.centraldepesagem.workers.NetworkWorker
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
@@ -34,8 +32,10 @@ import br.com.backupautomacao.centraldepesagem.utils.ScaleStatus
 import br.com.backupautomacao.centraldepesagem.utils.StatusApp
 import br.com.backupautomacao.centraldepesagem.utils.Util
 import br.com.backupautomacao.centraldepesagem.utils.findItem
+import br.com.backupautomacao.centraldepesagem.workers.NetworkWorker
 import br.com.backupautomacao.centraldepesagem.workers.PRINT_TASK
 import br.com.backupautomacao.centraldepesagem.workers.UsbWorker
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -89,6 +89,10 @@ class MainViewModel(
 
   init {
     applicationMonitor()
+    val usbConfig = configRepository.getUsbConfig()
+      ?: throw Exception("nenhuma configuração usb definida")
+    epson.finalizePrinter()
+    epson.initializePrinter(usbConfig)
   }
 
   private fun applicationMonitor() {
@@ -160,6 +164,7 @@ class MainViewModel(
   override fun onCleared() {
     super.onCleared()
     cancelAllJobs()
+    epson.finalizePrinter()
   }
 
   suspend fun connectToDevices(btAdapter: BluetoothAdapter) {
@@ -313,21 +318,20 @@ class MainViewModel(
 
       Timber.i("Impressora selecionada: %s", printerType)
 
-      val printTask = when (printerType) {
+      when (printerType) {
         PrinterType.USB -> {
-          val usbConfig =
-            configRepository.getUsbConfig() ?: throw Exception("nenhuma configuração usb definida")
-          epson.initializePrinter(usbConfig)
+
           epson.createReceiptData(product)
           epson.printData()
 
-          createUsbTask("")
+//          createUsbTask("")
         }
 
         PrinterType.NETWORK -> {
           createNetworkTask(newLabel)
         }
       }
+
 
 //      workManager.enqueueUniqueWork(
 //        PRINT_TASK,
@@ -349,6 +353,7 @@ class MainViewModel(
       showMessage("${resourceProvider.getString(R.string.unexpected_error)}: ${e.localizedMessage}")
     }
   }
+
 
   private fun createNetworkTask(label: String): OneTimeWorkRequest {
     val printerIp = configRepository.getConfig(PRINTER_IP)
