@@ -10,6 +10,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentSettingsBinding
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
@@ -17,6 +18,7 @@ import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.centraldepesagem.utils.EventMask
 import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
@@ -135,12 +137,17 @@ class SettingsFragment : Fragment() {
   }
 
   private fun handleMessages() {
-    viewModel.statusMessage.onEach { message ->
-      Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
+    viewLifecycleOwner.lifecycleScope.launch {
+      viewModel.statusMessage.collect { message ->
+        if (message.isNotEmpty()) {
+          Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
+          viewModel.clearStatusMessage()
+        }
+      }
     }
   }
 
-  private fun handleCheckbox() {
+      private fun handleCheckbox() {
     binding.checkboxAutomaticPrint.setOnCheckedChangeListener { _, isChecked ->
       viewModel.enableAutomaticPrint(isChecked)
     }

@@ -90,10 +90,32 @@ class MainViewModel(
   init {
     applicationMonitor()
     val usbConfig = configRepository.getUsbConfig()
+    if (usbConfig != null) {
+      epson.finalizePrinter()
+      epson.initializePrinter(usbConfig)
+    } else {
+      viewModelScope.launch {
+        emitMessage("Nenhuma configuração USB definida")
+      }
+    }
+  }
+
+
+  /*
+  init {
+    applicationMonitor()
+    val usbConfig = configRepository.getUsbConfig()
       ?: throw Exception("nenhuma configuração usb definida")
     epson.finalizePrinter()
     epson.initializePrinter(usbConfig)
+//    val usbConfig = configRepository.getConfig(ConfigRepository.USB_PRINTER_NAME)
+//    if (usbConfig.isNullOrEmpty()) {
+//      throw Exception("nenhuma configuração usb definida")
+//    }
+//    epson.initializePrinter(usbConfig)
   }
+
+   */
 
   private fun applicationMonitor() {
     _updateStatus.onEach { status ->
@@ -218,7 +240,13 @@ class MainViewModel(
 
   fun fetchItem(codItem: String) {
     Timber.i("fetchItem: Buscando item")
-    val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
+//    val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)!!
+    val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)
+    if (mgvPassword == null) {
+      showMessage("Senha do MGV não configurada")
+      return
+    }
+
     val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
     if (codItem.isEmpty()) {
       showMessage(resourceProvider.getString(R.string.product_not_found))

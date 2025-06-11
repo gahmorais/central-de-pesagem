@@ -15,15 +15,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentMainBinding
 import br.com.backupautomacao.centraldepesagem.permission.Permission
 import br.com.backupautomacao.centraldepesagem.permission.PermissionManager
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModel
+import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.get
 import timber.log.Timber
 
 class MainFragment : Fragment() {
@@ -32,7 +35,37 @@ class MainFragment : Fragment() {
     FragmentMainBinding.inflate(layoutInflater)
   }
 
-  private val mainViewModel: MainViewModel by activityViewModels()
+//  private val mainViewModel: MainViewModel by activityViewModels()
+
+  private val mainViewModel: MainViewModel by activityViewModels {
+  MainViewModelFactory(
+    epson = get(),
+    configRepository = get(),
+    operationRepository = get(),
+    workManager = get(),
+    bluetoothHandler = get(),
+    resourceProvider = get(),
+    label = get(),
+    mgvService = get()
+  )
+}
+
+  /*
+//  private val mainViewModel: MainViewModel by activityViewModels {
+//    MainViewModelFactory(
+//      epson = requireContext().getKoin().get(),
+//      configRepository = requireContext().getKoin().get(),
+//      operationRepository = requireContext().getKoin().get(),
+//      workManager = requireContext().getKoin().get(),
+//      bluetoothHandler = requireContext().getKoin().get(),
+//      resourceProvider = requireContext().getKoin().get(),
+//      label = requireContext().getKoin().get(),
+//      mgvService = requireContext().getKoin().get()
+//    )
+//  }
+
+   */
+
   private val permissionManager = PermissionManager.from(this)
 
   override fun onCreateView(

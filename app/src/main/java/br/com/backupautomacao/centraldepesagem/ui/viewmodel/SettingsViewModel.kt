@@ -109,4 +109,9 @@ class SettingsViewModel(
             resourceProvider.getString(R.string.sucessfully_save_printer_type)
     }
 
+    fun clearStatusMessage() {
+        _statusMessage.value = ""
+    }
+
+
 }
