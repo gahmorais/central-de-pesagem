@@ -95,9 +95,14 @@ class SettingsViewModel(
         }
     }
 
+//    fun savePrinterUsbName(printerName: String) {
+//        configRepository.setUsbConfig(ConfigRepository.USB_PRINTER_NAME, printerName)
+//    }
+
     fun savePrinterUsbName(printerName: String) {
-        configRepository.setUsbConfig(ConfigRepository.USB_PRINTER_NAME, printerName)
+        configRepository.setUsbConfig(printerName)
     }
+
 
     fun savePrinterConfig(printerType: PrinterType) {
         configRepository.setPrinterType(printerType.toString())
@@ -112,6 +117,4 @@ class SettingsViewModel(
     fun clearStatusMessage() {
         _statusMessage.value = ""
     }
-
-
 }

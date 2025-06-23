@@ -39,7 +39,9 @@ class MainFragment : Fragment() {
 
   private val mainViewModel: MainViewModel by activityViewModels {
   MainViewModelFactory(
+    context = get(),
     epson = get(),
+    honeywellPrinter = get(),
     configRepository = get(),
     operationRepository = get(),
     workManager = get(),

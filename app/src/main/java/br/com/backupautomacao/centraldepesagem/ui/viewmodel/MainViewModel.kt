@@ -1,9 +1,16 @@
 package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 
+import android.app.PendingIntent
 import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
+import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
 import android.os.Build
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -23,6 +30,8 @@ import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionai
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.network.MgvService
 import br.com.backupautomacao.centraldepesagem.printers.Epson
+import br.com.backupautomacao.centraldepesagem.printers.HoneywellPrinter
+//import br.com.backupautomacao.centraldepesagem.printers.PrinterManager
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.removeNonAlphaCharacters
 import br.com.backupautomacao.centraldepesagem.utils.Label
@@ -57,7 +66,9 @@ import java.security.InvalidParameterException
 
 class MainViewModel(
 //  private val printerUsb: PrinterUsb,
+  private val appContext: Context,
   private val epson: Epson,
+  private val honeywellPrinter: HoneywellPrinter,
   private val configRepository: ConfigRepository,
   private val operationRepository: OperationRepository,
   private val workManager: WorkManager,
@@ -66,6 +77,11 @@ class MainViewModel(
   private val label: Label,
   private val mgvService: MgvService
 ) : ViewModel(), SpeechDelegate {
+
+//  private lateinit var printerManager: PrinterManager
+//private val printerManager: PrinterManager by lazy {
+//  PrinterManager(appContext, configRepository)
+//}
 
   private val _mgvProduct = MutableLiveData<MgvProduct?>()
   val mgvProduct: LiveData<MgvProduct?> = _mgvProduct
@@ -87,35 +103,31 @@ class MainViewModel(
 
   private val jobsRunning = mutableListOf<Job>()
 
-  init {
+
+  fun initializePrinter() {
     applicationMonitor()
-    val usbConfig = configRepository.getUsbConfig()
-    if (usbConfig != null) {
-      epson.finalizePrinter()
-      epson.initializePrinter(usbConfig)
-    } else {
+
+    val usbManager = appContext.getSystemService(Context.USB_SERVICE) as UsbManager
+    val deviceName = configRepository.getUsbConfig()
+
+    if (deviceName == null) {
       viewModelScope.launch {
         emitMessage("Nenhuma configuração USB definida")
       }
+      return
     }
+
+    val usbDevice = usbManager.deviceList.values.firstOrNull { it.deviceName == deviceName }
+
+    if (usbDevice == null) {
+      viewModelScope.launch {
+        emitMessage("Dispositivo USB '$deviceName' não encontrado")
+      }
+      return
+    }
+
+    honeywellPrinter.initializePrinter(usbDevice)
   }
-
-
-  /*
-  init {
-    applicationMonitor()
-    val usbConfig = configRepository.getUsbConfig()
-      ?: throw Exception("nenhuma configuração usb definida")
-    epson.finalizePrinter()
-    epson.initializePrinter(usbConfig)
-//    val usbConfig = configRepository.getConfig(ConfigRepository.USB_PRINTER_NAME)
-//    if (usbConfig.isNullOrEmpty()) {
-//      throw Exception("nenhuma configuração usb definida")
-//    }
-//    epson.initializePrinter(usbConfig)
-  }
-
-   */
 
   private fun applicationMonitor() {
     _updateStatus.onEach { status ->
@@ -130,6 +142,10 @@ class MainViewModel(
         else -> Timber.i("Processo finalizado")
       }
     }.launchIn(viewModelScope)
+  }
+
+  fun getCurrentProduct(): MgvProduct? {
+    return mgvProduct.value
   }
 
   fun requestPermissionUSB(context: Context) {
@@ -340,45 +356,69 @@ class MainViewModel(
       return
     }
 
-    try {
-      val printerType = configRepository.getPrinterType()
-      val newLabel = label.generateLabelBase(product, null)
+    viewModelScope.launch {
+      try {
+        val printerType = configRepository.getPrinterType()
+        Timber.i("Impressora selecionada: %s", printerType)
 
-      Timber.i("Impressora selecionada: %s", printerType)
+        when (printerType) {
+          PrinterType.USB -> {
+            val usbManager = appContext.getSystemService(Context.USB_SERVICE) as UsbManager
+            val savedDeviceName = configRepository.getUsbConfig()
 
-      when (printerType) {
-        PrinterType.USB -> {
+            if (savedDeviceName == null) {
+              showMessage("Nenhuma impressora USB configurada.")
+              return@launch
+            }
 
-          epson.createReceiptData(product)
-          epson.printData()
+            val printerName = savedDeviceName.split(";")
+            val honeywellDevice = usbManager.deviceList.values.find {
+              it.deviceName == printerName[1]
+            }
 
-//          createUsbTask("")
+            if (honeywellDevice != null) {
+              honeywellPrinter.initializePrinter(honeywellDevice)
+
+              val success = withContext(Dispatchers.IO) {
+                honeywellPrinter.safeConnectSuspend()
+              }
+
+              if (success) {
+                val zpl = label.generateLabelBase(product, null)
+
+                withContext(Dispatchers.IO) {
+                  honeywellPrinter.printZpl(zpl)
+                }
+
+                clearFields()
+                _updateStatus.update { StatusApp.FINALIZAR }
+              } else {
+                showMessage("Falha na conexão com a impressora")
+              }
+            } else {
+              showMessage("Impressora USB '$savedDeviceName' não encontrada")
+            }
+          }
+
+          PrinterType.NETWORK -> {
+            val zpl = label.generateLabelBase(product, null)
+            createNetworkTask(zpl)
+
+            _scale.value = null
+            _updateStatus.update { StatusApp.FINALIZAR }
+            clearFields()
+          }
         }
 
-        PrinterType.NETWORK -> {
-          createNetworkTask(newLabel)
-        }
+      } catch (e: FileNotFoundException) {
+        showMessage(resourceProvider.getString(R.string.file_not_found_error))
+      } catch (e: InvalidParameterException) {
+        Timber.e(e)
+        showMessage(resourceProvider.getString(R.string.invalid_printer_config))
+      } catch (e: Exception) {
+        Timber.e(e)
+        showMessage("${resourceProvider.getString(R.string.unexpected_error)}: ${e.localizedMessage}")
       }
-
-
-//      workManager.enqueueUniqueWork(
-//        PRINT_TASK,
-//        ExistingWorkPolicy.REPLACE,
-//        printTask
-//      )
-
-      _scale.value = null
-      _updateStatus.update { StatusApp.FINALIZAR }
-      clearFields()
-
-    } catch (e: FileNotFoundException) {
-      showMessage(resourceProvider.getString(R.string.file_not_found_error))
-    } catch (e: InvalidParameterException) {
-      e.printStackTrace()
-      showMessage(resourceProvider.getString(R.string.invalid_printer_config))
-    } catch (e: Exception) {
-      e.printStackTrace()
-      showMessage("${resourceProvider.getString(R.string.unexpected_error)}: ${e.localizedMessage}")
     }
   }
 
