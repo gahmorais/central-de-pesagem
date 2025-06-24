@@ -1,4 +1,4 @@
-package br.com.backupautomacao.centraldepesagem.printers
+package br.com.backupautomacao.centraldepesagem.utils
 
 enum class UsbPrinterModel {
     EPSON,

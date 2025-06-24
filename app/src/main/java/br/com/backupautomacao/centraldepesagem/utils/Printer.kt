@@ -1,4 +1,4 @@
-package br.com.backupautomacao.centraldepesagem.printers
+package br.com.backupautomacao.centraldepesagem.utils
 
 import android.hardware.usb.UsbDevice
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct

@@ -108,6 +108,49 @@ class MainViewModel(
     applicationMonitor()
 
     val usbManager = appContext.getSystemService(Context.USB_SERVICE) as UsbManager
+    val config = configRepository.getUsbConfig()
+
+    if (config == null) {
+      viewModelScope.launch {
+        emitMessage("Nenhuma configuração USB definida")
+      }
+      return
+    }
+
+    val parts = config.split(";")
+    if (parts.size < 2) {
+      viewModelScope.launch {
+        emitMessage("Configuração USB inválida")
+      }
+      return
+    }
+
+    val model = parts[0]
+    val deviceName = parts[1]
+
+    val usbDevice = usbManager.deviceList.values.firstOrNull { it.deviceName == deviceName }
+
+    if (usbDevice == null) {
+      viewModelScope.launch {
+        emitMessage("Dispositivo USB '$deviceName' não encontrado")
+      }
+      return
+    }
+
+    if (model.contains("TM-L100", ignoreCase = true)) {
+      epson.initializePrinter(config)
+    } else {
+      honeywellPrinter.initializePrinter(usbDevice)
+    }
+  }
+
+
+  //HONEYWELL
+  /*
+  fun initializePrinter() {
+    applicationMonitor()
+
+    val usbManager = appContext.getSystemService(Context.USB_SERVICE) as UsbManager
     val deviceName = configRepository.getUsbConfig()
 
     if (deviceName == null) {
@@ -129,6 +172,8 @@ class MainViewModel(
     honeywellPrinter.initializePrinter(usbDevice)
   }
 
+   */
+
   private fun applicationMonitor() {
     _updateStatus.onEach { status ->
       val automaticPrint = configRepository
@@ -142,6 +187,10 @@ class MainViewModel(
         else -> Timber.i("Processo finalizado")
       }
     }.launchIn(viewModelScope)
+  }
+
+  fun getUsbConfig(): String? {
+    return configRepository.getUsbConfig()
   }
 
   fun getCurrentProduct(): MgvProduct? {
@@ -371,6 +420,71 @@ class MainViewModel(
               return@launch
             }
 
+            val (printerModel, devicePath) = savedDeviceName.split(";")
+            val usbDevice = usbManager.deviceList.values.find { it.deviceName == devicePath }
+
+            if (usbDevice != null) {
+              if (printerModel.contains("TM-L100", ignoreCase = true)) {
+                epson.initializePrinter(savedDeviceName)
+
+                val created = epson.createReceiptData(product)
+                if (created) {
+                  val success = epson.printData()
+                  if (!success) {
+                    showMessage("Erro ao imprimir na Epson")
+                  }
+                } else {
+                  showMessage("Erro na definição Epson")
+                }
+
+              } else {
+                honeywellPrinter.initializePrinter(usbDevice)
+
+                val success = withContext(Dispatchers.IO) {
+                  honeywellPrinter.safeConnectSuspend()
+                }
+
+                if (success) {
+                  val zpl = label.generateLabelBase(product, null)
+                  withContext(Dispatchers.IO) {
+                    honeywellPrinter.printZpl(zpl)
+                  }
+                } else {
+                  showMessage("Falha na conexão com a impressora Honeywell")
+                }
+              }
+
+              clearFields()
+              _updateStatus.update { StatusApp.FINALIZAR }
+
+            } else {
+              showMessage("Impressora USB '$devicePath' não encontrada.")
+            }
+          }
+
+          PrinterType.NETWORK -> {
+            val zpl = label.generateLabelBase(product, null)
+            createNetworkTask(zpl)
+
+            _scale.value = null
+            _updateStatus.update { StatusApp.FINALIZAR }
+            clearFields()
+          }
+        }
+
+
+        //HONEYWELL
+        /*
+        when (printerType) {
+          PrinterType.USB -> {
+            val usbManager = appContext.getSystemService(Context.USB_SERVICE) as UsbManager
+            val savedDeviceName = configRepository.getUsbConfig()
+
+            if (savedDeviceName == null) {
+              showMessage("Nenhuma impressora USB configurada.")
+              return@launch
+            }
+
             val printerName = savedDeviceName.split(";")
             val honeywellDevice = usbManager.deviceList.values.find {
               it.deviceName == printerName[1]
@@ -409,6 +523,7 @@ class MainViewModel(
             clearFields()
           }
         }
+        */
 
       } catch (e: FileNotFoundException) {
         showMessage(resourceProvider.getString(R.string.file_not_found_error))

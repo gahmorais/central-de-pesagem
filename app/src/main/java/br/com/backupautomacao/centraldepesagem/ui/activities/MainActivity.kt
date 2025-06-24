@@ -1,12 +1,7 @@
 package br.com.backupautomacao.centraldepesagem.ui.activities
 
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Color
-import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.widget.Toast
@@ -15,10 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.databinding.ActivityMainBinding
-import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
-import br.com.backupautomacao.centraldepesagem.network.MgvProduct
+import br.com.backupautomacao.centraldepesagem.printers.Epson
 import br.com.backupautomacao.centraldepesagem.printers.HoneywellPrinter
-import br.com.backupautomacao.centraldepesagem.printers.Printer
 import br.com.backupautomacao.centraldepesagem.ui.ScreenSlidePagerAdapter
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModel
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModelFactory
@@ -76,6 +69,74 @@ class MainActivity : AppCompatActivity() {
 
   private fun connectAndPrintUsb() {
     val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+    val config = mainViewModel.getUsbConfig()
+
+    if (config == null) {
+      showMessage("Nenhuma configuração USB definida")
+      return
+    }
+
+    val parts = config.split(";")
+    if (parts.size < 2) {
+      showMessage("Configuração USB inválida")
+      return
+    }
+
+    val model = parts[0]
+    val deviceName = parts[1]
+
+    val usbDevice = usbManager.deviceList.values.firstOrNull { it.deviceName == deviceName }
+    if (usbDevice == null) {
+      showMessage("Dispositivo USB '$deviceName' não encontrado")
+      return
+    }
+
+    if (model.contains("TM-L100", ignoreCase = true)) {
+      val epson = Epson(usbManager, this)
+      epson.initializePrinter(config)
+
+      val product = mainViewModel.getCurrentProduct()
+      if (product == null) {
+        showMessage("Produto inválido ou nulo.")
+        return
+      }
+
+      val created = epson.createReceiptData(product)
+      if (created) {
+        val success = epson.printData()
+        showMessage(if (success) "Impressão enviada com sucesso (Epson)!" else "Erro ao imprimir na Epson")
+      } else {
+        showMessage("Erro ao criar dados de impressão para Epson")
+      }
+
+    } else {
+
+      val printer = HoneywellPrinter(usbManager, this)
+      printer.initializePrinter(usbDevice)
+
+      if (printer.hasPermission()) {
+        val connected = printer.connect()
+        if (connected) {
+          printLabel(printer)
+        } else {
+          showMessage("Falha ao conectar com a impressora Honeywell.")
+        }
+      } else {
+        printer.requestPermissionAndConnect(usbDevice) { success, message ->
+          showMessage(message)
+          if (success) {
+            printLabel(printer)
+          }
+        }
+      }
+    }
+  }
+
+
+  //HONEYWELL
+  /*
+  private fun connectAndPrintUsb() {
+    val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
     val devices = usbManager.deviceList.values
 
     if (devices.isEmpty()) {
@@ -104,6 +165,7 @@ class MainActivity : AppCompatActivity() {
       }
     }
   }
+  */
 
   private fun printLabel(printer: HoneywellPrinter) {
     val product = mainViewModel.getCurrentProduct()
@@ -144,6 +206,8 @@ class MainActivity : AppCompatActivity() {
   }
 }
 
+
+//PRIMEIRO MODELO
 /*
 import android.app.PendingIntent
 import android.content.BroadcastReceiver

@@ -11,9 +11,9 @@ import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbManager
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
+import br.com.backupautomacao.centraldepesagem.utils.Printer
 import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
-import java.nio.charset.Charset
 import java.util.Locale
 import java.util.Random
 

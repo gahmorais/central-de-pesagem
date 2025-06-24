@@ -2,7 +2,7 @@ package br.com.backupautomacao.centraldepesagem.db.repository
 
 import android.content.Context
 import android.content.SharedPreferences
-import br.com.backupautomacao.centraldepesagem.printers.UsbPrinterModel
+import br.com.backupautomacao.centraldepesagem.utils.UsbPrinterModel
 import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 
 private const val NOME_ARQUIVO = "configuracoes"
@@ -99,7 +99,7 @@ class ConfigRepository(context: Context) {
 /*
 import android.content.Context
 import android.content.SharedPreferences
-import br.com.backupautomacao.centraldepesagem.printers.UsbPrinterModel
+import br.com.backupautomacao.centraldepesagem.utils.UsbPrinterModel
 import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 
 private const val NOME_ARQUIVO = "configuracoes"
