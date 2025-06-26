@@ -1,6 +1,5 @@
 package br.com.backupautomacao.centraldepesagem.utils
 
-import timber.log.Timber
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.*
@@ -65,8 +64,13 @@ class Formatter private constructor() {
       return String.format(Locale.ENGLISH, "%.1f g", value).replace(".", ",")
     }
 
-    fun formatDate(timestamp: Long): String {
+    fun formatDateTime(timestamp: Long): String {
       val formatter = SimpleDateFormat("dd-MM-yyyy | HH:mm", Locale.ENGLISH)
+      return formatter.format(timestamp)
+    }
+
+    fun formatDate(timestamp: Long): String {
+      val formatter = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
       return formatter.format(timestamp)
     }
 

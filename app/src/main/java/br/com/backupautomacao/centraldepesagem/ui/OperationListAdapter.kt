@@ -18,7 +18,7 @@ class OperationListAdapter :
         fun bind(operation: Operation) {
             binding.apply {
                 tvDescription.text = operation.description
-                tvDate.text = Formatter.formatDate(operation.date)
+                tvDate.text = Formatter.formatDateTime(operation.date)
                 tvUsername.text = operation.username
                 tvWeight.text = Formatter.formatWeight(operation.weight)
                 tvTotalPrice.text = Formatter.formatPrice(operation.totalPrice)

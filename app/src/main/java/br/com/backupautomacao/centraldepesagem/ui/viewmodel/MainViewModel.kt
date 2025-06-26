@@ -445,9 +445,8 @@ class MainViewModel(
                 }
 
                 if (success) {
-                  val zpl = label.generateLabelBase(product, null)
                   withContext(Dispatchers.IO) {
-                    honeywellPrinter.printZpl(zpl)
+                    honeywellPrinter.print(product)
                   }
                 } else {
                   showMessage("Falha na conexão com a impressora Honeywell")
@@ -471,59 +470,6 @@ class MainViewModel(
             clearFields()
           }
         }
-
-
-        //HONEYWELL
-        /*
-        when (printerType) {
-          PrinterType.USB -> {
-            val usbManager = appContext.getSystemService(Context.USB_SERVICE) as UsbManager
-            val savedDeviceName = configRepository.getUsbConfig()
-
-            if (savedDeviceName == null) {
-              showMessage("Nenhuma impressora USB configurada.")
-              return@launch
-            }
-
-            val printerName = savedDeviceName.split(";")
-            val honeywellDevice = usbManager.deviceList.values.find {
-              it.deviceName == printerName[1]
-            }
-
-            if (honeywellDevice != null) {
-              honeywellPrinter.initializePrinter(honeywellDevice)
-
-              val success = withContext(Dispatchers.IO) {
-                honeywellPrinter.safeConnectSuspend()
-              }
-
-              if (success) {
-                val zpl = label.generateLabelBase(product, null)
-
-                withContext(Dispatchers.IO) {
-                  honeywellPrinter.printZpl(zpl)
-                }
-
-                clearFields()
-                _updateStatus.update { StatusApp.FINALIZAR }
-              } else {
-                showMessage("Falha na conexão com a impressora")
-              }
-            } else {
-              showMessage("Impressora USB '$savedDeviceName' não encontrada")
-            }
-          }
-
-          PrinterType.NETWORK -> {
-            val zpl = label.generateLabelBase(product, null)
-            createNetworkTask(zpl)
-
-            _scale.value = null
-            _updateStatus.update { StatusApp.FINALIZAR }
-            clearFields()
-          }
-        }
-        */
 
       } catch (e: FileNotFoundException) {
         showMessage(resourceProvider.getString(R.string.file_not_found_error))
