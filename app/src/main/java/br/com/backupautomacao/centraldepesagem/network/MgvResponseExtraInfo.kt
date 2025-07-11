@@ -42,14 +42,22 @@ data class ExtraInfo(
     val line14: String,
     @SerializedName("Linha15")
     val line15: String,
-    @SerializedName("Linha16")
-    val line16: String,
-    @SerializedName("Linha17")
-    val line17: String,
-    @SerializedName("Linha18")
-    val line18: String,
-    @SerializedName("Linha19")
-    val line19: String,
-    @SerializedName("Linha20")
-    val line20: String,
+    @SerializedName("CampoExtra1")
+    val campoextra: String,
+    @SerializedName("CampoExtra2")
+    val campoextra2: String,
+    @SerializedName("CampoExtra3")
+    val campoextra3: String,
+    @SerializedName("Conservacao")
+    val conservacao: String,
+    @SerializedName("Conservacao2")
+    val conservacao2: String,
+    @SerializedName("Fracionador")
+    val fracionador: String,
+    @SerializedName("Fracionador2")
+    val fracionador2: String,
+    @SerializedName("Fornecedor")
+    val fornecedor: String,
+    @SerializedName("Fornecedor2")
+    val fornecedor2: String,
 )

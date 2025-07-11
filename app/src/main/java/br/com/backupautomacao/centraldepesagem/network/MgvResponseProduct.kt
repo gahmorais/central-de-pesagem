@@ -11,6 +11,7 @@ data class MgvResponseProduct(
 data class MgvProduct(
     var nutrictionFacts: MgvInformacoesNutricionais? = null,
     var extraInfo: ExtraInfo? = null,
+    var quantity: Int? = null,
     @SerializedName("Codigo")
     val code: String = "",
     @SerializedName("Descritivo1aLinha")
@@ -30,5 +31,7 @@ data class MgvProduct(
     @SerializedName("PrecoPromocional")
     val promotionalPrice: Double = 0.0,
     var weight: Double? = 0.0,
-    var totalPrice: Double? = 0.0
+    var totalPrice: Double? = 0.0,
+    @SerializedName("TipoVendaInt")
+    val unitOfMeasure: Int? = null
 )

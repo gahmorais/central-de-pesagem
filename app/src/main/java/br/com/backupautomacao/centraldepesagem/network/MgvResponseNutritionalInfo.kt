@@ -13,8 +13,8 @@ data class MgvResponseNutritionalInfo(
 data class MgvInformacoesNutricionais(
     val Codigo: String?,
     val Carboidrato: Double?,
-    val acucaresTotais: Double?,
-    val acucaresAdicionado: Double?,
+    val AcucaresTotais: Double?,
+    val AcucaresAdicionado: Double?,
     val DescricaoMedidaCaseira: Int?,
     val FibraAlimentar: Double?,
     val FracaoMedidaCaseira: Double?,

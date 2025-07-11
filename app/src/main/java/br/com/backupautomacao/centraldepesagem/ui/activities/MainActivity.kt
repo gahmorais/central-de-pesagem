@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.databinding.ActivityMainBinding
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.printers.Epson
 import br.com.backupautomacao.centraldepesagem.printers.HoneywellPrinter
 import br.com.backupautomacao.centraldepesagem.ui.ScreenSlidePagerAdapter
@@ -24,6 +25,8 @@ class MainActivity : AppCompatActivity() {
   private val binding: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
   private val ACTION_USB_PERMISSION = "br.com.backupautomacao.USB_PERMISSION"
+
+  private lateinit var configRepository: ConfigRepository
 
   private val mainViewModel: MainViewModel by viewModels {
     MainViewModelFactory(
@@ -42,6 +45,8 @@ class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    configRepository = ConfigRepository(applicationContext)
+    configRepository.initializeDefaults()
     setContentView(binding.root)
 
     lifecycleScope.launch {

@@ -17,6 +17,8 @@ data class Operation(
     val weight: Double,
     @ColumnInfo(name = "preco_por_kg")
     val pricePerKilogram: Double,
+    @ColumnInfo(name = "preco_por_quantidade")
+    val pricePerUnit: Double,
     @ColumnInfo(name = "preco_total")
     val totalPrice: Double,
     @ColumnInfo(name = "data")

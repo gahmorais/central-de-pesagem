@@ -1,14 +1,7 @@
 package br.com.backupautomacao.centraldepesagem.utils
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Typeface
 import br.com.backupautomacao.centraldepesagem.FileController
-import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
@@ -16,7 +9,6 @@ import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatB
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatNutriction
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatPrice
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatWeight
-import timber.log.Timber
 import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -101,11 +93,15 @@ class Label(private val context: Context) {
             .replace("var_info_13", extraInfo.line13)
             .replace("var_info_14", extraInfo.line14)
             .replace("var_info_15", extraInfo.line15)
-            .replace("var_info_16", extraInfo.line16)
-            .replace("var_info_17", extraInfo.line17)
-            .replace("var_info_18", extraInfo.line18)
-            .replace("var_info_19", extraInfo.line19)
-            .replace("var_info_20", extraInfo.line20)
+            .replace("var_info_16", extraInfo.campoextra)
+            .replace("var_info_17", extraInfo.campoextra2)
+            .replace("var_info_18", extraInfo.campoextra3)
+            .replace("var_info_19", extraInfo.conservacao)
+            .replace("var_info_20", extraInfo.conservacao2)
+            .replace("var_info_21", extraInfo.fracionador)
+            .replace("var_info_22", extraInfo.fracionador2)
+            .replace("var_info_23", extraInfo.fornecedor)
+            .replace("var_info_24", extraInfo.fornecedor2)
 
         labelBase.append(label)
     }

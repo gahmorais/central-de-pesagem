@@ -87,6 +87,33 @@ class ConfigRepository(context: Context) {
   fun getPrinterPort(): Int {
     return preferencias.getInt(PRINTER_PORT, 9100)
   }
+
+  fun initializeDefaults() {
+    if (!containsKey(AUTOMATIC_PRINT)) {
+      setBooleanConfig(AUTOMATIC_PRINT, false)
+    }
+
+    if (!containsKey(PRINTER_TYPE)) {
+      setPrinterType(PrinterType.NETWORK.toString())
+    }
+
+    if (!containsKey(STORE_NUMBER)) {
+      setIntConfig(STORE_NUMBER, 1)
+    }
+
+    if (!containsKey(PRINTER_PORT)) {
+      setIntConfig(PRINTER_PORT, 9100)
+    }
+
+    if (!containsKey(SERVER_ADDRESS)) {
+      setTextConfig(SERVER_ADDRESS, "")
+    }
+  }
+
+  private fun containsKey(key: String): Boolean {
+    return preferencias.contains(key)
+  }
+
 }
 
 

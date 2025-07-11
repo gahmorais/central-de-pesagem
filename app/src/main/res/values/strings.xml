@@ -102,6 +102,11 @@
     <string name="barcode_error">Por favor, digite o código do item</string>
     <string name="unexpected_error">Erro tente novamente</string>
 
+//TESTE
+
+    <string name="inputLayoutQuantity">Texto Quantidade</string>
+    <string name="inputQuantity">Edit txto Quantidade</string>
+
     //Database
     <string name="database_name">app_database</string>
 
