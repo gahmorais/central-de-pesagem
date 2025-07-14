@@ -137,41 +137,6 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
-
-  //HONEYWELL
-  /*
-  private fun connectAndPrintUsb() {
-    val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
-    val devices = usbManager.deviceList.values
-
-    if (devices.isEmpty()) {
-      showMessage("Nenhum dispositivo USB encontrado")
-      return
-    }
-
-    val device = devices.first()
-    val printer = HoneywellPrinter(usbManager, this)
-
-    printer.initializePrinter(device)
-
-    if (printer.hasPermission()) {
-      val connected = printer.connect()
-      if (connected) {
-        printLabel(printer)
-      } else {
-        showMessage("Falha ao conectar com a impressora.")
-      }
-    } else {
-      printer.requestPermissionAndConnect(device) { success, message ->
-        showMessage(message)
-        if (success) {
-          printLabel(printer)
-        }
-      }
-    }
-  }
-  */
-
   private fun printLabel(printer: HoneywellPrinter) {
     val product = mainViewModel.getCurrentProduct()
     if (product == null) {
@@ -211,6 +176,39 @@ class MainActivity : AppCompatActivity() {
   }
 }
 
+//HONEYWELL
+/*
+private fun connectAndPrintUsb() {
+  val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
+  val devices = usbManager.deviceList.values
+
+  if (devices.isEmpty()) {
+    showMessage("Nenhum dispositivo USB encontrado")
+    return
+  }
+
+  val device = devices.first()
+  val printer = HoneywellPrinter(usbManager, this)
+
+  printer.initializePrinter(device)
+
+  if (printer.hasPermission()) {
+    val connected = printer.connect()
+    if (connected) {
+      printLabel(printer)
+    } else {
+      showMessage("Falha ao conectar com a impressora.")
+    }
+  } else {
+    printer.requestPermissionAndConnect(device) { success, message ->
+      showMessage(message)
+      if (success) {
+        printLabel(printer)
+      }
+    }
+  }
+}
+*/
 
 //PRIMEIRO MODELO
 /*

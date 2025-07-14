@@ -129,7 +129,7 @@
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/white"
                     android:hint="Digite a quantidade"
-                    android:inputType="numberDecimal"
+                    android:inputType="number"
                     android:text="@={viewModel.quantity}" />
             </com.google.android.material.textfield.TextInputLayout>
 

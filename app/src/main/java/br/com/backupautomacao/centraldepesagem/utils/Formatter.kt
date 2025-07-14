@@ -69,6 +69,12 @@ class Formatter private constructor() {
       return formatter.format(timestamp)
     }
 
+    fun calculateVD(value: Double?, vdRef: Double): String {
+      if (value == null || value == 0.0) return ""
+      val perc = (value / vdRef) * 100
+      return "${perc.toInt()}%"
+    }
+
     fun formatDate(timestamp: Long): String {
       val formatter = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
       return formatter.format(timestamp)
