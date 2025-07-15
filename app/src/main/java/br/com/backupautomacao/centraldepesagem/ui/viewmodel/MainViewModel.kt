@@ -21,7 +21,10 @@ import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
 import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
+import br.com.backupautomacao.centraldepesagem.network.ConservadorInfo
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
+import br.com.backupautomacao.centraldepesagem.network.FornecedorInfo
+import br.com.backupautomacao.centraldepesagem.network.FracionadorInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.network.MgvService
@@ -284,6 +287,7 @@ class MainViewModel(
 //        ScaleStatus.OVERWEIGHT.value -> emitMessage("Balança em sobrecarga, remove o peso extra")
 //        else -> updateWeightProduct(bytes)
 //      }
+
     }.launchIn(viewModelScope)
 
     jobsRunning.add(job)
@@ -398,6 +402,18 @@ class MainViewModel(
             getExtraInfo(mgvPassword, storeNumber, code)
           }
 
+          product.conservacaoInfo = product.codConservacaoInfo?.let { code ->
+            getConservadorInfo(mgvPassword, storeNumber, code)
+          }
+
+          product.fornecedorInfo = product.codFornecedorInfo?.let { code ->
+            getFornecedorInfo(mgvPassword, storeNumber, code)
+          }
+
+          product.fracionadorInfo= product.codFracionadorInfo?.let { code ->
+            getFracionadorInfo(mgvPassword, storeNumber, code)
+          }
+
           product.nutrictionFacts = product.codNutrictionFacts?.let { code ->
             getNutriction(mgvPassword, storeNumber, code)
           }
@@ -465,6 +481,51 @@ class MainViewModel(
     }
 
     return responseExtraInfo.extraInfos?.find {
+      it.code == codItem.toString()
+    }
+  }
+
+  private suspend fun getConservadorInfo(
+    mgvPassword: String,
+    storeNumber: String,
+    codItem: Int
+  ): ConservadorInfo? {
+
+    val responseExtraInfo = withContext(Dispatchers.Default) {
+      mgvService.queryConservacaoInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
+    }
+
+    return responseExtraInfo.conservadorInfos?.find {
+      it.code == codItem.toString()
+    }
+  }
+
+  private suspend fun getFornecedorInfo(
+    mgvPassword: String,
+    storeNumber: String,
+    codItem: Int
+  ): FornecedorInfo? {
+
+    val responseExtraInfo = withContext(Dispatchers.Default) {
+      mgvService.queryFornecedorInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
+    }
+
+    return responseExtraInfo.fornecedorInfos?.find {
+      it.code == codItem.toString()
+    }
+  }
+
+  private suspend fun getFracionadorInfo(
+    mgvPassword: String,
+    storeNumber: String,
+    codItem: Int
+  ): FracionadorInfo? {
+
+    val responseExtraInfo = withContext(Dispatchers.Default) {
+      mgvService.queryFracionadorInfo(palavraChave = mgvPassword, numeroLoja = storeNumber)
+    }
+
+    return responseExtraInfo.fracionadorInfos?.find {
       it.code == codItem.toString()
     }
   }

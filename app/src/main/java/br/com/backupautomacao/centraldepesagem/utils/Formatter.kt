@@ -69,12 +69,13 @@ class Formatter private constructor() {
       return formatter.format(timestamp)
     }
 
-    fun calculateVD(value: Double?, vdRef: Double): String {
-      if (value == null || value == 0.0) return ""
-      val perc = (value / vdRef) * 100
-      return "${perc.toInt()}%"
+    fun formatVD(value: String?): String {
+      return value
+        ?.replace(",", ".")
+        ?.toDoubleOrNull()
+        ?.let { String.format(Locale.getDefault(), "%.0f%%", it) }
+        ?: ""
     }
-
     fun formatDate(timestamp: Long): String {
       val formatter = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
       return formatter.format(timestamp)

@@ -51,6 +51,25 @@ interface MgvService {
         @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
         @Query("loja") numeroLoja: String = NUMERO_LOJA
     ): MgvResponseExtraInfo
+
+    @GET("ExportaInformacaoConservacao")
+    suspend fun queryConservacaoInfo(
+        @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
+        @Query("loja") numeroLoja: String = NUMERO_LOJA
+    ): MgvResponseConservacaoInfo
+
+    @GET("ExportaInformacaoFornecedor")
+    suspend fun queryFornecedorInfo(
+        @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
+        @Query("loja") numeroLoja: String = NUMERO_LOJA
+    ): MgvResponseFornecedorInfo
+
+    @GET("ExportaInformacaoFracionador")
+    suspend fun queryFracionadorInfo(
+        @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
+        @Query("loja") numeroLoja: String = NUMERO_LOJA
+    ): MgvResponseFracionadorInfo
+
 }
 
 object MgvApi {

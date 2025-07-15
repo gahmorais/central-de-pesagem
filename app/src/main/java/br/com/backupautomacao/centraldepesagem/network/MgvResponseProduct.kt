@@ -11,24 +11,37 @@ data class MgvResponseProduct(
 data class MgvProduct(
     var nutrictionFacts: MgvInformacoesNutricionais? = null,
     var extraInfo: ExtraInfo? = null,
+    var fracionadorInfo: FracionadorInfo? = null,
+    var fornecedorInfo: FornecedorInfo? = null,
+    var conservacaoInfo: ConservadorInfo? = null,
     var quantity: Int? = null,
-    @SerializedName("Codigo")
+    @SerializedName("codigo")
     val code: String = "",
-    @SerializedName("Descritivo1aLinha")
+    @SerializedName("descricao_primeira_linha")
     val description: String = "",
-    @SerializedName("CodInfoExtra")
+    @SerializedName("descricao_segunda_linha")
+    val description2: String = "",
+    @SerializedName("descricao_terceira_linha")
+    val description3: String = "",
+    @SerializedName("descricao_quarta_linha")
+    val description4: String = "",
+    @SerializedName("informacao_extra")
     val codExtraInfo: Int? = null,
-    @SerializedName("CodInfoNutricional")
+    @SerializedName("informacao_conservacao")
+    val codConservacaoInfo: Int? = null,
+    @SerializedName("informacao_fornecedor")
+    val codFornecedorInfo: Int? = null,
+    @SerializedName("informacao_fracionador")
+    val codFracionadorInfo: Int? = null,
+    @SerializedName("informacao_nutricional")
     val codNutrictionFacts: Int? = null,
-    @SerializedName("CodTara")
-    val codTara: Int? = null,
-    @SerializedName("DiasValidade")
+    @SerializedName("validade_dias")
     val shelfLife: Int = 0,
-    @SerializedName("Preco")
+    @SerializedName("preco")
     val price: Double = 0.0,
-    @SerializedName("Lote")
+    @SerializedName("lote")
     val batch: String = "",
-    @SerializedName("PrecoPromocional")
+    @SerializedName("preco_promocional")
     val promotionalPrice: Double = 0.0,
     var weight: Double? = 0.0,
     var totalPrice: Double? = 0.0,

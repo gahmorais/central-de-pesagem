@@ -2,7 +2,10 @@ package br.com.backupautomacao.centraldepesagem.utils
 
 import android.content.Context
 import br.com.backupautomacao.centraldepesagem.FileController
+import br.com.backupautomacao.centraldepesagem.network.ConservadorInfo
 import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
+import br.com.backupautomacao.centraldepesagem.network.FornecedorInfo
+import br.com.backupautomacao.centraldepesagem.network.FracionadorInfo
 import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatBarcode
@@ -30,7 +33,9 @@ class Label(private val context: Context) {
         }
         val label: StringBuilder = StringBuilder()
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
-        val (nutrictionFacts, extraInfo) = mgvProduct
+        val (nutrictionFacts,
+            extraInfo,
+        ) = mgvProduct
         val now = System.currentTimeMillis()
         val currentDateFormatted = formatter.format(now)
 
@@ -50,7 +55,7 @@ class Label(private val context: Context) {
             .replace("var_peso", weightFormatted)
             .replace("var_preco_kilo", pricePerKilogramFormatted)
             .replace("var_preco", totalPriceFormatted)
-            .replace("var_tara", formatWeight(mgvProduct.codTara))
+//            .replace("var_tara", formatWeight(mgvProduct.codTara))
         label.append(labelBase)
         var length = BASE_LENGTH
 
@@ -60,7 +65,10 @@ class Label(private val context: Context) {
         }
 
         extraInfo?.let {
-            appendExtraInfo(label, mgvProduct.extraInfo!!)
+            appendExtraInfo(label, mgvProduct.extraInfo!!,
+                mgvProduct.conservacaoInfo!!,
+                mgvProduct.fracionadorInfo!!,
+                mgvProduct.fornecedorInfo!!)
             length = FULL_LENGTH
         }
 
@@ -69,7 +77,11 @@ class Label(private val context: Context) {
         return String(label).replace("var_comprimento", length)
     }
 
-    private fun appendExtraInfo(labelBase: StringBuilder, extraInfo: ExtraInfo) {
+    private fun appendExtraInfo(labelBase: StringBuilder,
+                                extraInfo: ExtraInfo,
+                                conservacaoInfo: ConservadorInfo,
+                                fracionadorInfo: FracionadorInfo,
+                                fornecedorInfo: FornecedorInfo) {
 
         var label: String = try {
             fileController.readFileFromAssets("extra_info.txt")
@@ -96,15 +108,77 @@ class Label(private val context: Context) {
             .replace("var_info_16", extraInfo.campoextra)
             .replace("var_info_17", extraInfo.campoextra2)
             .replace("var_info_18", extraInfo.campoextra3)
-            .replace("var_info_19", extraInfo.conservacao)
-            .replace("var_info_20", extraInfo.conservacao2)
-            .replace("var_info_21", extraInfo.fracionador)
-            .replace("var_info_22", extraInfo.fracionador2)
-            .replace("var_info_23", extraInfo.fornecedor)
-            .replace("var_info_24", extraInfo.fornecedor2)
+            .replace("var_info_19", conservacaoInfo.conservacao)
+            .replace("var_info_20", conservacaoInfo.conservacao2)
+            .replace("var_info_21", fracionadorInfo.fracionador)
+            .replace("var_info_22", fracionadorInfo.fracionador2)
+            .replace("var_info_23", fornecedorInfo.fornecedor)
+            .replace("var_info_24", fornecedorInfo.fornecedor2)
 
         labelBase.append(label)
     }
+
+    private fun appendNutrictionFacts(
+        labelBase: StringBuilder,
+        nutrictionFacts: MgvInformacoesNutricionais
+    ) {
+        var label: String = try {
+            fileController.readFileFromAssets("nutri_info.txt")
+        } catch (e: FileNotFoundException) {
+            throw e
+        }
+
+//        label = label
+//            .replace("ve_100", formatNutriction(nutrictionFacts.ValorEnergetico_100g))
+//            .replace("ve_000", formatNutriction(nutrictionFacts.Porcao_ValorEnergetico))
+//            .replace("ve_vd", Formatter.formatVD(nutrictionFacts.Porcentagem_vd_ValorEnergetico))
+//
+//            .replace("ct_100", formatNutriction(nutrictionFacts.Carboidrato_100g))
+//            .replace("ct_000", formatNutriction(nutrictionFacts.Porcao_Carboidrato))
+//            .replace("ct_vd", Formatter.formatVD(nutrictionFacts.Porcentagem_vd_Carboidrato))
+//
+//            .replace("prot_100", formatNutriction(nutritionFacts.Proteina_100g))
+//            .replace("prot_000", formatNutriction(nutritionFacts.Porcao_Proteina))
+//            .replace("prot_vd", Formatter.formatVD(nutritionFacts.Porcentagem_vd_Proteina))
+//
+//            .replace("gt_100", formatNutriction(nutritionFacts.Gordura_Totais_100g))
+//            .replace("gt_000", formatNutriction(nutritionFacts.Porcao_GorduraTotais))
+//            .replace("gt_vd", Formatter.formatVD(nutritionFacts.Porcentagem_vd_GorduraTotais))
+//
+//            .replace("gs_100", formatNutriction(nutritionFacts.Gordura_Saturada_100g))
+//            .replace("gs_000", formatNutriction(nutritionFacts.Porcao_GorduraSaturada))
+//            .replace("gs_vd", Formatter.formatVD(nutritionFacts.Porcentagem_vd_GorduraSaturada))
+//
+//            .replace("gtr_100", formatNutriction(nutritionFacts.GorduraTrans_100g))
+//            .replace("gtr_000", formatNutriction(nutritionFacts.Porcao_GorduraTrans))
+//            .replace("gtr_vd", Formatter.formatVD(nutritionFacts.Porcentagem_vd_GorduraTrans))
+//
+//            .replace("fa_100", formatNutriction(nutritionFacts.FibraAlimentar_100g))
+//            .replace("fa_000", formatNutriction(nutritionFacts.Porcao_FibraAlimentar))
+//            .replace("fa_vd", Formatter.formatVD(nutritionFacts.Porcentagem_vd_FibraAlimentar))
+//
+//            .replace("so_100", formatNutriction(nutritionFacts.Sodio_100g))
+//            .replace("so_000", formatNutriction(nutritionFacts.Porcao_Sodio))
+//            .replace("so_vd", Formatter.formatVD(nutritionFacts.Porcentagem_vd_Sodio))
+//
+//            .replace("at_100", formatNutriction(nutritionFacts.Acucares_Totais_100g))
+//            .replace("at_000", formatNutriction(nutritionFacts.Porcao_AcucaresTotais))
+//            .replace("at_vd", Formatter.formatVD(nutritionFacts.Porcentagem_vd_AcucaresTotais))
+//
+//            .replace("ac_add_100", formatNutriction(nutritionFacts.Acucares_Adicionado_100g))
+//            .replace("ac_add_000", formatNutriction(nutritionFacts.Porcao_AcucaresAdicionado))
+//            .replace("ac_add_vd", Formatter.formatVD(nutritionFacts.Porcentagem_vd_AcucaresAdicionado))
+//
+//            .replace("porcao_emb", nutritionFacts.Quantidade_Porcoes_Por_Embalagem.orEmpty())
+//            .replace("med_caseira", formatNutriction(nutritionFacts.Medida_Caseira_Utilizada))
+//            .replace("var_comprimento", NUTRICTION_LENGTH)
+//
+//        labelBase.append(label)
+    }
+
+
+
+    /*
 
     private fun appendNutrictionFacts(
         labelBase: StringBuilder,
@@ -184,6 +258,8 @@ class Label(private val context: Context) {
 
         labelBase.append(label)
     }
+
+    */
 
     fun generateLabelWithQuantity(
         mgvProduct: MgvProduct,
