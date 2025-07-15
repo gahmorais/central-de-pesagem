@@ -254,19 +254,21 @@ class HoneywellPrinter(
             val imagens = mutableListOf<String>()
 
             if (exibirImagens) {
-                imagens.add(Constants.IMAGE_FORGET)
-
-                if (nutrition?.Sodio?.let { it >= 600.0 } == true) {
-                    //300
+                if (nutrition?.Sodio?.let { it >= 100.0 } == true) {
+                    //600.0
+                    //300.0
                     imagens.add(Constants.IMAGE_SODIUM)
+                    imagens.add(Constants.IMAGE_FORGET)
                 }
-                if (nutrition?.GorduraSaturada?.let { it >= 6.0 } == true) {
-                    //3
+                if (nutrition?.GorduraSaturada?.let { it >= 3.0 } == true) {
+                    //6.0
                     imagens.add(Constants.IMAGE_SATURATED_FAT)
+                    imagens.add(Constants.IMAGE_FORGET)
                 }
-                if (nutrition?.AcucaresAdicionado?.let { it >= 15.0 } == true) {
-                    //7,5
+                if (nutrition?.AcucaresAdicionado?.let { it >= 7.5 } == true) {
+                    //15.00
                     imagens.add(Constants.IMAGE_ADDED_SUGAR)
+                    imagens.add(Constants.IMAGE_FORGET)
                 }
             }
 
