@@ -16,6 +16,7 @@ import br.com.backupautomacao.centraldepesagem.printers.HoneywellPrinter
 import br.com.backupautomacao.centraldepesagem.ui.ScreenSlidePagerAdapter
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModel
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModelFactory
+import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.delay
 import org.koin.android.ext.android.get
 import kotlinx.coroutines.launch
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
   private val ACTION_USB_PERMISSION = "br.com.backupautomacao.USB_PERMISSION"
 
   private lateinit var configRepository: ConfigRepository
+  private val settingsViewModel: SettingsViewModel by viewModels()
 
   private val mainViewModel: MainViewModel by viewModels {
     MainViewModelFactory(
@@ -116,7 +118,7 @@ class MainActivity : AppCompatActivity() {
 
     } else {
 
-      val printer = HoneywellPrinter(usbManager, this)
+      val printer = HoneywellPrinter(usbManager ,this , settingsViewModel)
       printer.initializePrinter(usbDevice)
 
       if (printer.hasPermission()) {

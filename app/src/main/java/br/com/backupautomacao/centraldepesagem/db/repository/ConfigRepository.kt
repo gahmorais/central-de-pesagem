@@ -25,6 +25,9 @@ class ConfigRepository(context: Context) {
     const val STORE_NUMBER = "store_number"
     const val PRINTER_TYPE = "printer_type"
     const val USB_PRINTER_NAME = "usb_printer_name"
+    const val LABEL_TEMPLATE_NAME = "LABEL_TEMPLATE_NAME"
+    private const val KEY_LABEL_TEMPLATE_KG = "LABEL_TEMPLATE_KG"
+    private const val KEY_LABEL_TEMPLATE_QUANT = "LABEL_TEMPLATE_QUANT"
   }
 
   fun setTextConfig(key: String, value: String) {

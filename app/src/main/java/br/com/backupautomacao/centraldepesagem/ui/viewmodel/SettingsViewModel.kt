@@ -5,6 +5,118 @@ import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
+class SettingsViewModel(
+    private val configRepository: ConfigRepository,
+    private val resourceProvider: ResourceProvider
+) : ViewModel() {
+
+    companion object {
+        private const val KEY_LABEL_TEMPLATE_KG = "LABEL_TEMPLATE_KG"
+        private const val KEY_LABEL_TEMPLATE_QUANT = "LABEL_TEMPLATE_QUANT"
+    }
+
+    private val _statusMessage = MutableStateFlow("")
+    val statusMessage: StateFlow<String> = _statusMessage
+
+    private val _printerTypeLiveData = MutableStateFlow("")
+    val printerTypeLiveData: StateFlow<String> = _printerTypeLiveData
+
+    private val _selectedLabelTemplate = MutableStateFlow("")
+    val selectedLabelTemplate: StateFlow<String> = _selectedLabelTemplate
+
+    private val _labelTemplateKg = MutableStateFlow("")
+    val labelTemplateKg: StateFlow<String> = _labelTemplateKg
+
+    private val _labelTemplateQuant = MutableStateFlow("")
+    val labelTemplateQuant: StateFlow<String> = _labelTemplateQuant
+
+    init {
+        _printerTypeLiveData.value =
+            configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE) ?: ""
+
+        _selectedLabelTemplate.value =
+            configRepository.getTextConfig(ConfigRepository.LABEL_TEMPLATE_NAME) ?: ""
+
+        _labelTemplateKg.value =
+            configRepository.getTextConfig(KEY_LABEL_TEMPLATE_KG) ?: ""
+
+        _labelTemplateQuant.value =
+            configRepository.getTextConfig(KEY_LABEL_TEMPLATE_QUANT) ?: ""
+    }
+
+    fun savePrinterUsbName(model: String, deviceName: String) {
+        configRepository.setUsbConfig(model, deviceName)
+    }
+
+    fun saveNetworkConfig(ip: String, port: String) {
+        configRepository.setTextConfig(ConfigRepository.PRINTER_IP, ip)
+        configRepository.setIntConfig(ConfigRepository.PRINTER_PORT, port.toIntOrNull() ?: 0)
+    }
+
+    fun savePrinterConfig(printerType: PrinterType) {
+        configRepository.setTextConfig(ConfigRepository.PRINTER_TYPE, printerType.toString())
+        _statusMessage.value = resourceProvider.getString(R.string.sucessfully_save_printer_type)
+    }
+
+    fun saveServerAddress(address: String) {
+        configRepository.setTextConfig(ConfigRepository.SERVER_ADDRESS, address)
+    }
+
+    fun saveMgvConfig(password: String, store: String) {
+        configRepository.setTextConfig(ConfigRepository.PASSWORD_MGV, password)
+        configRepository.setIntConfig(ConfigRepository.STORE_NUMBER, store.toIntOrNull() ?: 0)
+    }
+
+    fun enableAutomaticPrint(enabled: Boolean) {
+        configRepository.setBooleanConfig(ConfigRepository.AUTOMATIC_PRINT, enabled)
+    }
+
+    fun setStatusMessage(message: String) {
+        _statusMessage.value = message
+    }
+
+    fun clearStatusMessage() {
+        _statusMessage.value = ""
+    }
+
+    fun setLabelTemplateKg(template: String) {
+        _labelTemplateKg.value = template
+        configRepository.setTextConfig(KEY_LABEL_TEMPLATE_KG, template)
+    }
+
+    fun setLabelTemplateQuant(template: String) {
+        _labelTemplateQuant.value = template
+        configRepository.setTextConfig(KEY_LABEL_TEMPLATE_QUANT, template)
+    }
+
+    fun getLabelTemplateKg(): String? = _labelTemplateKg.value.takeIf { it.isNotEmpty() }
+
+    fun getLabelTemplateQuant(): String? = _labelTemplateQuant.value.takeIf { it.isNotEmpty() }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+import androidx.lifecycle.ViewModel
+import br.com.backupautomacao.centraldepesagem.R
+import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
+import br.com.backupautomacao.centraldepesagem.utils.PrinterType
+import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
 import br.com.backupautomacao.centraldepesagem.utils.Validate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -141,6 +253,7 @@ class SettingsViewModel(
     }
 }
 
+*/
 
 
 

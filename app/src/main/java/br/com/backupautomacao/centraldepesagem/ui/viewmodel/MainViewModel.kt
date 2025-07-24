@@ -7,6 +7,7 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import br.com.backupautomacao.centraldepesagem.utils.UsbPrinterModel
 import android.os.Build
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -603,7 +604,7 @@ class MainViewModel(
 
                   if (success) {
                     withContext(Dispatchers.IO) {
-                      honeywellPrinter.print(product, showQuantity)
+                      honeywellPrinter.print(appContext , product, showQuantity)
                     }
                   } else {
                     showMessage("Falha na conexão com a impressora Honeywell")
@@ -689,7 +690,7 @@ class MainViewModel(
           val quantity = product.quantity?.toDouble() ?: 1.0
           Operation(
             weight = 0.0,
-            totalPrice = product.totalPrice ?: product.price * quantity,
+            totalPrice = product.totalPrice ?: product.price * quantity ,
             pricePerKilogram = 0.0,
             pricePerUnit = product.price,
             username = Build.ID,
@@ -704,7 +705,7 @@ class MainViewModel(
             ?: throw Exception("Preço total não informado")
           Operation(
             weight = weight,
-            totalPrice = total,
+            totalPrice = total.toDouble(),
             pricePerKilogram = product.price,
             pricePerUnit = 0.0,
             username = Build.ID,

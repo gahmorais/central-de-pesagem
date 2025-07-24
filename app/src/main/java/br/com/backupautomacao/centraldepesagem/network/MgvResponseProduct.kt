@@ -38,11 +38,11 @@ data class MgvProduct(
     @SerializedName("validade_dias")
     val shelfLife: Int = 0,
     @SerializedName("preco")
-    val price: Double = 0.0,
+    val price: Double = 0.00,
     @SerializedName("lote")
     val batch: String = "",
     @SerializedName("preco_promocional")
-    val promotionalPrice: Double = 0.0,
+    val promotionalPrice: Double = 0.00,
     var weight: Double? = 0.0,
     var totalPrice: Double? = 0.0,
     @SerializedName("TipoVendaInt")

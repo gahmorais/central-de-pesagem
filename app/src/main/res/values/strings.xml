@@ -110,4 +110,13 @@
     //Database
     <string name="database_name">app_database</string>
 
+    //STRINGS ETIQUETA
+
+    <string-array name="label_type_options">
+        <item>Etiqueta KG</item>
+        <item>Etiqueta UN</item>
+        <item>Etiqueta Simples</item>
+    </string-array>
+
+
 </resources>

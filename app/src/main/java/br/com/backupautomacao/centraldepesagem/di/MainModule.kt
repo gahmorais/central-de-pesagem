@@ -30,7 +30,7 @@ val mainModule = module {
   single {
     get<Context>().getSystemService(Context.USB_SERVICE) as UsbManager
   }
-  single { HoneywellPrinter(get(), get()) }
+  single { HoneywellPrinter(get(), get(),get()) }
 
 
   single { Label(get()) }
