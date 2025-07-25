@@ -3,7 +3,7 @@ package br.com.backupautomacao.centraldepesagem.network
 import com.google.gson.annotations.SerializedName
 
 data class MgvResponseFracionadorInfo (
-    @SerializedName("FracionadorExtras")
+    @SerializedName("informacao_fracionador")
     val fracionadorInfos: List<FracionadorInfo>?,
     @SerializedName("ExportaInformacaoExtraResult")
     val mgvError: MgvError?

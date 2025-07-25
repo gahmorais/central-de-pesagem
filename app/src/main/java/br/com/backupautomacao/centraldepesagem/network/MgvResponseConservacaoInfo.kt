@@ -3,7 +3,7 @@ package br.com.backupautomacao.centraldepesagem.network
 import com.google.gson.annotations.SerializedName
 
 data class MgvResponseConservacaoInfo (
-    @SerializedName("ConservadorExtras")
+    @SerializedName("informacao_conservacao")
     val conservadorInfos: List<ConservadorInfo>?,
     @SerializedName("ExportaInformacaoExtraResult")
     val mgvError: MgvError?

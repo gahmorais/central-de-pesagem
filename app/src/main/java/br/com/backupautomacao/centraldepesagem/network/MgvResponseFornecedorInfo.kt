@@ -3,7 +3,7 @@ package br.com.backupautomacao.centraldepesagem.network
 import com.google.gson.annotations.SerializedName
 
 data class MgvResponseFornecedorInfo (
-    @SerializedName("FornecedorExtras")
+    @SerializedName("informacao_fornecedor")
     val fornecedorInfos: List<FornecedorInfo>?,
     @SerializedName("ExportaInformacaoExtraResult")
     val mgvError: MgvError?

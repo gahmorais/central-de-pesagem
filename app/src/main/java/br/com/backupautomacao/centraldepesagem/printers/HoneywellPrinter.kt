@@ -1,5 +1,6 @@
 package br.com.backupautomacao.centraldepesagem.printers
 
+
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -435,6 +436,7 @@ class HoneywellPrinter(
         }
     }
 }
+
 
 
 

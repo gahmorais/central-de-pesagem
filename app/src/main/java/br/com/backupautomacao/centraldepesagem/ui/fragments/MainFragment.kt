@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -269,6 +270,7 @@ class MainFragment : Fragment() {
 
       buttonWeighing.setOnClickListener {
         val connectedDevice = mainViewModel.activeDevice.value
+        Log.d("MainFragment", "Botão PESAR clicado")
         connectedDevice?.let { mainViewModel.weighining(it) }
       }
 

@@ -13,6 +13,7 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentSettingsBinding
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
@@ -137,6 +138,20 @@ class SettingsFragment : Fragment() {
     }
   }
 
+//    private fun handleMessages() {
+//      viewLifecycleOwner.lifecycleScope.launch {
+//        viewLifecycleOwner.lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+//          viewModel.statusMessage.collect { message ->
+//            if (message.isNotEmpty()) {
+//              Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+//              viewModel.clearStatusMessage()
+//            }
+//          }
+//        }
+//      }
+//    }
+
+
   private fun handleCheckbox() {
     binding.checkboxAutomaticPrint.setOnCheckedChangeListener { _, isChecked ->
       viewModel.enableAutomaticPrint(isChecked)
@@ -256,6 +271,17 @@ class SettingsFragment : Fragment() {
     }
   }
 
+
+//  override fun onResume() {
+//    super.onResume()
+//    carregarConfiguracoes()
+//  }
+//
+//  override fun onPause() {
+//    super.onPause()
+//   salvarConfiguracoes()
+//  }
+
   override fun onResume() {
     super.onResume()
     loadSavedConfigs()
@@ -264,7 +290,8 @@ class SettingsFragment : Fragment() {
   private fun loadSavedConfigs() {
     val configRepository = ConfigRepository(requireContext())
 
-    val automaticPrinting = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
+//    val automaticPrinting = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
+    binding.checkboxAutomaticPrint.isChecked = viewModel.automaticPrintingEnable
     val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
     val printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP)
     val portAddress = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
@@ -272,7 +299,7 @@ class SettingsFragment : Fragment() {
     val printerType = configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE) ?: "Network"
 
     binding.apply {
-      checkboxAutomaticPrint.isChecked = automaticPrinting
+//      checkboxAutomaticPrint.isChecked = automaticPrinting
       textInputServerAddress.setText(serverAddress)
       textInputPrinterIp.setText(printerAddress)
       textInputPrinterPort.setText(portAddress.toString())
@@ -282,6 +309,54 @@ class SettingsFragment : Fragment() {
   }
 }
 
+
+
+/*
+  private fun carregarConfiguracoes() {
+    binding.textInputPrinterIp.setText(configRepository.getPrinterIp() ?: "")
+    binding.textInputPrinterPort.setText(configRepository.getPrinterPort().toString())
+
+    binding.textInputMgvPassword.setText(configRepository.getTextConfig(ConfigRepository.PASSWORD_MGV) ?: "")
+    binding.textInputMgvStoreNumber.setText(configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString())
+    binding.textInputServerAddress.setText(configRepository.getTextConfig(ConfigRepository.SERVER_ADDRESS) ?: "")
+
+    binding.checkboxAutomaticPrint.isChecked = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
+
+    when (configRepository.getPrinterType()) {
+      PrinterType.USB -> binding.radioButtonUSB.isChecked = true
+      PrinterType.NETWORK -> binding.radioButtonNetwork.isChecked = true
+    }
+
+    val templateKg = configRepository.getTextConfig("LABEL_TEMPLATE_KG")
+    val templateQuant = configRepository.getTextConfig("LABEL_TEMPLATE_QUANT")
+    selecionarItemNoSpinner(binding.spinnerLabelKg, templateKg)
+    selecionarItemNoSpinner(binding.spinnerLabelQuant, templateQuant)
+  }
+
+
+  private fun salvarConfiguracoes() {
+    configRepository.setTextConfig(ConfigRepository.PRINTER_IP, binding.textInputPrinterIp.text.toString())
+    configRepository.setIntConfig(ConfigRepository.PRINTER_PORT, binding.textInputPrinterPort.text.toString().toIntOrNull() ?: 9100)
+
+    configRepository.setTextConfig(ConfigRepository.PASSWORD_MGV, binding.textInputMgvPassword.text.toString())
+    configRepository.setIntConfig(ConfigRepository.STORE_NUMBER, binding.textInputMgvStoreNumber.text.toString().toIntOrNull() ?: 1)
+    configRepository.setTextConfig(ConfigRepository.SERVER_ADDRESS, binding.textInputServerAddress.text.toString())
+
+    configRepository.setBooleanConfig(ConfigRepository.AUTOMATIC_PRINT, binding.checkboxAutomaticPrint.isChecked)
+
+    val tipo = when {
+      binding.radioButtonUSB.isChecked -> PrinterType.USB
+      else -> PrinterType.NETWORK
+    }
+    configRepository.setPrinterType(tipo.toString())
+
+    val templateKg = binding.spinnerLabelKg.selectedItem?.toString() ?: ""
+    val templateQuant = binding.spinnerLabelQuant.selectedItem?.toString() ?: ""
+    configRepository.setTextConfig("LABEL_TEMPLATE_KG", templateKg)
+    configRepository.setTextConfig("LABEL_TEMPLATE_QUANT", templateQuant)
+  }
+
+ */
 
 
 

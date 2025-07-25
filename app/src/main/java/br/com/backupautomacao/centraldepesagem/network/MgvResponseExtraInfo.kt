@@ -3,7 +3,7 @@ package br.com.backupautomacao.centraldepesagem.network
 import com.google.gson.annotations.SerializedName
 
 data class MgvResponseExtraInfo(
-    @SerializedName("informacoesExtras")
+    @SerializedName("informacao_extra")
     val extraInfos: List<ExtraInfo>?,
     @SerializedName("ExportaInformacaoExtraResult")
     val mgvError: MgvError?
@@ -14,45 +14,45 @@ data class ExtraInfo(
     val code: String,
     @SerializedName("Observacao")
     val observacao: String,
-    @SerializedName("Linha1")
+    @SerializedName("linha__1")
     val line1: String,
-    @SerializedName("Linha2")
+    @SerializedName("linha_2")
     val line2: String,
-    @SerializedName("Linha3")
+    @SerializedName("linha_3")
     val line3: String,
-    @SerializedName("Linha4")
+    @SerializedName("linha_4")
     val line4: String,
-    @SerializedName("Linha5")
+    @SerializedName("linha_5")
     val line5: String,
-    @SerializedName("Linha6")
+    @SerializedName("linha_6")
     val line6: String,
-    @SerializedName("Linha7")
+    @SerializedName("linha_7")
     val line7: String,
-    @SerializedName("Linha8")
+    @SerializedName("linha_8")
     val line8: String,
-    @SerializedName("Linha9")
+    @SerializedName("linha_9")
     val line9: String,
-    @SerializedName("Linha10")
+    @SerializedName("linha_10")
     val line10: String,
-    @SerializedName("Linha11")
+    @SerializedName("linha_11")
     val line11: String,
-    @SerializedName("Linha12")
+    @SerializedName("linha_12")
     val line12: String,
-    @SerializedName("Linha13")
+    @SerializedName("linha_13")
     val line13: String,
-    @SerializedName("Linha14")
+    @SerializedName("linha_14")
     val line14: String,
-    @SerializedName("Linha15")
+    @SerializedName("linha_15")
     val line15: String,
-    @SerializedName("Linha16")
+    @SerializedName("linha_16")
     val line16: String,
-    @SerializedName("Linha17")
+    @SerializedName("linha_17")
     val line17: String,
-    @SerializedName("Linha18")
+    @SerializedName("linha_18")
     val line18: String,
-    @SerializedName("Linha19")
+    @SerializedName("linha_19")
     val line19: String,
-    @SerializedName("Linha20")
+    @SerializedName("linha_20")
     val line20: String,
     @SerializedName("CampoExtra1")
     val campoextra: String,

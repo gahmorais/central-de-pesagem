@@ -25,16 +25,18 @@ data class MgvProduct(
     val description3: String = "",
     @SerializedName("descricao_quarta_linha")
     val description4: String = "",
-    @SerializedName("informacao_extra")
-    val codExtraInfo: Int? = null,
-    @SerializedName("informacao_conservacao")
-    val codConservacaoInfo: Int? = null,
-    @SerializedName("informacao_fornecedor")
-    val codFornecedorInfo: Int? = null,
-    @SerializedName("informacao_fracionador")
-    val codFracionadorInfo: Int? = null,
-    @SerializedName("informacao_nutricional")
-    val codNutrictionFacts: Int? = null,
+    @SerializedName("departamento")
+    val department : String = "",
+//    @SerializedName("informacao_extra")
+//    val codExtraInfo: Int? = null,
+//    @SerializedName("informacao_conservacao")
+//    val codConservacaoInfo: Int? = null,
+//    @SerializedName("informacao_fornecedor")
+//    val codFornecedorInfo: Int? = null,
+//    @SerializedName("informacao_fracionador")
+//    val codFracionadorInfo: Int? = null,
+//    @SerializedName("informacao_nutricional")
+//    val codNutrictionFacts: Int? = null,
     @SerializedName("validade_dias")
     val shelfLife: Int = 0,
     @SerializedName("preco")
@@ -45,6 +47,13 @@ data class MgvProduct(
     val promotionalPrice: Double = 0.00,
     var weight: Double? = 0.0,
     var totalPrice: Double? = 0.0,
-    @SerializedName("TipoVendaInt")
-    val unitOfMeasure: Int? = null
-)
+    @SerializedName("tipo_produto")
+    val typeProductRaw: String? = null
+) {
+    val unitOfMeasure: Int?
+        get() = typeProductRaw?.toIntOrNull()
+}
+
+//    @SerializedName("TipoVendaInt")
+//    val unitOfMeasure: Int? = null
+//)

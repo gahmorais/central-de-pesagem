@@ -119,6 +119,8 @@ class MainActivity : AppCompatActivity() {
     } else {
 
       val printer = HoneywellPrinter(usbManager ,this , settingsViewModel)
+//      val printer = HoneywellPrinter(usbManager ,this)
+
       printer.initializePrinter(usbDevice)
 
       if (printer.hasPermission()) {
