@@ -170,11 +170,16 @@ class MainViewModel(
     }
 
     _mgvProduct.value?.let { product ->
-      product.quantity = newQuantity
-      _mgvProduct.value = product
+      val updatedProduct = product.copy(
+        quantity = newQuantity,
+        totalPrice = product.price * newQuantity
+      )
+      _mgvProduct.value = updatedProduct
       emitMessage("Quantidade atualizada: $newQuantity")
+      loadPrice(updatedProduct.totalPrice ?: 0.0)
     }
   }
+
 
   private fun applicationMonitor() {
     _updateStatus.onEach { status ->

@@ -16,6 +16,8 @@ import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionai
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
+import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.isUnidadePorPesoOuVolume
+import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.isUnidadePorQuantidade
 import br.com.backupautomacao.centraldepesagem.utils.LabelManager
 import br.com.backupautomacao.centraldepesagem.utils.Printer
 import br.com.backupautomacao.centraldepesagem.utils.UnitOfMeasure
@@ -219,15 +221,11 @@ class HoneywellPrinter(
         printZpl(zpl)
     }
 
-//    override fun print(product: MgvProduct) {
-//        val showQuantity = product.unitOfMeasure == "UN"
-//        print(product, showQuantity)
-//    }
-
     override fun print(product: MgvProduct) {
         val showQuantity = UnitOfMeasure.fromCodigo(product.unitOfMeasure) == UnitOfMeasure.UNIDADE
         print(context, product, showQuantity)
     }
+
 
     private fun buildZpl(context: Context, product: MgvProduct, showQuantity: Boolean): String {
         val selectedTemplateName = if (showQuantity) {
@@ -277,11 +275,22 @@ class HoneywellPrinter(
         val nutrition = product.nutrictionFacts
         fun buildImagemZpl(): String {
             val imagens = mutableListOf<String>()
-            if (exibirImagens) {
-                if (nutrition?.Alto_Sodio == true) imagens.add(Constants.IMAGE_SODIUM)
-                if (nutrition?.Alto_Gordura_Saturada == true) imagens.add(Constants.IMAGE_SATURATED_FAT)
-                if (nutrition?.Alto_Acucar_Add == true) imagens.add(Constants.IMAGE_ADDED_SUGAR)
+            if (exibirImagens && nutrition != null) {
+                val acucar = nutrition.Alto_Acucar_Add == true
+                val gordura = nutrition.Alto_Gordura_Saturada == true
+                val sodio = nutrition.Alto_Sodio == true
+
+                when {
+                    acucar && gordura && sodio -> imagens.add(Constants.IMAGE_ALL)
+                    acucar && gordura -> imagens.add(Constants.IMAGE_SUGAR_FAT)
+                    acucar && sodio -> imagens.add(Constants.IMAGE_SUGAR_SODIUM)
+                    gordura && sodio -> imagens.add(Constants.IMAGE_FAT_SODIUM)
+                    acucar -> imagens.add(Constants.IMAGE_ADDED_SUGAR)
+                    gordura -> imagens.add(Constants.IMAGE_SATURATED_FAT)
+                    sodio -> imagens.add(Constants.IMAGE_SODIUM)
+                }
             }
+
             val startX = 100
             val spacing = 140
             val totalWidth = (imagens.size - 1) * spacing
@@ -292,6 +301,7 @@ class HoneywellPrinter(
             }.joinToString("\n")
         }
 
+        Timber.d("${product.toString()}")
         template = template.replace("{{imagens_nutricionais}}", buildImagemZpl())
         val result = template
             .replace("var_descricao", product.description)
@@ -299,7 +309,6 @@ class HoneywellPrinter(
             .replace("var_preco_kilo", precoKilo)
             .replace("var_preco", precoTotal)
             .replace("var_peso", pesoFormatado)
-//            .replace("var_tara", taraFormatada)
             .replace("var_quant", quantidadeFormatada)
             .replace("var_data_embalado", dataEmbalado)
             .replace("var_data_validade", dataValidade)
@@ -348,8 +357,20 @@ class HoneywellPrinter(
             .replace("var_fibra_alimentar_100g", Formatter.formatNutriction(nutrition?.FibraAlimentar_100g))
             .replace("var_sodio_100g", Formatter.formatNutriction(nutrition?.Sodio_100g))
 
-            // VDs
-            .replace("vd_energetico", Formatter.formatVD(nutrition?.Porcentagem_vd_ValorEnergetico.toString()))
+            // Nutricional (porção / 20g)
+            .replace("var_valor_energetico_20g", Formatter.formatNutriction(nutrition?.Porcao_ValorEnergetico))
+            .replace("var_carboidratos_20g", Formatter.formatNutriction(nutrition?.Porcao_Carboidrato))
+            .replace("var_acucares_totais_20g", Formatter.formatNutriction(nutrition?.Porcao_AcucaresTotais))
+            .replace("var_acucares_adicionados_20g", Formatter.formatNutriction(nutrition?.Porcao_AcucaresAdicionado))
+            .replace("var_proteinas_20g", Formatter.formatNutriction(nutrition?.Porcao_Proteina))
+            .replace("var_gord_totais_20g", Formatter.formatNutriction(nutrition?.Porcao_GorduraTotais))
+            .replace("var_gord_saturadas_20g", Formatter.formatNutriction(nutrition?.Porcao_GorduraSaturada))
+            .replace("var_gorduras_trans_20g", Formatter.formatNutriction(nutrition?.Porcao_GorduraTrans))
+            .replace("var_fibra_alimentar_20g", Formatter.formatNutriction(nutrition?.Porcao_FibraAlimentar))
+            .replace("var_sodio_20g", Formatter.formatNutriction(nutrition?.Porcao_Sodio))
+
+            // Valores Diários (%VD)
+            .replace("vd_energetico", Formatter.formatVD(nutrition?.Porcentagem_vd_ValorEnergetico))
             .replace("vd_carboidratos", Formatter.formatVD(nutrition?.Porcentagem_vd_Carboidrato))
             .replace("vd_acucares_totais", Formatter.formatVD(nutrition?.Porcentagem_vd_AcucaresTotais))
             .replace("vd_acucares_adicionados", Formatter.formatVD(nutrition?.Porcentagem_vd_AcucaresAdicionado))
@@ -359,6 +380,7 @@ class HoneywellPrinter(
             .replace("vd_gord_trans", Formatter.formatVD(nutrition?.Porcentagem_vd_GorduraTrans))
             .replace("vd_fibra_alimentar", Formatter.formatVD(nutrition?.Porcentagem_vd_FibraAlimentar))
             .replace("vd_sodio", Formatter.formatVD(nutrition?.Porcentagem_vd_Sodio))
+
             .replace("var_copies", "1")
 
         return result

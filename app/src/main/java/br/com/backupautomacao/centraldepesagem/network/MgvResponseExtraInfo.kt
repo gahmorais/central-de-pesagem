@@ -14,7 +14,7 @@ data class ExtraInfo(
     val code: String,
     @SerializedName("Observacao")
     val observacao: String,
-    @SerializedName("linha__1")
+    @SerializedName("linha_1")
     val line1: String,
     @SerializedName("linha_2")
     val line2: String,

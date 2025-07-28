@@ -9,10 +9,15 @@ data class MgvResponseProduct(
 )
 
 data class MgvProduct(
+    @SerializedName("informacao_nutricional")
     var nutrictionFacts: MgvInformacoesNutricionais? = null,
+    @SerializedName("informacao_extra")
     var extraInfo: ExtraInfo? = null,
+    @SerializedName("informacao_fracionador")
     var fracionadorInfo: FracionadorInfo? = null,
+    @SerializedName("informacao_fornecedor")
     var fornecedorInfo: FornecedorInfo? = null,
+    @SerializedName("informacao_conservacao")
     var conservacaoInfo: ConservadorInfo? = null,
     var quantity: Int? = null,
     @SerializedName("codigo")
@@ -27,16 +32,6 @@ data class MgvProduct(
     val description4: String = "",
     @SerializedName("departamento")
     val department : String = "",
-//    @SerializedName("informacao_extra")
-//    val codExtraInfo: Int? = null,
-//    @SerializedName("informacao_conservacao")
-//    val codConservacaoInfo: Int? = null,
-//    @SerializedName("informacao_fornecedor")
-//    val codFornecedorInfo: Int? = null,
-//    @SerializedName("informacao_fracionador")
-//    val codFracionadorInfo: Int? = null,
-//    @SerializedName("informacao_nutricional")
-//    val codNutrictionFacts: Int? = null,
     @SerializedName("validade_dias")
     val shelfLife: Int = 0,
     @SerializedName("preco")
@@ -53,7 +48,17 @@ data class MgvProduct(
     val unitOfMeasure: Int?
         get() = typeProductRaw?.toIntOrNull()
 }
-
+//    @SerializedName("informacao_extra")
+//    val codExtraInfo: Int? = null,
+//    @SerializedName("informacao_conservacao")
+//    val codConservacaoInfo: Int? = null,
+//    @SerializedName("informacao_fornecedor")
+//    val codFornecedorInfo: Int? = null,
+//    @SerializedName("informacao_fracionador")
+//    val codFracionadorInfo: Int? = null,
+//    @SerializedName("informacao_nutricional")
+//    val codNutrictionFacts: Int? = null,
+//    @SerializedName("validade_dias")
 //    @SerializedName("TipoVendaInt")
 //    val unitOfMeasure: Int? = null
 //)

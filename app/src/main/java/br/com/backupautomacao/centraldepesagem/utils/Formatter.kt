@@ -61,7 +61,12 @@ class Formatter private constructor() {
       if (value is Int) {
         return String.format(Locale.ENGLISH, "%d g", value)
       }
-      return String.format(Locale.ENGLISH, "%.1f g", value).replace(".", ",")
+
+      val doubleValue = value.toString().toDoubleOrNull()
+      return if (doubleValue != null)
+        String.format(Locale.ENGLISH, "%.1f g", doubleValue).replace(".", ",")
+      else
+        "0,0 g"
     }
 
     fun formatDateTime(timestamp: Long): String {
@@ -88,6 +93,16 @@ class Formatter private constructor() {
 
     private fun convertByteArrayToString(data: ByteArray): String {
       return String(data, StandardCharsets.UTF_8)
+    }
+
+     fun isUnidadePorQuantidade(unidade: String?): Boolean {
+      val un = unidade?.trim()?.lowercase() ?: return false
+      return un in listOf("un", "unidade", "peça", "peca", "dúzia", "duzia", "caixa", "maco", "maço")
+    }
+
+     fun isUnidadePorPesoOuVolume(unidade: String?): Boolean {
+      val un = unidade?.trim()?.lowercase() ?: return false
+      return un in listOf("g", "kg", "t", "ml", "l")
     }
   }
 }
