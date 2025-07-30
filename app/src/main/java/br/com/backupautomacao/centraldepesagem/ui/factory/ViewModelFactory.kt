@@ -1,4 +1,4 @@
-package br.com.backupautomacao.centraldepesagem.ui.viewmodel
+package br.com.backupautomacao.centraldepesagem.ui.factory
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
@@ -10,6 +10,7 @@ import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
 import br.com.backupautomacao.centraldepesagem.network.MgvService
 import br.com.backupautomacao.centraldepesagem.printers.Epson
 import br.com.backupautomacao.centraldepesagem.printers.HoneywellPrinter
+import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModel
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
 

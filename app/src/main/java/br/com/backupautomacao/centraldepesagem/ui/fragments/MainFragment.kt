@@ -23,7 +23,7 @@ import br.com.backupautomacao.centraldepesagem.databinding.FragmentMainBinding
 import br.com.backupautomacao.centraldepesagem.permission.Permission
 import br.com.backupautomacao.centraldepesagem.permission.PermissionManager
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModel
-import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModelFactory
+import br.com.backupautomacao.centraldepesagem.ui.factory.MainViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach

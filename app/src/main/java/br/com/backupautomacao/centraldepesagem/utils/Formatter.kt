@@ -59,14 +59,44 @@ class Formatter private constructor() {
         return ""
       }
       if (value is Int) {
-        return String.format(Locale.ENGLISH, "%d g", value)
+        return String.format(Locale.ENGLISH, "%d ", value)
       }
 
       val doubleValue = value.toString().toDoubleOrNull()
       return if (doubleValue != null)
-        String.format(Locale.ENGLISH, "%.1f g", doubleValue).replace(".", ",")
+        String.format(Locale.ENGLISH, "%.1f ", doubleValue).replace(".", ",")
       else
-        "0,0 g"
+        "0,0 "
+    }
+
+    fun <T> formatNutrictionMg(value: T?): String {
+      if (value == null) {
+        return ""
+      }
+      if (value is Int) {
+        return String.format(Locale.ENGLISH, "%d ", value)
+      }
+
+      val doubleValue = value.toString().toDoubleOrNull()
+      return if (doubleValue != null)
+        String.format(Locale.ENGLISH, "%.1f ", doubleValue).replace(".", ",")
+      else
+        "0,0"
+    }
+
+    fun <T> formatNutrictionKcal(value: T?): String {
+      if (value == null) {
+        return ""
+      }
+      if (value is Int) {
+        return String.format(Locale.ENGLISH, "%d  ", value)
+      }
+
+      val doubleValue = value.toString().toDoubleOrNull()
+      return if (doubleValue != null)
+        String.format(Locale.ENGLISH, "%.1f  ", doubleValue).replace(".", ",")
+      else
+        "0,0 "
     }
 
     fun formatDateTime(timestamp: Long): String {

@@ -48,6 +48,8 @@ data class MgvProduct(
     val unitOfMeasure: Int?
         get() = typeProductRaw?.toIntOrNull()
 }
+
+/*
 //    @SerializedName("informacao_extra")
 //    val codExtraInfo: Int? = null,
 //    @SerializedName("informacao_conservacao")
@@ -62,3 +64,5 @@ data class MgvProduct(
 //    @SerializedName("TipoVendaInt")
 //    val unitOfMeasure: Int? = null
 //)
+
+ */

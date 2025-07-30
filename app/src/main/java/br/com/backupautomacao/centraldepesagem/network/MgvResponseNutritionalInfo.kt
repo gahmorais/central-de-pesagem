@@ -14,6 +14,7 @@ data class MgvInformacoesNutricionais(
     val code: String,
     @SerializedName("observacao")
     val observacao: String,
+
     //100G
     @SerializedName("100g_valor_energetico")
     val ValorEnergetico_100g: String?,
@@ -59,7 +60,7 @@ data class MgvInformacoesNutricionais(
     val Porcao_Sodio: String?,
 
     //VD
-    @SerializedName("porcentagem_vd_valor_energetico")
+    @SerializedName("porcentagem_vd_val_energetico")
     val Porcentagem_vd_ValorEnergetico: String?,
     @SerializedName("porcentagem_vd_carboidratos")
     val Porcentagem_vd_Carboidrato: String?,
@@ -102,7 +103,7 @@ data class MgvInformacoesNutricionais(
     @SerializedName("medida_caseira_utilizada")
     val Medida_Caseira_Utilizada: String?,
 
-    //IMAGENS DE ALTO EM ...
+    //IMAGENS DE ALTO EM
     @SerializedName("alto_em_acucar_adicionado")
     val Alto_Acucar_Add : Boolean?,
     @SerializedName("alto_em_gordura_saturada")

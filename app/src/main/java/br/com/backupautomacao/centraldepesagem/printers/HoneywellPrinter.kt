@@ -180,7 +180,7 @@ class HoneywellPrinter(
         }
     }
 
-    fun safeConnectOrRequestPermission(onReady: (Boolean, String) -> Unit) {
+   private fun safeConnectOrRequestPermission(onReady: (Boolean, String) -> Unit) {
         usbDevice?.let {
             if (usbManager.hasPermission(it)) {
                 val connected = connectPrinter()
@@ -309,6 +309,7 @@ class HoneywellPrinter(
             .replace("var_preco_kilo", precoKilo)
             .replace("var_preco", precoTotal)
             .replace("var_peso", pesoFormatado)
+//            .replace("var_tara", pesoFormatado)
             .replace("var_quant", quantidadeFormatada)
             .replace("var_data_embalado", dataEmbalado)
             .replace("var_data_validade", dataValidade)
@@ -345,6 +346,14 @@ class HoneywellPrinter(
             .replace("var_fornecedor_line1", product.fornecedorInfo?.fornecedor.orEmpty())
             .replace("var_fornecedor_line2", product.fornecedorInfo?.fornecedor2.orEmpty())
 
+            //INFORMAÇÃO NUTRICIONAL
+            .replace("var_porcao_por_embalagem", product.nutrictionFacts?.Quantidade_Porcoes_Por_Embalagem.orEmpty())
+            .replace("var_porcao_por_unidade", product.nutrictionFacts?.Quantidade_porcao.orEmpty())
+            .replace("var_unidade", product.nutrictionFacts?.Unidade_porcao.orEmpty())
+            .replace("var_parte_inteira_medida", product.nutrictionFacts?.Parte_Inteira_Medida_Caseira.orEmpty())
+            .replace("var_parte_decimal_medida", product.nutrictionFacts?.Parte_Decimal_Medida_Caseira.orEmpty())
+            .replace("var_medida_utilizada", product.nutrictionFacts?.Medida_Caseira_Utilizada.orEmpty())
+
             // Nutricional (100g)
             .replace("var_valor_energetico_100g", Formatter.formatNutriction(nutrition?.ValorEnergetico_100g))
             .replace("var_carboidratos_100g", Formatter.formatNutriction(nutrition?.Carboidrato_100g))
@@ -357,8 +366,8 @@ class HoneywellPrinter(
             .replace("var_fibra_alimentar_100g", Formatter.formatNutriction(nutrition?.FibraAlimentar_100g))
             .replace("var_sodio_100g", Formatter.formatNutriction(nutrition?.Sodio_100g))
 
-            // Nutricional (porção / 20g)
-            .replace("var_valor_energetico_20g", Formatter.formatNutriction(nutrition?.Porcao_ValorEnergetico))
+            // Nutricional (porção/ 20g)
+            .replace("var_valor_energetico_20g", Formatter.formatNutrictionKcal(nutrition?.Porcao_ValorEnergetico))
             .replace("var_carboidratos_20g", Formatter.formatNutriction(nutrition?.Porcao_Carboidrato))
             .replace("var_acucares_totais_20g", Formatter.formatNutriction(nutrition?.Porcao_AcucaresTotais))
             .replace("var_acucares_adicionados_20g", Formatter.formatNutriction(nutrition?.Porcao_AcucaresAdicionado))
@@ -369,7 +378,7 @@ class HoneywellPrinter(
             .replace("var_fibra_alimentar_20g", Formatter.formatNutriction(nutrition?.Porcao_FibraAlimentar))
             .replace("var_sodio_20g", Formatter.formatNutriction(nutrition?.Porcao_Sodio))
 
-            // Valores Diários (%VD)
+            // Valores Diários PORCENTAGEM (%VD)
             .replace("vd_energetico", Formatter.formatVD(nutrition?.Porcentagem_vd_ValorEnergetico))
             .replace("vd_carboidratos", Formatter.formatVD(nutrition?.Porcentagem_vd_Carboidrato))
             .replace("vd_acucares_totais", Formatter.formatVD(nutrition?.Porcentagem_vd_AcucaresTotais))
