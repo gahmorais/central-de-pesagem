@@ -211,7 +211,7 @@ class SettingsFragment : Fragment() {
         launch { viewModel.printerPort.collect { binding.textInputPrinterPort.setText(it) } }
         launch { viewModel.storeNumber.collect { binding.textInputMgvStoreNumber.setText(it) } }
         launch { viewModel.printerTypeLiveData.collect { binding.radioGroupPrinterType.check(getPrinterTypeId(it)) } }
-        launch { viewModel.automaticPrintingEnable.collect { binding.checkboxAutomaticPrint.isChecked = it } }
+//        launch { viewModel.automaticPrintingEnable.collect { binding.checkboxAutomaticPrint.isChecked = it } }
       }
     }
   }
@@ -247,6 +247,33 @@ class SettingsFragment : Fragment() {
       setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     }
   }
+
+  override fun onResume() {
+    super.onResume()
+    binding.checkboxAutomaticPrint.isChecked = viewModel.automaticPrintingEnable
+    val configRepository = ConfigRepository(requireActivity())
+    val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
+    val printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP)
+    val portAddress = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
+    val store = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER)
+    val printerType = configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE) ?: "Network"
+    binding.apply {
+      val selectedPrinter = getPrinterTypeId(printerType)
+      radioGroupPrinterType.check(selectedPrinter)
+      textInputServerAddress.setText(serverAddress)
+      textInputPrinterPort.setText(portAddress.toString())
+      textInputPrinterIp.setText(printerAddress)
+      textInputMgvStoreNumber.setText(store.toString())
+    }
+  }
+
+  private fun isInvalidAddress(address: String): Boolean {
+    return address.isBlank() ||
+            address == "127.0.0.1" ||
+            address.equals("localhost", ignoreCase = true)
+  }
+
+
 
   override fun onDestroyView() {
     super.onDestroyView()

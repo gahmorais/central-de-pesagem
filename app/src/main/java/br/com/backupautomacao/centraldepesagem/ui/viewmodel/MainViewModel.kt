@@ -36,6 +36,7 @@ import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.removeN
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
+import br.com.backupautomacao.centraldepesagem.utils.ResumeSettings
 import br.com.backupautomacao.centraldepesagem.utils.ScaleStatus
 import br.com.backupautomacao.centraldepesagem.utils.StatusApp
 import br.com.backupautomacao.centraldepesagem.utils.UnitOfMeasure
@@ -107,11 +108,22 @@ class MainViewModel(
   private val _activeDevice = MutableStateFlow<BluetoothConnected?>(null)
   val activeDevice = _activeDevice.asStateFlow()
 
+  private val _resumeSettings = MutableStateFlow<ResumeSettings?>(null)
+  val resumeSettings: StateFlow<ResumeSettings?> = _resumeSettings.asStateFlow()
+
+  val automaticPrintingEnable: Boolean
+    get() = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
+
   private val jobsRunning = mutableListOf<Job>()
 
 
-  fun initializePrinter() {
+  init{
     applicationMonitor()
+    initializePrinter()
+    loadResumeSettings()
+  }
+
+  private fun initializePrinter() {
 
     val usbManager = appContext.getSystemService(Context.USB_SERVICE) as UsbManager
     val config = configRepository.getUsbConfig()
@@ -178,6 +190,19 @@ class MainViewModel(
       emitMessage("Quantidade atualizada: $newQuantity")
       loadPrice(updatedProduct.totalPrice ?: 0.0)
     }
+  }
+
+   fun loadResumeSettings() {
+    val settings = ResumeSettings(
+      automaticPrint = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT),
+      serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS),
+      printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP),
+      printerPort = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT),
+      storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER),
+      printerType = configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE) ?: "Network"
+    )
+
+    _resumeSettings.value = settings
   }
 
 

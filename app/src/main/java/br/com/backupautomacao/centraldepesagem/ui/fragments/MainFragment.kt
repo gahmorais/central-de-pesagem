@@ -286,6 +286,21 @@ class MainFragment : Fragment() {
     }.launchIn(lifecycleScope)
   }
 
+  override fun onResume() {
+    super.onResume()
+    mainViewModel.loadResumeSettings()
+
+    lifecycleScope.launch {
+      mainViewModel.resumeSettings.collect { settings ->
+        settings?.let {
+          Timber.d("Configurações carregadas: $it")
+        }
+      }
+    }
+  }
+
+
+
   private fun showMessage(text: String) {
     mainViewModel.emitMessage(text)
   }

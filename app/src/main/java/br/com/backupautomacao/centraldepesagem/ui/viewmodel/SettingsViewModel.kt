@@ -49,8 +49,11 @@ class SettingsViewModel(
     private val _passwordMgv = MutableStateFlow("")
     val passwordMgv: StateFlow<String> = _passwordMgv
 
-    private val _automaticPrintingEnable = MutableStateFlow(false)
-    val automaticPrintingEnable: StateFlow<Boolean> = _automaticPrintingEnable
+    var automaticPrintingEnable: Boolean =
+        configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
+
+//    private val _automaticPrintingEnable = MutableStateFlow(false)
+//    val automaticPrintingEnable: StateFlow<Boolean> = _automaticPrintingEnable
 
     init {
         _printerTypeLiveData.value =
@@ -80,8 +83,8 @@ class SettingsViewModel(
         _passwordMgv.value =
             configRepository.getTextConfig(ConfigRepository.PASSWORD_MGV) ?: ""
 
-        _automaticPrintingEnable.value =
-            configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
+//        _automaticPrintingEnable.value =
+//            configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
     }
 
     fun saveNetworkConfig(address: String, port: String) {
@@ -152,11 +155,22 @@ class SettingsViewModel(
         _statusMessage.value = resourceProvider.getString(R.string.sucessfully_save_server_address)
     }
 
+//    fun enableAutomaticPrint(isEnable: Boolean) {
+//        val currentValue = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
+//        if (isEnable != currentValue) {
+//            configRepository.setBooleanConfig(ConfigRepository.AUTOMATIC_PRINT, isEnable)
+//            _automaticPrintingEnable.value = isEnable
+//            _statusMessage.value =
+//                if (isEnable) resourceProvider.getString(R.string.automatic_print_enable)
+//                else resourceProvider.getString(R.string.automatic_print_disable)
+//        }
+//    }
+
     fun enableAutomaticPrint(isEnable: Boolean) {
         val currentValue = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
         if (isEnable != currentValue) {
+            automaticPrintingEnable = isEnable
             configRepository.setBooleanConfig(ConfigRepository.AUTOMATIC_PRINT, isEnable)
-            _automaticPrintingEnable.value = isEnable
             _statusMessage.value =
                 if (isEnable) resourceProvider.getString(R.string.automatic_print_enable)
                 else resourceProvider.getString(R.string.automatic_print_disable)

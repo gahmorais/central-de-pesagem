@@ -263,6 +263,7 @@ class HoneywellPrinter(
         val precoTotal = Formatter.formatPrice(totalPrice)
         val precoKilo = Formatter.formatPrice(unitPrice)
         val pesoFormatado = if (showQuantity) "" else Formatter.formatWeight(weight)
+//        val tara = "0"
 //        val taraFormatada = if (showQuantity) "" else Formatter.formatWeight(tara)
         val quantidadeFormatada = if (showQuantity) (product.quantity ?: 0).toString() else ""
 
@@ -271,6 +272,17 @@ class HoneywellPrinter(
         val diasValidade = product.shelfLife.takeIf { it > 0 } ?: 5
         val validadeMillis = dataAtualMillis + diasValidade * 24 * 60 * 60 * 1000
         val dataValidade = Formatter.formatDate(validadeMillis)
+
+        val parteInteira = product.nutrictionFacts?.Parte_Inteira_Medida_Caseira.orEmpty().trim()
+        val parteDecimal = product.nutrictionFacts?.Parte_Decimal_Medida_Caseira.orEmpty().trim()
+
+        val medidaFormatada = when {
+            parteInteira.isNotBlank() && parteDecimal.isNotBlank() -> "$parteInteira.$parteDecimal"
+            parteInteira.isNotBlank() -> parteInteira
+            parteDecimal.isNotBlank() -> "0.$parteDecimal"
+            else -> ""
+        }
+
 
         val nutrition = product.nutrictionFacts
         fun buildImagemZpl(): String {
@@ -309,7 +321,7 @@ class HoneywellPrinter(
             .replace("var_preco_kilo", precoKilo)
             .replace("var_preco", precoTotal)
             .replace("var_peso", pesoFormatado)
-//            .replace("var_tara", pesoFormatado)
+            .replace("var_tara", "0")
             .replace("var_quant", quantidadeFormatada)
             .replace("var_data_embalado", dataEmbalado)
             .replace("var_data_validade", dataValidade)
@@ -350,8 +362,8 @@ class HoneywellPrinter(
             .replace("var_porcao_por_embalagem", product.nutrictionFacts?.Quantidade_Porcoes_Por_Embalagem.orEmpty())
             .replace("var_porcao_por_unidade", product.nutrictionFacts?.Quantidade_porcao.orEmpty())
             .replace("var_unidade", product.nutrictionFacts?.Unidade_porcao.orEmpty())
-            .replace("var_parte_inteira_medida", product.nutrictionFacts?.Parte_Inteira_Medida_Caseira.orEmpty())
-            .replace("var_parte_decimal_medida", product.nutrictionFacts?.Parte_Decimal_Medida_Caseira.orEmpty())
+            .replace("var_parte_inteira_medida", "")
+            .replace("var_parte_decimal_medida", medidaFormatada)
             .replace("var_medida_utilizada", product.nutrictionFacts?.Medida_Caseira_Utilizada.orEmpty())
 
             // Nutricional (100g)
