@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="label"
+            type="br.com.backupautomacao.centraldepesagem.ui.zpl.ZplLabel" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:elevation="4dp"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvZplName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{label.name}"
+                android:textStyle="bold"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/ivLabelPreview"
+                android:layout_width="match_parent"
+                android:layout_height="600dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:contentDescription="Preview da etiqueta" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</layout>
