@@ -153,6 +153,8 @@ class SettingsViewModel(
         configRepository.setTextConfig(ConfigRepository.SERVER_ADDRESS, address)
         _serverAddress.value = address
         _statusMessage.value = resourceProvider.getString(R.string.sucessfully_save_server_address)
+        _statusMessage.value = resourceProvider.getString(R.string.restart_app)
+
     }
 
 //    fun enableAutomaticPrint(isEnable: Boolean) {

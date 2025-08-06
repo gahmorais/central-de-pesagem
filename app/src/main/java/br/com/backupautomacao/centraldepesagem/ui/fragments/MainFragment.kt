@@ -65,6 +65,7 @@ class MainFragment : Fragment() {
       mainViewModel.cancelPrint()
       stopLoading()
     }
+//    onResume()
 
     return binding.root
   }
@@ -285,21 +286,6 @@ class MainFragment : Fragment() {
       Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
     }.launchIn(lifecycleScope)
   }
-
-  override fun onResume() {
-    super.onResume()
-    mainViewModel.loadResumeSettings()
-
-    lifecycleScope.launch {
-      mainViewModel.resumeSettings.collect { settings ->
-        settings?.let {
-          Timber.d("Configurações carregadas: $it")
-        }
-      }
-    }
-  }
-
-
 
   private fun showMessage(text: String) {
     mainViewModel.emitMessage(text)

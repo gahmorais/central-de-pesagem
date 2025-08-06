@@ -88,6 +88,7 @@ class SettingsFragment : Fragment() {
 
     binding.buttonSaveServerAddress.setOnClickListener {
       val serverAddress = binding.textInputServerAddress.text.toString()
+      Timber.d("endereço ip $serverAddress")
       viewModel.saveServerAddress(serverAddress)
     }
 

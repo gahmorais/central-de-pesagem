@@ -62,6 +62,7 @@
     <string name="dialog_permission_default_message">Mensagem padrão</string>
     <string name="dialog_permission_button_positive">OK</string>
     <string name="sucessfully_save_server_address">Endereço do servidor salvo com sucesso</string>
+    <string name="restart_app">Reinicie o app para começar a consultar</string>
     <string name="connecting">Conectando…</string>
     <string name="insert_label_quantity">Insira a quantidade de etiquetas</string>
     <string name="insert_label_weight">Insira o peso do produto</string>

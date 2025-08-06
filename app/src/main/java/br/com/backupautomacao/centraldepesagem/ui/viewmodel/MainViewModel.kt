@@ -120,7 +120,6 @@ class MainViewModel(
   init{
     applicationMonitor()
     initializePrinter()
-    loadResumeSettings()
   }
 
   private fun initializePrinter() {
@@ -191,20 +190,6 @@ class MainViewModel(
       loadPrice(updatedProduct.totalPrice ?: 0.0)
     }
   }
-
-   fun loadResumeSettings() {
-    val settings = ResumeSettings(
-      automaticPrint = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT),
-      serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS),
-      printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP),
-      printerPort = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT),
-      storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER),
-      printerType = configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE) ?: "Network"
-    )
-
-    _resumeSettings.value = settings
-  }
-
 
   private fun applicationMonitor() {
     _updateStatus.onEach { status ->
