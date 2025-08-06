@@ -5,9 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import br.com.backupautomacao.centraldepesagem.utils.UsbPrinterModel
 import android.os.Build
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,11 +20,6 @@ import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
 import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
-import br.com.backupautomacao.centraldepesagem.network.ConservadorInfo
-import br.com.backupautomacao.centraldepesagem.network.ExtraInfo
-import br.com.backupautomacao.centraldepesagem.network.FornecedorInfo
-import br.com.backupautomacao.centraldepesagem.network.FracionadorInfo
-import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionais
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.network.MgvService
 import br.com.backupautomacao.centraldepesagem.printers.Epson
@@ -36,10 +29,9 @@ import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.removeN
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
-import br.com.backupautomacao.centraldepesagem.utils.ResumeSettings
-import br.com.backupautomacao.centraldepesagem.utils.ScaleStatus
 import br.com.backupautomacao.centraldepesagem.utils.StatusApp
 import br.com.backupautomacao.centraldepesagem.utils.UnitOfMeasure
+import br.com.backupautomacao.centraldepesagem.utils.UsbPrinterModel
 import br.com.backupautomacao.centraldepesagem.utils.Util
 import br.com.backupautomacao.centraldepesagem.utils.findItem
 import br.com.backupautomacao.centraldepesagem.workers.NetworkWorker
@@ -59,7 +51,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.gotev.speech.SpeechDelegate
-import okhttp3.logging.HttpLoggingInterceptor
 import timber.log.Timber
 import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
@@ -107,9 +98,6 @@ class MainViewModel(
 
   private val _activeDevice = MutableStateFlow<BluetoothConnected?>(null)
   val activeDevice = _activeDevice.asStateFlow()
-
-  private val _resumeSettings = MutableStateFlow<ResumeSettings?>(null)
-  val resumeSettings: StateFlow<ResumeSettings?> = _resumeSettings.asStateFlow()
 
   val automaticPrintingEnable: Boolean
     get() = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
