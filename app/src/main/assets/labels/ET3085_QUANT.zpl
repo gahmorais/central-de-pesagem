@@ -3,7 +3,7 @@
 ^MTT
 ^MNN
 ^PW480
-^LL1120
+^LL1200
 ^LS0
 
 ^FX --- PRODUTO (SUPERIOR) ---
