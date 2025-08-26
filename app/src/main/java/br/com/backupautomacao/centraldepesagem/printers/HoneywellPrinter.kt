@@ -16,6 +16,7 @@ import br.com.backupautomacao.centraldepesagem.network.MgvInformacoesNutricionai
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
+import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.formatNutriction
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.isUnidadePorPesoOuVolume
 import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.isUnidadePorQuantidade
 import br.com.backupautomacao.centraldepesagem.utils.LabelManager
@@ -313,6 +314,14 @@ class HoneywellPrinter(
             }.joinToString("\n")
         }
 
+        val textoPorcoes = Formatter.formatPorcoes(
+            product.weight,
+            nutrition?.Quantidade_porcao,
+            nutrition?.Unidade_porcao,
+            nutrition?.Quantidade_Porcoes_Por_Embalagem
+        )
+
+
         Timber.d("${product.toString()}")
         template = template.replace("{{imagens_nutricionais}}", buildImagemZpl())
         val result = template
@@ -359,7 +368,7 @@ class HoneywellPrinter(
             .replace("var_fornecedor_line2", product.fornecedorInfo?.fornecedor2.orEmpty())
 
             //INFORMAÇÃO NUTRICIONAL
-            .replace("var_porcao_por_embalagem", product.nutrictionFacts?.Quantidade_Porcoes_Por_Embalagem.orEmpty())
+            .replace("var_porcao_por_embalagem", textoPorcoes)
             .replace("var_porcao_por_unidade", product.nutrictionFacts?.Quantidade_porcao.orEmpty())
             .replace("var_unidade", product.nutrictionFacts?.Unidade_porcao.orEmpty())
             .replace("var_parte_inteira_medida", "")
@@ -367,28 +376,28 @@ class HoneywellPrinter(
             .replace("var_medida_utilizada", product.nutrictionFacts?.Medida_Caseira_Utilizada.orEmpty())
 
             // Nutricional (100g)
-            .replace("var_valor_energetico_100g", Formatter.formatNutriction(nutrition?.ValorEnergetico_100g))
-            .replace("var_carboidratos_100g", Formatter.formatNutriction(nutrition?.Carboidrato_100g))
-            .replace("var_acucares_totais_100g", Formatter.formatNutriction(nutrition?.Acucares_Totais_100g))
-            .replace("var_acucares_adicionados_100g", Formatter.formatNutriction(nutrition?.Acucares_Adicionado_100g))
-            .replace("var_proteinas_100g", Formatter.formatNutriction(nutrition?.Proteina_100g))
-            .replace("var_gord_totais_100g", Formatter.formatNutriction(nutrition?.Gordura_Totais_100g))
-            .replace("var_gord_saturadas_100g", Formatter.formatNutriction(nutrition?.Gordura_Saturada_100g))
-            .replace("var_gorduras_trans_100g", Formatter.formatNutriction(nutrition?.GorduraTrans_100g))
-            .replace("var_fibra_alimentar_100g", Formatter.formatNutriction(nutrition?.FibraAlimentar_100g))
-            .replace("var_sodio_100g", Formatter.formatNutriction(nutrition?.Sodio_100g))
+            .replace("var_valor_energetico_100g", formatNutriction(nutrition?.ValorEnergetico_100g.orEmpty()))
+            .replace("var_carboidratos_100g",formatNutriction(nutrition?.Carboidrato_100g.orEmpty()))
+            .replace("var_acucares_totais_100g", formatNutriction(nutrition?.Acucares_Totais_100g.orEmpty()))
+            .replace("var_acucares_adicionados_100g", formatNutriction(nutrition?.Acucares_Adicionado_100g.orEmpty()))
+            .replace("var_proteinas_100g", formatNutriction(nutrition?.Proteina_100g.orEmpty()))
+            .replace("var_gord_totais_100g", formatNutriction(nutrition?.Gordura_Totais_100g.orEmpty()))
+            .replace("var_gord_saturadas_100g", formatNutriction(nutrition?.Gordura_Saturada_100g.orEmpty()))
+            .replace("var_gorduras_trans_100g", formatNutriction(nutrition?.GorduraTrans_100g.orEmpty()))
+            .replace("var_fibra_alimentar_100g", formatNutriction(nutrition?.FibraAlimentar_100g.orEmpty()))
+            .replace("var_sodio_100g", formatNutriction(nutrition?.Sodio_100g.orEmpty()))
 
-            // Nutricional (porção/ 20g)
-            .replace("var_valor_energetico_20g", Formatter.formatNutrictionKcal(nutrition?.Porcao_ValorEnergetico))
-            .replace("var_carboidratos_20g", Formatter.formatNutriction(nutrition?.Porcao_Carboidrato))
-            .replace("var_acucares_totais_20g", Formatter.formatNutriction(nutrition?.Porcao_AcucaresTotais))
-            .replace("var_acucares_adicionados_20g", Formatter.formatNutriction(nutrition?.Porcao_AcucaresAdicionado))
-            .replace("var_proteinas_20g", Formatter.formatNutriction(nutrition?.Porcao_Proteina))
-            .replace("var_gord_totais_20g", Formatter.formatNutriction(nutrition?.Porcao_GorduraTotais))
-            .replace("var_gord_saturadas_20g", Formatter.formatNutriction(nutrition?.Porcao_GorduraSaturada))
-            .replace("var_gorduras_trans_20g", Formatter.formatNutriction(nutrition?.Porcao_GorduraTrans))
-            .replace("var_fibra_alimentar_20g", Formatter.formatNutriction(nutrition?.Porcao_FibraAlimentar))
-            .replace("var_sodio_20g", Formatter.formatNutriction(nutrition?.Porcao_Sodio))
+            // Nutricional (porção/ unidade)
+            .replace("var_valor_energetico_PU", formatNutriction(nutrition?.Porcao_ValorEnergetico.orEmpty()))
+            .replace("var_carboidratos_PU", formatNutriction(nutrition?.Porcao_Carboidrato.orEmpty()))
+            .replace("var_acucares_totais_PU", formatNutriction(nutrition?.Porcao_AcucaresTotais.orEmpty()))
+            .replace("var_acucares_adicionados_PU", formatNutriction(nutrition?.Porcao_AcucaresAdicionado.orEmpty()))
+            .replace("var_proteinas_PU", formatNutriction(nutrition?.Porcao_Proteina.orEmpty()))
+            .replace("var_gord_totais_PU", formatNutriction(nutrition?.Porcao_GorduraTotais.orEmpty()))
+            .replace("var_gord_saturadas_PU", formatNutriction(nutrition?.Porcao_GorduraSaturada.orEmpty()))
+            .replace("var_gorduras_trans_PU", formatNutriction(nutrition?.Porcao_GorduraTrans.orEmpty()))
+            .replace("var_fibra_alimentar_PU", formatNutriction(nutrition?.Porcao_FibraAlimentar.orEmpty()))
+            .replace("var_sodio_PU", formatNutriction(nutrition?.Porcao_Sodio.orEmpty()))
 
             // Valores Diários PORCENTAGEM (%VD)
             .replace("vd_energetico", Formatter.formatVD(nutrition?.Porcentagem_vd_ValorEnergetico))
@@ -798,20 +807,20 @@ private fun buildZpl(product: MgvProduct, showQuantity: Boolean): String {
         .replace("var_fibra_alimentar_100g", Formatter.formatNutriction(nutrition?.FibraAlimentar))
         .replace("var_sodio_100g", Formatter.formatNutriction(nutrition?.Sodio))
 
-        // Nutricionais (20g)
-        .replace("var_valor_energetico_20g", Formatter.formatNutriction(nutrition?.ValorEnergetico))
-        .replace("var_carboidratos_20g", Formatter.formatNutriction(nutrition?.Carboidrato))
-        .replace("var_acucares_totais_20g", Formatter.formatNutriction(nutrition?.AcucaresTotais))
+        // Nutricionais (PU)
+        .replace("var_valor_energetico_PU", Formatter.formatNutriction(nutrition?.ValorEnergetico))
+        .replace("var_carboidratos_PU", Formatter.formatNutriction(nutrition?.Carboidrato))
+        .replace("var_acucares_totais_PU", Formatter.formatNutriction(nutrition?.AcucaresTotais))
         .replace(
-            "var_acucares_adicionados_20g",
+            "var_acucares_adicionados_PU",
             Formatter.formatNutriction(nutrition?.AcucaresAdicionado)
         )
-        .replace("var_proteinas_20g", Formatter.formatNutriction(nutrition?.Proteina))
-        .replace("var_gord_totais_20g", Formatter.formatNutriction(nutrition?.GorduraTotal))
-        .replace("var_gord_saturadas_20g", Formatter.formatNutriction(nutrition?.GorduraSaturada))
-        .replace("var_gorduras_trans_20g", Formatter.formatNutriction(nutrition?.GorduraTrans))
-        .replace("var_fibra_alimentar_20g", Formatter.formatNutriction(nutrition?.FibraAlimentar))
-        .replace("var_sodio_20g", Formatter.formatNutriction(nutrition?.Sodio))
+        .replace("var_proteinas_PU", Formatter.formatNutriction(nutrition?.Proteina))
+        .replace("var_gord_totais_PU", Formatter.formatNutriction(nutrition?.GorduraTotal))
+        .replace("var_gord_saturadas_PU", Formatter.formatNutriction(nutrition?.GorduraSaturada))
+        .replace("var_gorduras_trans_PU", Formatter.formatNutriction(nutrition?.GorduraTrans))
+        .replace("var_fibra_alimentar_PU", Formatter.formatNutriction(nutrition?.FibraAlimentar))
+        .replace("var_sodio_PU", Formatter.formatNutriction(nutrition?.Sodio))
 
         .replace(
             "vd_energetico",
