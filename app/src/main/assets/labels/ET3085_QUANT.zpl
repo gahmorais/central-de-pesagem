@@ -1,9 +1,10 @@
 ^XA
 ^POI
 ^MMP,n
-^MTT
-^MNN
+^MTD
+^MNY
 ^PW480
+^LH0,60
 ^LL1200
 ^LS0
 

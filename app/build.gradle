@@ -27,8 +27,10 @@ android {
         applicationId "br.com.backupautomacao.centraldepesagem"
         minSdk 24
         targetSdk 35
-        versionCode 13
-        versionName "1.4.5"
+        versionCode 16
+        versionName "1.4.8"
+
+        setProperty("archivesBaseName", "PESAGEM_MODULAR_v${versionName}_${versionCode}")
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
