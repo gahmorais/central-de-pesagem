@@ -1,10 +1,8 @@
 package br.com.backupautomacao.centraldepesagem.ui.fragments
 
 import android.bluetooth.BluetoothManager
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -14,8 +12,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkInfo
 import br.com.backupautomacao.centraldepesagem.R
@@ -23,12 +21,11 @@ import br.com.backupautomacao.centraldepesagem.databinding.FragmentMainBinding
 import br.com.backupautomacao.centraldepesagem.permission.Permission
 import br.com.backupautomacao.centraldepesagem.permission.PermissionManager
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModel
-import br.com.backupautomacao.centraldepesagem.ui.factory.MainViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.get
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import timber.log.Timber
 
 class MainFragment : Fragment() {
@@ -37,20 +34,7 @@ class MainFragment : Fragment() {
     FragmentMainBinding.inflate(layoutInflater)
   }
 
-  private val mainViewModel: MainViewModel by activityViewModels {
-    MainViewModelFactory(
-      context = get(),
-      epson = get(),
-      honeywellPrinter = get(),
-      configRepository = get(),
-      operationRepository = get(),
-      workManager = get(),
-      bluetoothHandler = get(),
-      resourceProvider = get(),
-      label = get(),
-      mgvService = get()
-    )
-  }
+  private val mainViewModel by activityViewModel<MainViewModel>()
 
   private val permissionManager = PermissionManager.from(this)
 
@@ -84,7 +68,7 @@ class MainFragment : Fragment() {
 
   private fun configureQuantityInput() {
     binding.inputQuantity.setOnEditorActionListener { view, actionId, _ ->
-    if (actionId == EditorInfo.IME_ACTION_DONE) {
+      if (actionId == EditorInfo.IME_ACTION_DONE) {
         val quantity = view.text.toString()
         mainViewModel.updateProductQuantity(quantity)
         hideKeyboard(view)
@@ -108,20 +92,25 @@ class MainFragment : Fragment() {
             stopLoading()
             mainViewModel.showMessage(getString(R.string.printing_done))
           }
+
           WorkInfo.State.FAILED -> {
             stopLoading()
             mainViewModel.showMessage(getString(R.string.printing_error))
           }
+
           WorkInfo.State.CANCELLED -> {
             stopLoading()
             mainViewModel.showMessage(getString(R.string.printing_cancelled))
           }
+
           WorkInfo.State.RUNNING -> {
             Timber.i("monitoringPrint: Rodando tarefa")
           }
+
           WorkInfo.State.ENQUEUED -> {
             startLoading(getString(R.string.printing))
           }
+
           else -> stopLoading()
         }
       }
@@ -210,13 +199,13 @@ class MainFragment : Fragment() {
 
   private fun success(message: String) {
     Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT)
-      .setTextColor(Color.parseColor("#09AF00"))
+      .setTextColor("#09AF00".toColorInt())
       .show()
   }
 
   private fun error(message: String) {
     Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT)
-      .setTextColor(Color.parseColor("#B00020"))
+      .setTextColor("#B00020".toColorInt())
       .show()
   }
 
@@ -271,7 +260,7 @@ class MainFragment : Fragment() {
 
       buttonWeighing.setOnClickListener {
         val connectedDevice = mainViewModel.activeDevice.value
-        Log.d("MainFragment", "Botão PESAR clicado")
+        Timber.tag("MainFragment").d("Botão PESAR clicado")
         connectedDevice?.let { mainViewModel.weighining(it) }
       }
 

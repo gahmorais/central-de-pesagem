@@ -7,15 +7,15 @@
     <string name="error_to_set_scale">Não foi possíve definir a balança</string>
 
     //MGV
-    <string name="text_title_mgv_config">Configuração MGV</string>
-    <string name="sucessfully_save_mgv_config">Configuração do MGV salva com sucesso!</string>
+    <string name="text_title_mgv_config">Configuração da API</string>
+    <string name="sucessfully_save_mgv_config">Configuração da api salva com sucesso!</string>
 
     //Impressão
     <string name="printing_done">Impressão realizada</string>
     <string name="printing_error">Falha ao realizar impressão</string>
     <string name="printing">Imprimindo</string>
     <string name="impressao_autom_tica">Impressão Automática</string>
-    <string name="text_automatic_print">Impressão Automática</string>
+    <string name="text_automatic_print">Ativar Impressão Automática</string>
     <string name="automatic_print_enable">Impressão automática habilitada</string>
     <string name="automatic_print_disable">Impressão automática desabilitada</string>
     <string name="printing_cancelled">Impressão cancelada</string>
@@ -41,6 +41,8 @@
     <string name="invalid_printer_config">Nenhuma opção de impressora selecionada</string>
     <string name="sucessfully_save_printer_type">Tipo de impressora salvo com sucesso</string>
     <string name="status_impressora_usb">Status da impressora USB</string>
+    <string name="key_label_template_kg">LABEL_TEMPLATE_KG</string>
+    <string name="key_label_template_quant">LABEL_TEMPLATE_QUANT</string>
 
     //Informações
     <string name="text_button_search">Busca produto</string>
@@ -103,7 +105,7 @@
     <string name="barcode_error">Por favor, digite o código do item</string>
     <string name="unexpected_error">Erro tente novamente</string>
 
-//TESTE
+    //TESTE
 
     <string name="inputLayoutQuantity">Texto Quantidade</string>
     <string name="inputQuantity">Edit txto Quantidade</string>

@@ -4,6 +4,7 @@ import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 import android.content.Context
 import android.content.SharedPreferences
 import br.com.backupautomacao.centraldepesagem.utils.UsbPrinterModel
+import androidx.core.content.edit
 
 private const val NOME_ARQUIVO = "configuracoes"
 
@@ -17,22 +18,22 @@ class ConfigRepository(context: Context) {
     const val AUTOMATIC_PRINT = "automatic_printing"
     const val SERVER_ADDRESS = "server"
     const val PRINTER_PORT = "printer_port"
-    const val PASSWORD_MGV = "password_mgv"
+    const val PASSWORD_API = "password_api"
     const val STORE_NUMBER = "store_number"
     const val PRINTER_TYPE = "printer_type"
     const val USB_PRINTER_NAME = "usb_printer_name"
     const val LABEL_TEMPLATE_NAME = "LABEL_TEMPLATE_NAME"
-    private const val KEY_LABEL_TEMPLATE_KG = "LABEL_TEMPLATE_KG"
-    private const val KEY_LABEL_TEMPLATE_QUANT = "LABEL_TEMPLATE_QUANT"
+    const val KEY_LABEL_TEMPLATE_KG = "LABEL_TEMPLATE_KG"
+    const val KEY_LABEL_TEMPLATE_QUANT = "LABEL_TEMPLATE_QUANT"
 
   }
 
   fun setTextConfig(key: String, value: String) {
-    preferencias.edit().putString(key, value).apply()
+    preferencias.edit { putString(key, value) }
   }
 
-  fun getTextConfig(key: String): String? {
-    return preferencias.getString(key, null)
+  fun getTextConfig(key: String): String {
+    return preferencias.getString(key, null) ?: ""
   }
 
   fun getConfig(key: String): String? {

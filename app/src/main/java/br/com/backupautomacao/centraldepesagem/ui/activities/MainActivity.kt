@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import br.com.backupautomacao.centraldepesagem.R
@@ -15,13 +14,10 @@ import br.com.backupautomacao.centraldepesagem.printers.Epson
 import br.com.backupautomacao.centraldepesagem.printers.HoneywellPrinter
 import br.com.backupautomacao.centraldepesagem.ui.ScreenSlidePagerAdapter
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.MainViewModel
-import br.com.backupautomacao.centraldepesagem.ui.factory.MainViewModelFactory
-import br.com.backupautomacao.centraldepesagem.ui.factory.SettingsViewModelFactory
-import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
-import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
 import kotlinx.coroutines.delay
-import org.koin.android.ext.android.get
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -29,33 +25,34 @@ class MainActivity : AppCompatActivity() {
 
   private val ACTION_USB_PERMISSION = "br.com.backupautomacao.USB_PERMISSION"
 
-  private lateinit var configRepository: ConfigRepository
-  private val settingsViewModel: SettingsViewModel by viewModels {
-    SettingsViewModelFactory(
-      configRepository = ConfigRepository(this),
-      resourceProvider = ResourceProvider(this)
-    )
-  }
+  private val configRepository by inject<ConfigRepository>()
+//  private val settingsViewModel: SettingsViewModel by viewModels {
+//    SettingsViewModelFactory(
+//      configRepository = ConfigRepository(this),
+//      resourceProvider = ResourceProvider(this)
+//    )
+//  }
 
 
-  private val mainViewModel: MainViewModel by viewModels {
-    MainViewModelFactory(
-      context = this,
-      epson = get(),
-      honeywellPrinter = get(),
-      configRepository = get(),
-      operationRepository = get(),
-      workManager = get(),
-      bluetoothHandler = get(),
-      resourceProvider = get(),
-      label = get(),
-      mgvService = get()
-    )
-  }
+  private val viewModel by inject<MainViewModel>()
+//  viewModels {
+//    MainViewModelFactory(
+//      context = this,
+//      epson = get(),
+//      honeywellPrinter = get(),
+//      configRepository = get(),
+//      operationRepository = get(),
+//      workManager = get(),
+//      bluetoothHandler = get(),
+//      resourceProvider = get(),
+//      label = get(),
+//      mgvService = get()
+//    )
+//  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    configRepository = ConfigRepository(applicationContext)
+
     configRepository.initializeDefaults()
     setContentView(binding.root)
 
@@ -84,7 +81,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun connectAndPrintUsb() {
     val usbManager = getSystemService(Context.USB_SERVICE) as UsbManager
-    val config = mainViewModel.getUsbConfig()
+    val config = viewModel.getUsbConfig()
 
     if (config == null) {
       showMessage("Nenhuma configuração USB definida")
@@ -110,7 +107,7 @@ class MainActivity : AppCompatActivity() {
       val epson = Epson(usbManager, this)
       epson.initializePrinter(config)
 
-      val product = mainViewModel.getCurrentProduct()
+      val product = viewModel.getCurrentProduct()
       if (product == null) {
         showMessage("Produto inválido ou nulo.")
         return
@@ -126,7 +123,7 @@ class MainActivity : AppCompatActivity() {
 
     } else {
 
-      val printer = HoneywellPrinter(usbManager ,this , settingsViewModel)
+      val printer = HoneywellPrinter(this, usbManager, get<ConfigRepository>())
 //      val printer = HoneywellPrinter(usbManager ,this)
 
       printer.initializePrinter(usbDevice)
@@ -150,7 +147,7 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun printLabel(printer: HoneywellPrinter) {
-    val product = mainViewModel.getCurrentProduct()
+    val product = viewModel.getCurrentProduct()
     if (product == null) {
       showMessage("Produto inválido ou nulo.")
       return
@@ -168,7 +165,6 @@ class MainActivity : AppCompatActivity() {
       }
     }
   }
-
 
 
   private fun showMessage(text: String) {

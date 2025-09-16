@@ -1,7 +1,9 @@
 package br.com.backupautomacao.centraldepesagem.network
 
+import com.google.gson.JsonObject
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
@@ -38,38 +40,7 @@ interface MgvService {
         @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
         @Query("loja") numeroLoja: String = NUMERO_LOJA,
         @Query("codItem") item: String
-    ): MgvResponseProduct
-
-    @GET("ExportaInformacaoNutricional")
-    suspend fun queryNutritionalInfo(
-        @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
-        @Query("loja") numeroLoja: String = NUMERO_LOJA
-    ): MgvResponseNutritionalInfo
-
-    @GET("ExportaInformacaoExtra")
-    suspend fun queryExtraInfo(
-        @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
-        @Query("loja") numeroLoja: String = NUMERO_LOJA
-    ): MgvResponseExtraInfo
-
-    @GET("ExportaInformacaoConservacao")
-    suspend fun queryConservacaoInfo(
-        @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
-        @Query("loja") numeroLoja: String = NUMERO_LOJA
-    ): MgvResponseConservacaoInfo
-
-    @GET("ExportaInformacaoFornecedor")
-    suspend fun queryFornecedorInfo(
-        @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
-        @Query("loja") numeroLoja: String = NUMERO_LOJA
-    ): MgvResponseFornecedorInfo
-
-    @GET("ExportaInformacaoFracionador")
-    suspend fun queryFracionadorInfo(
-        @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
-        @Query("loja") numeroLoja: String = NUMERO_LOJA
-    ): MgvResponseFracionadorInfo
-
+    ): Response<JsonObject>
 }
 
 object MgvApi {

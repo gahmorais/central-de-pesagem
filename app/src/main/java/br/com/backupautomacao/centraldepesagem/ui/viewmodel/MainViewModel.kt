@@ -4,7 +4,6 @@ package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbManager
 import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,8 +19,8 @@ import br.com.backupautomacao.centraldepesagem.db.model.Operation
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository.Companion.PRINTER_IP
 import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
+import br.com.backupautomacao.centraldepesagem.network.ApiPesagem
 import br.com.backupautomacao.centraldepesagem.network.MgvProduct
-import br.com.backupautomacao.centraldepesagem.network.MgvService
 import br.com.backupautomacao.centraldepesagem.printers.Epson
 import br.com.backupautomacao.centraldepesagem.printers.HoneywellPrinter
 import br.com.backupautomacao.centraldepesagem.utils.Formatter
@@ -37,7 +36,6 @@ import br.com.backupautomacao.centraldepesagem.utils.findItem
 import br.com.backupautomacao.centraldepesagem.workers.NetworkWorker
 import br.com.backupautomacao.centraldepesagem.workers.PRINT_TASK
 import br.com.backupautomacao.centraldepesagem.workers.UsbWorker
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -58,7 +56,7 @@ import java.security.InvalidParameterException
 
 class MainViewModel(
 //  private val printerUsb: PrinterUsb,
-  private val appContext: Context,
+//  private val appContext: Context,
   private val epson: Epson,
   private val honeywellPrinter: HoneywellPrinter,
   private val configRepository: ConfigRepository,
@@ -67,15 +65,12 @@ class MainViewModel(
   private val bluetoothHandler: BluetoothHandler,
   private val resourceProvider: ResourceProvider,
   private val label: Label,
-  private val mgvService: MgvService
+//  private val mgvService: MgvService
+  private val apiPesagem: ApiPesagem
 ) : ViewModel(), SpeechDelegate {
 
-//  private lateinit var printerManager: PrinterManager
-//private val printerManager: PrinterManager by lazy {
-//  PrinterManager(appContext, configRepository)
-//}
+  private val _showQuantity = MutableLiveData(false)
 
-  private val _showQuantity = MutableLiveData<Boolean>(false)
   //  val showQuantity: LiveData<Boolean> = _showQuantity
   val showQuantity = MutableLiveData(false)
 
@@ -105,41 +100,25 @@ class MainViewModel(
   private val jobsRunning = mutableListOf<Job>()
 
 
-  init{
+  init {
     applicationMonitor()
     initializePrinter()
   }
 
   private fun initializePrinter() {
-
-    val usbManager = appContext.getSystemService(Context.USB_SERVICE) as UsbManager
     val config = configRepository.getUsbConfig()
-
-    if (config == null) {
-      viewModelScope.launch {
-        emitMessage("Nenhuma configuração USB definida")
-      }
-      return
-    }
+      ?: return emitMessage("Nenhuma configuração USB definida")
 
     val parts = config.split(";")
     if (parts.size < 2) {
-      viewModelScope.launch {
-        emitMessage("Configuração USB inválida")
-      }
-      return
+      return emitMessage("Configuração USB inválida")
     }
 
-    val model = parts[0]
-    val deviceName = parts[1]
-
-    val usbDevice = usbManager.deviceList.values.firstOrNull { it.deviceName == deviceName }
-
-    if (usbDevice == null) {
-      viewModelScope.launch {
-        emitMessage("Dispositivo USB '$deviceName' não encontrado")
-      }
-      return
+    val (model, deviceName) = parts
+    val usbDevice = try {
+      honeywellPrinter.device(deviceName)
+    } catch (e: Exception) {
+      return emitMessage("Dispositivo USB '$deviceName' não encontrado")
     }
 
     if (model.contains("TM-L100", ignoreCase = true)) {
@@ -195,14 +174,17 @@ class MainViewModel(
           Timber.i("applicationMonitor: REALIZAR_PESAGEM")
           activeDevice.value?.let { weighining(it) }
         }
+
         StatusApp.GRAVAR_OPERACAO -> {
           Timber.i("applicationMonitor: GRAVAR_OPERACAO")
           saveOperation()
         }
+
         StatusApp.REALIZAR_IMPRESSAO -> {
           Timber.i("applicationMonitor: REALIZAR_IMPRESSAO")
           if (automaticPrint) print()
         }
+
         else -> Timber.i("applicationMonitor: Processo finalizado")
       }
     }.launchIn(viewModelScope)
@@ -336,80 +318,85 @@ class MainViewModel(
   fun fetchItem(codItem: String) {
     Timber.i("fetchItem: Buscando item")
 
-    val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_MGV)
-    if (mgvPassword == null) {
-      showMessage("Senha do MGV não configurada")
-      return
-    }
-
-    val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
-    if (codItem.isEmpty()) {
-      showMessage(resourceProvider.getString(R.string.product_not_found))
-      return
-    }
+//    val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_API)
+//    if (mgvPassword == null) {
+//      showMessage("Senha da api não configurada")
+//      return
+//    }
+//
+//    val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
+//    if (codItem.isEmpty()) {
+//      showMessage(resourceProvider.getString(R.string.product_not_found))
+//      return
+//    }
 
     _updateStatus.update { StatusApp.BUSCAR_PRODUTO }
 
     viewModelScope.launch {
       try {
-        val (mgvError, item) = withContext(Dispatchers.Default) {
-          mgvService.queryItem(
-            item = codItem,
-            palavraChave = mgvPassword,
-            numeroLoja = storeNumber
-          )
-        }
+        val product = apiPesagem.getProduct(codItem)
+//        val (mgvError, item) = withContext(Dispatchers.IO) {
+//          mgvService.queryItem(
+//            item = codItem,
+//            palavraChave = mgvPassword,
+//            numeroLoja = storeNumber
+//          )
+//        }
 
-        if (mgvError != null) {
-          Timber.i("fetchItem: Erro do MGV: ${mgvError.message}")
-          showMessage(resourceProvider.getString(R.string.error_responde_mgv))
-          return@launch
-        }
+//        if (mgvError != null) {
+//          Timber.i("fetchItem: Erro da API: ${mgvError.message}")
+//          showMessage(mgvError.message)// resourceProvider.getString(R.string.error_responde_mgv))
+//          return@launch
+//        }
 
-        item?.also { product ->
-          val gson = Gson()
-          val json = gson.toJson(product)
-          Timber.i("JSON do produto recebido: $json")
+//        item?.also { product ->
+//          val gson = Gson()
+//          val json = gson.toJson(product)
+//          Timber.i("JSON do produto recebido: $json")
+//
+//          val itemMap: Map<String, Any> = gson.fromJson(
+//            json,
+//            object : com.google.gson.reflect.TypeToken<Map<String, Any>>() {}.type
+//          )
+//          Timber.i("Chaves do produto recebido: ${itemMap.keys}")
 
-          val itemMap: Map<String, Any> = gson.fromJson(
-            json,
-            object : com.google.gson.reflect.TypeToken<Map<String, Any>>() {}.type
-          )
-          Timber.i("Chaves do produto recebido: ${itemMap.keys}")
+        _mgvProduct.value = product
+        quantity.value = product.quantity?.toString() ?: ""
 
-          _mgvProduct.value = product
-          quantity.value = product.quantity?.toString() ?: ""
+        val unitCode = product.unitOfMeasure
+        Timber.i("fetchItem: Produto recebido - Código: ${product.code}, UnitOfMeasureInt: $unitCode")
 
-          val unitCode = product.unitOfMeasure
-          Timber.i("fetchItem: Produto recebido - Código: ${product.code}, UnitOfMeasureInt: $unitCode")
+        _showQuantity.value = unitCode == UnitOfMeasure.UNIDADE
 
-          _showQuantity.value = unitCode == UnitOfMeasure.UNIDADE
+        when (unitCode) {
+          UnitOfMeasure.PESO -> {
+            Timber.i("fetchItem: Produto por peso - indo para REALIZAR_PESAGEM")
+            _updateStatus.update { StatusApp.REALIZAR_PESAGEM }
+          }
 
-          when (unitCode) {
-            UnitOfMeasure.PESO -> {
-              Timber.i("fetchItem: Produto por peso - indo para REALIZAR_PESAGEM")
-              _updateStatus.update { StatusApp.REALIZAR_PESAGEM }
-            }
+          UnitOfMeasure.UNIDADE -> {
+            Timber.i("fetchItem: Produto por unidade - indo para GRAVAR_OPERACAO")
+            _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
+          }
 
-            UnitOfMeasure.UNIDADE -> {
-              Timber.i("fetchItem: Produto por unidade - indo para GRAVAR_OPERACAO")
-              _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
-            }
-
-            else -> {
-              Timber.w("fetchItem: Produto sem unidade definida! Usando GRAVAR_OPERACAO como fallback.")
-              _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
-            }
+          else -> {
+            Timber.w("fetchItem: Produto sem unidade definida! Usando GRAVAR_OPERACAO como fallback.")
+            _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
           }
         }
+//        }
 
-      } catch (e: IllegalArgumentException) {
-        showMessage(resourceProvider.getString(R.string.invalid_address_server))
-        Timber.e(e, "fetchItem: Endereço inválido")
       } catch (e: Exception) {
-        showMessage(resourceProvider.getString(R.string.request_error))
-        Timber.e(e, "fetchItem: Erro inesperado")
+        showMessage(e.message!!)
       }
+
+//      catch (e: IllegalArgumentException) {
+//        showMessage(resourceProvider.getString(R.string.invalid_address_server))
+//        Timber.e(e, "fetchItem: Endereço inválido")
+//      } catch (e: Exception) {
+//        showMessage(resourceProvider.getString(R.string.request_error))
+//        Timber.e(e, "fetchItem: Erro inesperado")
+//      }
     }
   }
 
@@ -425,104 +412,108 @@ class MainViewModel(
       return
     }
 
-    val showQuantity = _showQuantity.value == true
+    val isPrintingByQuantity = _showQuantity.value == true
 
-    if (!showQuantity) {
+    if (!isPrintingByQuantity) {
       if (product.weight == null || product.weight == 0.0) {
         showMessage(resourceProvider.getString(R.string.make_weighing))
         return
       }
     }
 
-    viewModelScope.launch {
-      try {
-        val printerType = configRepository.getPrinterType()
-        Timber.i("Impressora selecionada: %s", printerType)
+    try {
+      val printerType = configRepository.getPrinterType()
+      Timber.i("Impressora selecionada: $printerType")
 
-        when (printerType) {
-          PrinterType.USB -> {
-            val usbManager = appContext.getSystemService(Context.USB_SERVICE) as UsbManager
-            val savedDeviceName = configRepository.getUsbConfig()
+      when (printerType) {
+        PrinterType.USB -> {
+          val savedDeviceName = configRepository.getUsbConfig()
 
-            if (savedDeviceName == null) {
-              showMessage("Nenhuma impressora USB configurada.")
-              return@launch
+          if (savedDeviceName == null) {
+            showMessage("Nenhuma impressora USB configurada.")
+            return
+          }
+
+          val printerModelEnum = configRepository.getUsbPrinterModel()
+          when (printerModelEnum) {
+            UsbPrinterModel.EPSON -> {
+              epsonPrint(savedDeviceName, product)
             }
 
-            val parts = savedDeviceName.split(";")
-            if (parts.size < 2) {
-              showMessage("Configuração de impressora inválida.")
-              return@launch
-            }
-
-            val printerModel = parts[0]
-            val devicePath = parts[1]
-
-            val usbDevice = usbManager.deviceList.values.find { it.deviceName == devicePath }
-
-            if (usbDevice != null) {
-              val printerModelEnum = configRepository.getUsbPrinterModel()
-
-              when (printerModelEnum) {
-                UsbPrinterModel.EPSON -> {
-                  epson.initializePrinter(savedDeviceName)
-                  val created = epson.createReceiptData(product)
-                  if (created) {
-                    val success = epson.printData()
-                    if (!success) {
-                      showMessage("Erro ao imprimir na Epson")
-                    }
-                  } else {
-                    showMessage("Erro na definição Epson")
-                  }
-                }
-
-                UsbPrinterModel.HONEYWELL -> {
-                  honeywellPrinter.initializePrinter(usbDevice)
-
-                  val success = withContext(Dispatchers.IO) {
-                    honeywellPrinter.safeConnectSuspend()
-                  }
-
-                  if (success) {
-                    withContext(Dispatchers.IO) {
-                      honeywellPrinter.print(appContext , product, showQuantity)
-//                      honeywellPrinter.print(product, showQuantity)
-                    }
-                  } else {
-                    showMessage("Falha na conexão com a impressora Honeywell")
-                  }
-                }
+            UsbPrinterModel.HONEYWELL -> {
+              viewModelScope.launch {
+                honeywellPrint(savedDeviceName, product, isPrintingByQuantity)
               }
-
-
-              clearFields()
-              _updateStatus.update { StatusApp.FINALIZAR }
-
-            } else {
-              showMessage("Impressora USB '$devicePath' não encontrada.")
             }
           }
 
-          PrinterType.NETWORK -> {
-            val zpl = label.generateLabelBase(product, null)
-            createNetworkTask(zpl)
+          clearFields()
+          _updateStatus.update { StatusApp.FINALIZAR }
 
-            _scale.value = null
-            _updateStatus.update { StatusApp.FINALIZAR }
-            clearFields()
-          }
         }
 
-      } catch (e: FileNotFoundException) {
-        showMessage(resourceProvider.getString(R.string.file_not_found_error))
-      } catch (e: InvalidParameterException) {
-        Timber.e(e)
-        showMessage(resourceProvider.getString(R.string.invalid_printer_config))
-      } catch (e: Exception) {
-        Timber.e(e)
-        showMessage("${resourceProvider.getString(R.string.unexpected_error)}: ${e.localizedMessage}")
+        PrinterType.NETWORK -> {
+          val zpl = label.generateLabelBase(product, null)
+          createNetworkTask(zpl)
+
+          _scale.value = null
+          _updateStatus.update { StatusApp.FINALIZAR }
+          clearFields()
+        }
+
       }
+
+    } catch (e: FileNotFoundException) {
+      showMessage(resourceProvider.getString(R.string.file_not_found_error))
+    } catch (e: InvalidParameterException) {
+      Timber.e(e)
+      showMessage(resourceProvider.getString(R.string.invalid_printer_config))
+    } catch (e: Exception) {
+      Timber.e(e)
+      showMessage("${resourceProvider.getString(R.string.unexpected_error)}: ${e.localizedMessage}")
+    }
+  }
+
+  private suspend fun honeywellPrint(
+    deviceName: String,
+    product: MgvProduct,
+    isQuantityPrinting: Boolean
+  ) {
+    val parts = deviceName.split(";")
+    if (parts.size < 2) {
+      showMessage("Configuração de impressora inválida.")
+      return
+    }
+
+    val devicePath = parts[1]
+    val device = honeywellPrinter.device(devicePath)
+
+    honeywellPrinter.initializePrinter(device)
+
+    val success = withContext(Dispatchers.IO) {
+      honeywellPrinter.safeConnectSuspend()
+    }
+
+    if (!success) {
+      showMessage("Falha na conexão com a impressora Honeywell")
+      return
+    }
+
+    withContext(Dispatchers.IO) {
+      honeywellPrinter.print(product, isQuantityPrinting)
+    }
+  }
+
+  private fun epsonPrint(deviceName: String, product: MgvProduct) {
+    epson.initializePrinter(deviceName)
+    val created = epson.createReceiptData(product)
+    if (created) {
+      val success = epson.printData()
+      if (!success) {
+        showMessage("Erro ao imprimir na Epson")
+      }
+    } else {
+      showMessage("Erro na definição Epson")
     }
   }
 

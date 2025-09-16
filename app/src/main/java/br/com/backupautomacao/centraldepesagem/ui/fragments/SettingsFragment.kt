@@ -3,56 +3,39 @@ package br.com.backupautomacao.centraldepesagem.ui.fragments
 import android.content.Context
 import android.hardware.usb.UsbManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Spinner
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import br.com.backupautomacao.centraldepesagem.R
 import br.com.backupautomacao.centraldepesagem.databinding.FragmentSettingsBinding
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
-import br.com.backupautomacao.centraldepesagem.ui.factory.SettingsViewModelFactory
 import br.com.backupautomacao.centraldepesagem.ui.viewmodel.SettingsViewModel
 import br.com.backupautomacao.centraldepesagem.utils.EventMask
 import br.com.backupautomacao.centraldepesagem.utils.LabelManager
 import br.com.backupautomacao.centraldepesagem.utils.PrinterType
-import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.androidx.viewmodel.ext.android.activityViewModel
 import timber.log.Timber
-import java.io.IOException
 
 class SettingsFragment : Fragment() {
 
-  private var _binding: FragmentSettingsBinding? = null
-  private val binding get() = _binding!!
+  private val binding by lazy {
+    FragmentSettingsBinding.inflate(layoutInflater)
+  }
 
-  private lateinit var viewModel: SettingsViewModel
+  private val viewModel by activityViewModel<SettingsViewModel>()
 
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View {
-    _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-
-    val context = requireContext()
-    val configRepository = ConfigRepository(context)
-    val resourceProvider = ResourceProvider(context)
-
-    val factory = SettingsViewModelFactory(configRepository, resourceProvider)
-    viewModel = ViewModelProvider(this, factory)[SettingsViewModel::class.java]
-
-    return binding.root
-  }
+  ) = binding.root
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -118,7 +101,8 @@ class SettingsFragment : Fragment() {
       val device = parts[1]
       viewModel.savePrinterUsbName(model, device)
     } else {
-      Toast.makeText(requireContext(), "Formato inválido de impressora USB", Toast.LENGTH_SHORT).show()
+      Toast.makeText(requireContext(), "Formato inválido de impressora USB", Toast.LENGTH_SHORT)
+        .show()
     }
   }
 
@@ -135,6 +119,7 @@ class SettingsFragment : Fragment() {
           binding.containerNetworkOptions.visibility = View.VISIBLE
           binding.containerUsbOptions.visibility = View.GONE
         }
+
         R.id.radioButtonUSB -> {
           binding.containerNetworkOptions.visibility = View.GONE
           binding.containerUsbOptions.visibility = View.VISIBLE
@@ -154,7 +139,8 @@ class SettingsFragment : Fragment() {
       handleSpinnerUsbList()
     } else {
       binding.statusImpressora.text = "Nenhuma impressora USB detectada."
-      Toast.makeText(requireContext(), "Nenhuma impressora USB encontrada.", Toast.LENGTH_SHORT).show()
+      Toast.makeText(requireContext(), "Nenhuma impressora USB encontrada.", Toast.LENGTH_SHORT)
+        .show()
     }
   }
 
@@ -211,7 +197,13 @@ class SettingsFragment : Fragment() {
         launch { viewModel.printerIp.collect { binding.textInputPrinterIp.setText(it) } }
         launch { viewModel.printerPort.collect { binding.textInputPrinterPort.setText(it) } }
         launch { viewModel.storeNumber.collect { binding.textInputMgvStoreNumber.setText(it) } }
-        launch { viewModel.printerTypeLiveData.collect { binding.radioGroupPrinterType.check(getPrinterTypeId(it)) } }
+        launch {
+          viewModel.printerTypeLiveData.collect {
+            binding.radioGroupPrinterType.check(
+              getPrinterTypeId(it)
+            )
+          }
+        }
 //        launch { viewModel.automaticPrintingEnable.collect { binding.checkboxAutomaticPrint.isChecked = it } }
       }
     }
@@ -270,23 +262,11 @@ class SettingsFragment : Fragment() {
 
   private fun isInvalidAddress(address: String): Boolean {
     return address.isBlank() ||
-            address == "127.0.0.1" ||
-            address.equals("localhost", ignoreCase = true)
+        address == "127.0.0.1" ||
+        address.equals("localhost", ignoreCase = true)
   }
 
-
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    _binding = null
-  }
 }
-
-
-
-
-
-
 
 
 /*
@@ -641,7 +621,6 @@ class SettingsFragment : Fragment() {
 }
 
  */
-
 
 
 /*

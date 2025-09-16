@@ -10,6 +10,7 @@ import br.com.backupautomacao.centraldepesagem.db.AppDatabase
 import br.com.backupautomacao.centraldepesagem.db.migrations.MIGRATION_1_2
 import br.com.backupautomacao.centraldepesagem.db.repository.ConfigRepository
 import br.com.backupautomacao.centraldepesagem.db.repository.OperationRepository
+import br.com.backupautomacao.centraldepesagem.network.ApiPesagem
 import br.com.backupautomacao.centraldepesagem.network.MgvApi
 import br.com.backupautomacao.centraldepesagem.printers.Epson
 import br.com.backupautomacao.centraldepesagem.printers.HoneywellPrinter
@@ -30,23 +31,26 @@ val mainModule = module {
   single {
     get<Context>().getSystemService(Context.USB_SERVICE) as UsbManager
   }
-  single { HoneywellPrinter(get(), get(),get()) }
+  single { HoneywellPrinter(get(), get(), get()) }
 //  single { HoneywellPrinter(get(), get()) }
 
 
   single { Label(get()) }
   single { BluetoothHandler() }
   single {
-    val address = get<ConfigRepository>()
-      .getConfig(ConfigRepository.SERVER_ADDRESS)
-
+    val address = get<ConfigRepository>().getConfig(ConfigRepository.SERVER_ADDRESS)
     val serverAddress = if (address.isNullOrEmpty()) {
-      "http://127.0.0.1:9300"
+      "http://127.0.0.1:9999"
     } else {
       address
     }
 
-    MgvApi.retrofitService(serverAddress)
+    val apiService = MgvApi.retrofitService(serverAddress)
+    val password = get<ConfigRepository>().getTextConfig(ConfigRepository.PASSWORD_API)
+    val store = get<ConfigRepository>().getIntConfig(ConfigRepository.STORE_NUMBER)
+
+    ApiPesagem(apiService, password, store.toString())
+
   }
   single {
     Room.databaseBuilder(
