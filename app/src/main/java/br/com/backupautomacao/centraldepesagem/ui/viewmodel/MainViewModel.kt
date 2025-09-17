@@ -130,7 +130,7 @@ class MainViewModel(
 
   fun toggleShowQuantity() {
 //    _showQuantity.value = _showQuantity.value?.not()
-    showQuantity.value = !(showQuantity.value ?: false)
+    showQuantity.value = showQuantity.value != true
   }
 
   fun setProduct(product: MgvProduct) {
@@ -318,47 +318,11 @@ class MainViewModel(
   fun fetchItem(codItem: String) {
     Timber.i("fetchItem: Buscando item")
 
-//    val mgvPassword = configRepository.getConfig(ConfigRepository.PASSWORD_API)
-//    if (mgvPassword == null) {
-//      showMessage("Senha da api não configurada")
-//      return
-//    }
-//
-//    val storeNumber = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
-//    if (codItem.isEmpty()) {
-//      showMessage(resourceProvider.getString(R.string.product_not_found))
-//      return
-//    }
-
     _updateStatus.update { StatusApp.BUSCAR_PRODUTO }
 
     viewModelScope.launch {
       try {
         val product = apiPesagem.getProduct(codItem)
-//        val (mgvError, item) = withContext(Dispatchers.IO) {
-//          mgvService.queryItem(
-//            item = codItem,
-//            palavraChave = mgvPassword,
-//            numeroLoja = storeNumber
-//          )
-//        }
-
-//        if (mgvError != null) {
-//          Timber.i("fetchItem: Erro da API: ${mgvError.message}")
-//          showMessage(mgvError.message)// resourceProvider.getString(R.string.error_responde_mgv))
-//          return@launch
-//        }
-
-//        item?.also { product ->
-//          val gson = Gson()
-//          val json = gson.toJson(product)
-//          Timber.i("JSON do produto recebido: $json")
-//
-//          val itemMap: Map<String, Any> = gson.fromJson(
-//            json,
-//            object : com.google.gson.reflect.TypeToken<Map<String, Any>>() {}.type
-//          )
-//          Timber.i("Chaves do produto recebido: ${itemMap.keys}")
 
         _mgvProduct.value = product
         quantity.value = product.quantity?.toString() ?: ""
@@ -384,19 +348,10 @@ class MainViewModel(
             _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
           }
         }
-//        }
 
       } catch (e: Exception) {
         showMessage(e.message!!)
       }
-
-//      catch (e: IllegalArgumentException) {
-//        showMessage(resourceProvider.getString(R.string.invalid_address_server))
-//        Timber.e(e, "fetchItem: Endereço inválido")
-//      } catch (e: Exception) {
-//        showMessage(resourceProvider.getString(R.string.request_error))
-//        Timber.e(e, "fetchItem: Erro inesperado")
-//      }
     }
   }
 
@@ -564,7 +519,7 @@ class MainViewModel(
           val quantity = product.quantity?.toDouble() ?: 1.0
           Operation(
             weight = 0.0,
-            totalPrice = product.totalPrice ?: product.price * quantity,
+            totalPrice = product.totalPrice ?: (product.price * quantity),
             pricePerKilogram = 0.0,
             pricePerUnit = product.price,
             username = Build.ID,
@@ -599,7 +554,7 @@ class MainViewModel(
       _updateStatus.value = StatusApp.REALIZAR_IMPRESSAO
 
     } catch (e: Exception) {
-      Timber.i("saveOperation: Erro ao salvar operação", e)
+      Timber.e(e, "saveOperation: Erro ao salvar operação")
       showMessage(e.message ?: "Erro desconhecido")
     }
   }

@@ -1,14 +1,13 @@
 package br.com.backupautomacao.centraldepesagem.network
 
-import com.google.gson.JsonObject
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Headers
 import retrofit2.http.Query
-import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
 private const val PALAVRA_CHAVE = "bkp@2018"
@@ -35,12 +34,13 @@ private fun createOkHttpClient() = OkHttpClient.Builder()
     .build()
 
 interface MgvService {
+    @Headers("Accept: application/json", "User-Agent: Android")
     @GET("ConsultaItem")
     suspend fun queryItem(
         @Query("palavraChave") palavraChave: String = PALAVRA_CHAVE,
         @Query("loja") numeroLoja: String = NUMERO_LOJA,
         @Query("codItem") item: String
-    ): Response<JsonObject>
+    ): Response<RequestResponse>
 }
 
 object MgvApi {

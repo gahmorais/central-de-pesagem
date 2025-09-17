@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 data class RequestResponse(
     @SerializedName("ConsultaItemResult")
     val mgvError: MgvError?,
+    @SerializedName("item")
     val item: MgvProduct?
 )
 
