@@ -18,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
@@ -26,29 +27,7 @@ class MainActivity : AppCompatActivity() {
   private val ACTION_USB_PERMISSION = "br.com.backupautomacao.USB_PERMISSION"
 
   private val configRepository by inject<ConfigRepository>()
-//  private val settingsViewModel: SettingsViewModel by viewModels {
-//    SettingsViewModelFactory(
-//      configRepository = ConfigRepository(this),
-//      resourceProvider = ResourceProvider(this)
-//    )
-//  }
-
-
-  private val viewModel by inject<MainViewModel>()
-//  viewModels {
-//    MainViewModelFactory(
-//      context = this,
-//      epson = get(),
-//      honeywellPrinter = get(),
-//      configRepository = get(),
-//      operationRepository = get(),
-//      workManager = get(),
-//      bluetoothHandler = get(),
-//      resourceProvider = get(),
-//      label = get(),
-//      mgvService = get()
-//    )
-//  }
+  private val viewModel by viewModel<MainViewModel>()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)

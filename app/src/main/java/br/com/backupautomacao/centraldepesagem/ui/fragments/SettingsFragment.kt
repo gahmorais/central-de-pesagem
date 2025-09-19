@@ -83,7 +83,7 @@ class SettingsFragment : Fragment() {
   private fun saveMgvConfig() {
     val password = binding.textInputMgvPassword.text.toString()
     val store = binding.textInputMgvStoreNumber.text.toString()
-    viewModel.saveMgvConfig(password, store)
+    viewModel.saveApiConfig(password, store)
     binding.textInputMgvPassword.setText("")
   }
 

@@ -42,6 +42,15 @@ class Formatter private constructor() {
       return data.toByteArray()
     }
 
+    fun formatDataToLoadTareToledo(value: Double): ByteArray {
+      val stx = "\u0001"
+      val etx = "\u0003"
+      val tareInteger = round(value * 100).toInt()
+      val tareText = tareInteger.toString().padStart(6, '0')
+      val data = "$stx$tareText$etx"
+      return data.toByteArray()
+    }
+
     fun formatFromUranoProtocolUseCb2(data: ByteArray): Double {
       val s = convertByteArrayToString(data)
 

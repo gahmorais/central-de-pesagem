@@ -25,7 +25,6 @@ class ConfigRepository(context: Context) {
     const val LABEL_TEMPLATE_NAME = "LABEL_TEMPLATE_NAME"
     const val KEY_LABEL_TEMPLATE_KG = "LABEL_TEMPLATE_KG"
     const val KEY_LABEL_TEMPLATE_QUANT = "LABEL_TEMPLATE_QUANT"
-
   }
 
   fun setTextConfig(key: String, value: String) {
@@ -41,7 +40,7 @@ class ConfigRepository(context: Context) {
   }
 
   fun setBooleanConfig(key: String, value: Boolean) {
-    preferencias.edit().putBoolean(key, value).apply()
+    preferencias.edit { putBoolean(key, value) }
   }
 
   fun getBooleanConfig(key: String): Boolean {
@@ -49,15 +48,15 @@ class ConfigRepository(context: Context) {
   }
 
   fun setIntConfig(key: String, value: Int) {
-    preferencias.edit().putInt(key, value).apply()
+    preferencias.edit { putInt(key, value) }
   }
 
   fun getIntConfig(key: String): Int {
     return preferencias.getInt(key, 0)
   }
 
-  fun setPrinterType(printerType: String) {
-    preferencias.edit().putString(PRINTER_TYPE, printerType).apply()
+  private fun setPrinterType(printerType: String) {
+    preferencias.edit { putString(PRINTER_TYPE, printerType) }
   }
 
   fun getPrinterType(): PrinterType {
@@ -71,7 +70,7 @@ class ConfigRepository(context: Context) {
 
   fun setUsbConfig(model: String, deviceName: String) {
     val fullName = "$model;$deviceName"
-    preferencias.edit().putString(USB_PRINTER_NAME, fullName).apply()
+    preferencias.edit { putString(USB_PRINTER_NAME, fullName) }
   }
 
   fun getUsbConfig(): String? {
@@ -118,9 +117,6 @@ class ConfigRepository(context: Context) {
     return preferencias.contains(key)
   }
 }
-
-
-
 
 
 /*
@@ -248,11 +244,6 @@ class ConfigRepository(context: Context) {
 }
 
  */
-
-
-
-
-
 
 
 /*

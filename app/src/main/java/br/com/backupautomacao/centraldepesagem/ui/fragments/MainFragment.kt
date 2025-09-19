@@ -179,7 +179,7 @@ class MainFragment : Fragment() {
     val itemListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, i: Int, p3: Long) {
         val devices = mainViewModel.devices.value
-        val devicesName = devices.mapIndexed { index, _ -> "Balança ${index + 1}" }
+        val devicesName = List(devices.size) { index -> "Balança ${index + 1}" }
         ArrayAdapter(
           requireActivity(),
           android.R.layout.simple_spinner_item,

@@ -1,6 +1,5 @@
 package br.com.backupautomacao.centraldepesagem.ui.viewmodel
 
-//import br.com.backupautomacao.centraldepesagem.printers.PrinterManager
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.hardware.usb.UsbDevice
@@ -28,6 +27,7 @@ import br.com.backupautomacao.centraldepesagem.utils.Formatter.Companion.removeN
 import br.com.backupautomacao.centraldepesagem.utils.Label
 import br.com.backupautomacao.centraldepesagem.utils.PrinterType
 import br.com.backupautomacao.centraldepesagem.utils.ResourceProvider
+import br.com.backupautomacao.centraldepesagem.utils.ScaleStatus
 import br.com.backupautomacao.centraldepesagem.utils.StatusApp
 import br.com.backupautomacao.centraldepesagem.utils.UnitOfMeasure
 import br.com.backupautomacao.centraldepesagem.utils.UsbPrinterModel
@@ -53,10 +53,9 @@ import timber.log.Timber
 import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
 import java.security.InvalidParameterException
+import java.text.Format
 
 class MainViewModel(
-//  private val printerUsb: PrinterUsb,
-//  private val appContext: Context,
   private val epson: Epson,
   private val honeywellPrinter: HoneywellPrinter,
   private val configRepository: ConfigRepository,
@@ -65,7 +64,6 @@ class MainViewModel(
   private val bluetoothHandler: BluetoothHandler,
   private val resourceProvider: ResourceProvider,
   private val label: Label,
-//  private val mgvService: MgvService
   private val apiPesagem: ApiPesagem
 ) : ViewModel(), SpeechDelegate {
 
@@ -83,7 +81,7 @@ class MainViewModel(
   val statusMessage = _statusMessage.asSharedFlow()
 
   private val _scale: MutableStateFlow<Int?> = MutableStateFlow(null)
-  val scale: StateFlow<Int?> = _scale
+  val scale = _scale.asStateFlow()
 
   private val _usbDevice: MutableStateFlow<UsbDevice?> = MutableStateFlow(null)
   private val _updateStatus: MutableStateFlow<StatusApp> = MutableStateFlow(StatusApp.INICIO)
@@ -141,7 +139,9 @@ class MainViewModel(
 
 
   fun updateProductQuantity(newQuantityStr: String) {
+
     val newQuantity = newQuantityStr.toIntOrNull()
+
     if (newQuantity == null) {
       emitMessage("Quantidade inválida")
       return
@@ -222,6 +222,20 @@ class MainViewModel(
     }
   }
 
+  private fun tareWeighining() {
+    val activeScale = activeDevice.value
+    if (activeScale == null) {
+      emitMessage("Nenhuma balança ativa")
+      return
+    }
+    weighining(activeScale)
+    val product = _mgvProduct.value
+    val weightForTare = product?.weight
+    val tareBytes = Formatter.formatDataToLoadTareToledo(weightForTare!!)
+    activeScale.write(tareBytes)
+
+  }
+
   private fun startCollectData(device: BluetoothConnected) {
 
     val job = device.read().onEach { bytes ->
@@ -235,19 +249,12 @@ class MainViewModel(
       val clean = removeNonAlphaCharacters(rawData)
       Timber.i("Peso: '$rawData' | Limpo: '$clean'")
 
-      when (clean) {
-        "ST" -> emitMessage("Peso instável, faça a pesagem novamente")
-        "NT" -> emitMessage("Nenhum peso na balança, realize a pesagem novamente")
-        "OL" -> emitMessage("Balança em sobrecarga, remove o peso extra")
+      when (removeNonAlphaCharacters(rawData)) {
+        ScaleStatus.UNSTABLE.value -> emitMessage("Peso instável, faça a pesagem novamente")
+        ScaleStatus.NEGATIVE_WEIGHT.value -> emitMessage("Balança com peso negativo")
+        ScaleStatus.OVERWEIGHT.value -> emitMessage("Balança em sobrecarga, remove o peso extra")
         else -> updateWeightProduct(bytes)
       }
-
-//      when (removeNonAlphaCharacters(rawData)) {
-//        ScaleStatus.UNSTABLE.value -> emitMessage("Peso instável, faça a pesagem novamente")
-//        ScaleStatus.NO_WEIGHT.value -> emitMessage("Nenhum peso na balança, realize a pesagem novamente")
-//        ScaleStatus.OVERWEIGHT.value -> emitMessage("Balança em sobrecarga, remove o peso extra")
-//        else -> updateWeightProduct(bytes)
-//      }
 
     }.launchIn(viewModelScope)
 
@@ -299,8 +306,6 @@ class MainViewModel(
   private fun updateWeightProduct(message: ByteArray) {
 
     val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
-
-    //weight = Formatter.formatFromUranoUseCb2Protocol(message)
     val currentProduct = _mgvProduct.value
     val updatedProduct = currentProduct?.copy(
       weight = newWeight,
