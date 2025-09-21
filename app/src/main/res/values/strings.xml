@@ -2,7 +2,7 @@
     <string name="app_name">Pesagem Modular</string>
 
     //Balança
-    <string name="text_title_select_scale">Balança selecionada:</string>
+    <string name="text_title_select_scale">Balança selec.:</string>
     <string name="message_scale_connected">"Balança %1$d conectada"</string>
     <string name="error_to_set_scale">Não foi possíve definir a balança</string>
 
@@ -94,7 +94,7 @@
     <string name="stronger_password_error">Por favor, utilize uma senha mais forte</string>
     <string name="invalid_store_number">O número da loja inválido</string>
     <string name="invalid_address_server">Endereço do servidor inválido</string>
-    <string name="placeholder_input_text">Digite o código do produto</string>
+    <string name="placeholder_input_text">Clique e digite o código do produto</string>
     <string name="invalid_ip">IP Inválido</string>
     <string name="invalid_port">Porta inválida</string>
     <string name="printer_connection_failed">conexão falhou</string>
@@ -112,6 +112,13 @@
 
     //Database
     <string name="database_name">app_database</string>
+    <string name="placeholder_tare">Tara (Kg):</string>
+    <string name="placeholder_description">DOCE S.GONC.kg GOIABADA</string>
+    <string name="placeholder_price">R$999,99</string>
+    <string name="placeholder_unit_price">Preço / Kg</string>
+    <string name="placeholder_product_code">999999</string>
+    <string name="text_block_product">Fixar produto</string>
+    <string name="text_button_tare">Tara</string>
 
     //STRINGS ETIQUETA
 

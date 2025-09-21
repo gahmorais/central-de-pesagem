@@ -4,7 +4,7 @@
     <data>
         <variable
             name="label"
-            type="br.com.backupautomacao.centraldepesagem.ui.zpl.ZplLabel" />
+            type="br.com.backupautomacao.pesagem_modular.ui.zpl.ZplLabel" />
     </data>
 
     <androidx.cardview.widget.CardView
