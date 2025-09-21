@@ -1,6 +1,6 @@
 ^XA
-^POI
 ^MMP,n
+^POI
 ^MTD
 ^MNY
 ^PW480
