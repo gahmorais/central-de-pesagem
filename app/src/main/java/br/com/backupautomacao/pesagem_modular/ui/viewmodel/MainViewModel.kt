@@ -354,7 +354,9 @@ class MainViewModel(
 
     viewModelScope.launch {
       try {
-        val product = apiPesagem.getProduct(codItem)
+        val product = withContext(Dispatchers.IO) {
+          apiPesagem.getProduct(codItem)
+        }
 
         _mgvProduct.value = product
         quantity.value = product.quantity?.toString() ?: ""
