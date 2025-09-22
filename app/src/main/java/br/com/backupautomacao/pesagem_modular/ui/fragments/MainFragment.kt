@@ -248,6 +248,18 @@ class MainFragment : Fragment() {
         print()
       }
 
+      buttonTare.setOnClickListener {
+        val connectedDevice = mainViewModel.activeDevice.value
+        Timber.tag("MainFragment").d("Botão PESAR clicado")
+        if (connectedDevice == null) {
+          showMessage("Balança não pareada")
+          return@setOnClickListener
+        }
+        lifecycleScope.launch {
+          mainViewModel.setTare(connectedDevice)
+        }
+      }
+
       inputProductCode.setOnKeyListener { _, keycode, event ->
         if (event.action == KeyEvent.ACTION_DOWN) {
           if (keycode == KeyEvent.KEYCODE_DPAD_CENTER || keycode == KeyEvent.KEYCODE_ENTER) {
@@ -261,7 +273,13 @@ class MainFragment : Fragment() {
       buttonWeighing.setOnClickListener {
         val connectedDevice = mainViewModel.activeDevice.value
         Timber.tag("MainFragment").d("Botão PESAR clicado")
-        connectedDevice?.let { mainViewModel.weighining(it) }
+        if (connectedDevice == null) {
+          showMessage("Balança não pareada")
+          return@setOnClickListener
+        }
+        lifecycleScope.launch {
+          mainViewModel.weighining(connectedDevice)
+        }
       }
 
       buttonUnitType.setOnClickListener {

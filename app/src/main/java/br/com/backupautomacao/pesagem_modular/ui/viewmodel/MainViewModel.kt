@@ -38,6 +38,7 @@ import br.com.backupautomacao.pesagem_modular.workers.PRINT_TASK
 import br.com.backupautomacao.pesagem_modular.workers.UsbWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -47,6 +48,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import net.gotev.speech.SpeechDelegate
 import timber.log.Timber
 import java.io.FileNotFoundException
@@ -66,8 +68,6 @@ class MainViewModel(
 ) : ViewModel(), SpeechDelegate {
 
   private val _showQuantity = MutableLiveData(false)
-
-  //  val showQuantity: LiveData<Boolean> = _showQuantity
   val showQuantity = MutableLiveData(false)
 
   val quantity = MutableLiveData<String>()
@@ -78,11 +78,11 @@ class MainViewModel(
   private val _statusMessage = MutableSharedFlow<String>()
   val statusMessage = _statusMessage.asSharedFlow()
 
-  private val _scale: MutableStateFlow<Int?> = MutableStateFlow(null)
+  private val _scale = MutableStateFlow<Int?>(null)
   val scale = _scale.asStateFlow()
 
-  private val _usbDevice: MutableStateFlow<UsbDevice?> = MutableStateFlow(null)
-  private val _updateStatus: MutableStateFlow<StatusApp> = MutableStateFlow(StatusApp.INICIO)
+  private val _usbDevice = MutableStateFlow<UsbDevice?>(null)
+  private val _updateStatus = MutableStateFlow<StatusApp>(StatusApp.INICIO)
 
   private val _devices = MutableStateFlow<List<BluetoothConnected>>(listOf())
   val devices = _devices.asStateFlow()
@@ -90,11 +90,13 @@ class MainViewModel(
   private val _activeDevice = MutableStateFlow<BluetoothConnected?>(null)
   val activeDevice = _activeDevice.asStateFlow()
 
+  private val _isActiveTare = MutableStateFlow(false)
+  private val weightReadyChannel = Channel<Double>(Channel.UNLIMITED)
+
   val automaticPrintingEnable: Boolean
     get() = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
 
   private val jobsRunning = mutableListOf<Job>()
-
 
   init {
     applicationMonitor()
@@ -204,15 +206,42 @@ class MainViewModel(
     workManager.cancelUniqueWork(PRINT_TASK)
   }
 
-  fun weighining(btConnected: BluetoothConnected) {
+  private suspend fun getWeight(btConnected: BluetoothConnected): Double {
+    val command = byteArrayOf(0x05)
+    btConnected.write(command)
+
+    //Limpa o canal de qualquer valor previamente utilizado
+    weightReadyChannel.tryReceive().getOrNull()
+
+    //Faz a busca do peso na balança
+    val newWeight = withTimeoutOrNull(2000L) {
+      weightReadyChannel.receive()
+    }
+
+    if (newWeight == null) {
+      throw Exception(resourceProvider.getString(R.string.weight_timeout_exceed))
+    }
+
+    return newWeight
+  }
+
+  suspend fun weighining(btConnected: BluetoothConnected) {
     Timber.i("weighing: Realizando pesagem")
     if (checkProductIsNullOrEmpty()) {
       showMessage(resourceProvider.getString(R.string.error_get_product))
       return
     }
     try {
-      val command = byteArrayOf(0x05)
-      btConnected.write(command)
+      val newWeight = getWeight(btConnected)
+      val currentProduct = _mgvProduct.value
+      val updatedProduct = currentProduct?.copy(
+        weight = newWeight,
+        totalPrice = currentProduct.price.times(newWeight)
+      )
+      currentProduct?.let { loadPrice(it.price) }
+      _mgvProduct.value = updatedProduct
+      Timber.i("Produto: ${_mgvProduct.value}")
+      _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
     } catch (e: ClosedSocketException) {
       e.message?.let { emitMessage(it) }
     } catch (e: Exception) {
@@ -220,18 +249,25 @@ class MainViewModel(
     }
   }
 
-  private fun tareWeighining() {
-    val activeScale = activeDevice.value
-    if (activeScale == null) {
-      emitMessage("Nenhuma balança ativa")
-      return
-    }
-    weighining(activeScale)
-    val product = _mgvProduct.value
-    val weightForTare = product?.weight
-    val tareBytes = Formatter.formatDataToLoadTareToledo(weightForTare!!)
-    activeScale.write(tareBytes)
+  suspend fun setTare(btConnected: BluetoothConnected, isActive: Boolean = true) {
+    try {
+      val weight = if (isActive) {
+        getWeight(btConnected)
+      } else {
+        0.0
+      }
+      Timber.i("Peso para tarar: $weight")
+      val tareBytes = Formatter.formatDataToLoadTareToledo(weight)
+      btConnected.write(tareBytes)
 
+      val updatedProduct = _mgvProduct.value?.copy(tare = weight)
+      _mgvProduct.value = updatedProduct
+      _isActiveTare.value = isActive
+    } catch (e: ClosedSocketException) {
+      e.message?.let { emitMessage(it) }
+    } catch (e: Exception) {
+      e.message?.let { emitMessage(it) }
+    }
   }
 
   private fun startCollectData(device: BluetoothConnected) {
@@ -251,7 +287,7 @@ class MainViewModel(
         ScaleStatus.UNSTABLE.value -> emitMessage("Peso instável, faça a pesagem novamente")
         ScaleStatus.NEGATIVE_WEIGHT.value -> emitMessage("Balança com peso negativo")
         ScaleStatus.OVERWEIGHT.value -> emitMessage("Balança em sobrecarga, remove o peso extra")
-        else -> updateWeightProduct(bytes)
+        else -> updateWeight(bytes)
       }
 
     }.launchIn(viewModelScope)
@@ -268,6 +304,7 @@ class MainViewModel(
   override fun onCleared() {
     super.onCleared()
     cancelAllJobs()
+    weightReadyChannel.close()
     epson.finalizePrinter()
   }
 
@@ -301,17 +338,9 @@ class MainViewModel(
 
   val statusPrint = workManager.getWorkInfosForUniqueWorkFlow(PRINT_TASK)
 
-  private fun updateWeightProduct(message: ByteArray) {
-
+  private fun updateWeight(message: ByteArray) {
     val newWeight: Double = Formatter.formatFromToledoProtocolP05(message)
-    val currentProduct = _mgvProduct.value
-    val updatedProduct = currentProduct?.copy(
-      weight = newWeight,
-      totalPrice = currentProduct.price.times(newWeight)
-    )
-    currentProduct?.let { loadPrice(it.price) }
-    _mgvProduct.value = updatedProduct
-    _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
+    weightReadyChannel.trySend(newWeight)
   }
 
   fun setActiveDevice(btConnected: BluetoothConnected) {

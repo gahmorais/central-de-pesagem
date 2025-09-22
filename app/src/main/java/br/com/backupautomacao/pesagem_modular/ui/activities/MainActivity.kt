@@ -105,22 +105,24 @@ class MainActivity : AppCompatActivity() {
 //      val printer = HoneywellPrinter(usbManager ,this)
 
       printer.initializePrinter(usbDevice)
-
-      if (printer.hasPermission()) {
-        val connected = printer.connect()
-        if (connected) {
-          printLabel(printer)
-        } else {
-          showMessage("Falha ao conectar com a impressora Honeywell.")
-        }
-      } else {
+      if (!printer.hasPermission()) {
         printer.requestPermissionAndConnect(usbDevice) { success, message ->
           showMessage(message)
           if (success) {
             printLabel(printer)
           }
         }
+        return
       }
+
+      val connected = printer.connect()
+      if (!connected) {
+        showMessage("Falha ao conectar com a impressora Honeywell.")
+        return
+      }
+
+      printLabel(printer)
+
     }
   }
 

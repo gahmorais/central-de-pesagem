@@ -43,7 +43,8 @@
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_marginStart="@dimen/big_margin"
-                app:layout_constraintEnd_toStartOf="@+id/guideline3"
+                android:layout_marginEnd="256dp"
+                app:layout_constraintEnd_toStartOf="@+id/guideline2"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -69,6 +70,7 @@
                 android:layout_height="48dp"
                 style="@style/TitleTextView"
                 android:layout_marginTop="@dimen/extra_small_margin"
+                android:layout_marginStart="100dp"
                 android:gravity="end"
                 android:text="@string/text_title_select_scale"
                 android:textColor="@color/black"
@@ -191,8 +193,7 @@
             <Button
                 android:id="@+id/buttonWeighing"
                 style="@style/BlueButton"
-                android:layout_marginStart="@dimen/big_margin"
-                android:layout_marginEnd="@dimen/extra_big_margin"
+
                 android:text="@string/text_button_weighing"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/guideline2"
@@ -201,8 +202,6 @@
             <Button
                 android:id="@+id/buttonPrint"
                 style="@style/BlueButton"
-                android:layout_marginStart="@dimen/big_margin"
-                android:layout_marginEnd="@dimen/extra_big_margin"
                 android:text="@string/text_button_print"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/guideline2"
@@ -214,6 +213,7 @@
                 android:text='@{viewModel.showQuantity ? "Preço / KG" : "Preço / UN"}'
                 app:layout_constraintEnd_toStartOf="@+id/guideline3"
                 app:layout_constraintStart_toStartOf="parent"
+                tools:text="Preço / UN"
                 app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
 
@@ -238,6 +238,7 @@
                 android:id="@+id/buttonBlockProduct"
                 style="@style/BlueButton"
                 android:text="@string/text_block_product"
+                tools:text="Desfixar produto"
                 app:layout_constraintEnd_toStartOf="@+id/guideline3"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/buttonUnitType" />
@@ -267,6 +268,7 @@
             <TextView
                 android:id="@+id/textView14"
                 style="@style/ItemTextView"
+                app:productTare="@{viewModel.mgvProduct.tare}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/guideline3"
                 app:layout_constraintTop_toBottomOf="@+id/productDescription"
