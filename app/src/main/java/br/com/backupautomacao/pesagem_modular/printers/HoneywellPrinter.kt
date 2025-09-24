@@ -46,7 +46,7 @@ class HoneywellPrinter(
   }
 
   fun device(deviceName: String): UsbDevice {
-    val selectedDevice = usbManager.deviceList.values.firstOrNull { it.deviceName == deviceName }
+    val selectedDevice = usbManager.deviceList.values.firstOrNull { it.productName == deviceName }
       ?: throw Exception("Nenhum dispositivo encontrado")
     return selectedDevice
   }

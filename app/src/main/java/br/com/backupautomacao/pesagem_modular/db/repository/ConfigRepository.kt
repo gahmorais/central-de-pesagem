@@ -70,7 +70,7 @@ class ConfigRepository(context: Context) {
 
   fun setUsbConfig(model: String, deviceName: String) {
     val fullName = "$model;$deviceName"
-    preferencias.edit { putString(USB_PRINTER_NAME, fullName) }
+    preferencias.edit { putString(USB_PRINTER_NAME, model) }
   }
 
   fun getUsbConfig(): String? {

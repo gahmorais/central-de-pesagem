@@ -49,7 +49,18 @@ class MainFragment : Fragment() {
       mainViewModel.cancelPrint()
       stopLoading()
     }
-//    onResume()
+
+    binding.buttonBlockProduct.setOnClickListener {
+      mainViewModel.changeProductState()
+    }
+
+    mainViewModel.fixedProduct.onEach { isFixed ->
+      if (isFixed) {
+        binding.buttonBlockProduct.text = "Desfixar Produto"
+      } else {
+        binding.buttonBlockProduct.text = "Fixar Produto"
+      }
+    }.launchIn(lifecycleScope)
 
     return binding.root
   }

@@ -13,8 +13,8 @@ class ApiPesagem(
         val response = apiService.queryItem(password, store, code)
         if (response.code() in 400..599) {
             val errorBody = response.errorBody()?.string()
-            val error = Gson().fromJson(errorBody, RequestResponse::class.java)
-            throw Exception(error.mgvError?.message)
+            val error = Gson().fromJson(errorBody, MgvError::class.java)
+            throw Exception(error?.message)
         }
 
         val responseBody = response.body()
@@ -23,8 +23,7 @@ class ApiPesagem(
         }
         responseBody.item
     } catch (e: Exception) {
-        e.printStackTrace()
-        throw Exception(e.message)
+        throw e
     } catch (e: IllegalArgumentException) {
         Timber.e(e, "fetchItem: endereço da api inválido")
         throw e

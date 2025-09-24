@@ -66,22 +66,25 @@ class MainActivity : AppCompatActivity() {
       return
     }
 
-    val parts = config.split(";")
-    if (parts.size < 2) {
-      showMessage("Configuração USB inválida")
-      return
+//    val parts = config.split(";")
+//    if (parts.size < 2) {
+//      showMessage("Configuração USB inválida")
+//      return
+//    }
+
+//    val model = parts[0]
+    val deviceName = config
+
+    val usbDevice = usbManager.deviceList.values.firstOrNull { usbDevice ->
+      Timber.i("USB Device: $usbDevice")
+      usbDevice.productName == deviceName
     }
-
-    val model = parts[0]
-    val deviceName = parts[1]
-
-    val usbDevice = usbManager.deviceList.values.firstOrNull { it.deviceName == deviceName }
     if (usbDevice == null) {
       showMessage("Dispositivo USB '$deviceName' não encontrado")
       return
     }
 
-    if (model.contains("TM-L100", ignoreCase = true)) {
+    if (deviceName.contains("TM-L100", ignoreCase = true)) {
       val epson = Epson(usbManager, this)
       epson.initializePrinter(config)
 

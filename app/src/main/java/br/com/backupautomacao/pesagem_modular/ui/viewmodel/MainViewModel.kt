@@ -72,7 +72,7 @@ class MainViewModel(
 
   val quantity = MutableLiveData<String>()
 
-  private val _mgvProduct = MutableLiveData<MgvProduct?>()
+  private val _mgvProduct = MutableLiveData<MgvProduct?>(null)
   val mgvProduct: LiveData<MgvProduct?> = _mgvProduct
 
   private val _statusMessage = MutableSharedFlow<String>()
@@ -82,7 +82,7 @@ class MainViewModel(
   val scale = _scale.asStateFlow()
 
   private val _usbDevice = MutableStateFlow<UsbDevice?>(null)
-  private val _updateStatus = MutableStateFlow<StatusApp>(StatusApp.INICIO)
+  private val _updateStatus = MutableStateFlow(StatusApp.INICIO)
 
   private val _devices = MutableStateFlow<List<BluetoothConnected>>(listOf())
   val devices = _devices.asStateFlow()
@@ -97,6 +97,9 @@ class MainViewModel(
     get() = configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
 
   private val jobsRunning = mutableListOf<Job>()
+
+  private val _isFixedProduct = MutableStateFlow(false)
+  val fixedProduct = _isFixedProduct.asStateFlow()
 
   init {
     applicationMonitor()
@@ -384,7 +387,8 @@ class MainViewModel(
         }
 
       } catch (e: Exception) {
-        showMessage(e.message!!)
+        e.printStackTrace()
+        showMessage(e.message ?: "Ocorreu um erro")
       }
     }
   }
@@ -436,7 +440,9 @@ class MainViewModel(
             }
           }
 
-          clearFields()
+          if (!_isFixedProduct.value) {
+            clearFields()
+          }
           _updateStatus.update { StatusApp.FINALIZAR }
 
         }
@@ -463,20 +469,16 @@ class MainViewModel(
     }
   }
 
+  fun changeProductState() {
+    _isFixedProduct.update { !_isFixedProduct.value }
+  }
+
   private suspend fun honeywellPrint(
     deviceName: String,
     product: MgvProduct,
     isQuantityPrinting: Boolean
   ) {
-    val parts = deviceName.split(";")
-    if (parts.size < 2) {
-      showMessage("Configuração de impressora inválida.")
-      return
-    }
-
-    val devicePath = parts[1]
-    val device = honeywellPrinter.device(devicePath)
-
+    val device = honeywellPrinter.device(deviceName)
     honeywellPrinter.initializePrinter(device)
 
     val success = withContext(Dispatchers.IO) {

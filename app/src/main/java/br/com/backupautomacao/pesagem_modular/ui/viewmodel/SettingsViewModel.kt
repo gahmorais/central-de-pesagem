@@ -20,61 +20,52 @@ class SettingsViewModel(
   private val _statusMessage = MutableStateFlow("")
   val statusMessage: StateFlow<String> = _statusMessage
 
-  private val _printerTypeLiveData = MutableStateFlow("")
+  private val _printerTypeLiveData = MutableStateFlow(
+    configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE)
+  )
   val printerTypeLiveData: StateFlow<String> = _printerTypeLiveData
 
-  private val _selectedLabelTemplate = MutableStateFlow("")
+  private val _selectedLabelTemplate = MutableStateFlow(
+    configRepository.getTextConfig(ConfigRepository.LABEL_TEMPLATE_NAME)
+  )
   val selectedLabelTemplate: StateFlow<String> = _selectedLabelTemplate
 
-  private val _labelTemplateKg =
-    MutableStateFlow(configRepository.getTextConfig(KEY_LABEL_TEMPLATE_KG))
+  private val _labelTemplateKg = MutableStateFlow(
+    configRepository.getTextConfig(KEY_LABEL_TEMPLATE_KG)
+  )
   val labelTemplateKg = _labelTemplateKg.asStateFlow()
 
   private val _labelTemplateQuant =
     MutableStateFlow(configRepository.getTextConfig(KEY_LABEL_TEMPLATE_QUANT))
   val labelTemplateQuant = _labelTemplateQuant.asStateFlow()
 
-  private val _serverAddress = MutableStateFlow("")
+  private val _serverAddress = MutableStateFlow(
+    configRepository.getTextConfig(ConfigRepository.SERVER_ADDRESS)
+  )
   val serverAddress: StateFlow<String> = _serverAddress
 
-  private val _printerIp = MutableStateFlow("")
+  private val _printerIp = MutableStateFlow(
+    configRepository.getTextConfig(ConfigRepository.PRINTER_IP)
+  )
   val printerIp: StateFlow<String> = _printerIp
 
-  private val _printerPort = MutableStateFlow("")
+  private val _printerPort = MutableStateFlow(
+    configRepository.getIntConfig(ConfigRepository.PRINTER_PORT).toString()
+  )
   val printerPort: StateFlow<String> = _printerPort
 
-  private val _storeNumber = MutableStateFlow("")
+  private val _storeNumber = MutableStateFlow(
+    configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
+  )
   val storeNumber: StateFlow<String> = _storeNumber
 
-  private val _passwordMgv = MutableStateFlow("")
-  val passwordMgv: StateFlow<String> = _passwordMgv
+  private val _passwordApi = MutableStateFlow(
+    configRepository.getTextConfig(ConfigRepository.PASSWORD_API)
+  )
+  val passwordMgv: StateFlow<String> = _passwordApi
 
   var automaticPrintingEnable: Boolean =
     configRepository.getBooleanConfig(ConfigRepository.AUTOMATIC_PRINT)
-
-  init {
-    _printerTypeLiveData.value =
-      configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE)
-
-    _selectedLabelTemplate.value =
-      configRepository.getTextConfig(ConfigRepository.LABEL_TEMPLATE_NAME)
-
-    _serverAddress.value =
-      configRepository.getTextConfig(ConfigRepository.SERVER_ADDRESS)
-
-    _printerIp.value =
-      configRepository.getTextConfig(ConfigRepository.PRINTER_IP)
-
-    _printerPort.value =
-      configRepository.getIntConfig(ConfigRepository.PRINTER_PORT).toString()
-
-    _storeNumber.value =
-      configRepository.getIntConfig(ConfigRepository.STORE_NUMBER).toString()
-
-    _passwordMgv.value =
-      configRepository.getTextConfig(ConfigRepository.PASSWORD_API)
-
-  }
 
   fun saveNetworkConfig(address: String, port: String) {
     if (!Validate.validaIp(address)) {
@@ -108,11 +99,6 @@ class SettingsViewModel(
         return
       }
 
-      password.length < 8 -> {
-        _statusMessage.value = resourceProvider.getString(R.string.stronger_password_error)
-        return
-      }
-
       store.isEmpty() -> {
         _statusMessage.value = resourceProvider.getString(R.string.invalid_store_number)
         return
@@ -128,7 +114,7 @@ class SettingsViewModel(
     configRepository.setTextConfig(ConfigRepository.PASSWORD_API, password)
     configRepository.setIntConfig(ConfigRepository.STORE_NUMBER, storeNumberInt)
 
-    _passwordMgv.value = password
+    _passwordApi.value = password
     _storeNumber.value = store
     _statusMessage.value = resourceProvider.getString(R.string.sucessfully_save_mgv_config)
   }
