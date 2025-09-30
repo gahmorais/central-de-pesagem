@@ -13,8 +13,10 @@ class ApiPesagem(
         val response = apiService.queryItem(password, store, code)
         if (response.code() in 400..599) {
             val errorBody = response.errorBody()?.string()
-            val error = Gson().fromJson(errorBody, MgvError::class.java)
-            throw Exception(error?.message)
+            val requestResponse = Gson().fromJson(errorBody, RequestResponse::class.java)
+            val errorMessage = requestResponse.mgvError?.message
+            Timber.i("Erro Produto: $errorMessage")
+            throw Exception(errorMessage)
         }
 
         val responseBody = response.body()

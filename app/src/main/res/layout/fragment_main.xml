@@ -5,9 +5,7 @@
     tools:context=".ui.fragments.MainFragment">
 
     <data>
-
         <import type="android.view.View" />
-
         <variable
             name="viewModel"
             type="br.com.backupautomacao.pesagem_modular.ui.viewmodel.MainViewModel" />
@@ -271,7 +269,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/guideline3"
                 app:layout_constraintTop_toBottomOf="@+id/productDescription"
-                app:productTare="@{viewModel.mgvProduct.tare}"
+                app:productTare="@{viewModel.currentTare}"
                 tools:text="999,99Kg" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

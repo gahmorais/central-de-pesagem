@@ -39,6 +39,7 @@ import br.com.backupautomacao.pesagem_modular.workers.UsbWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -91,6 +92,11 @@ class MainViewModel(
   val activeDevice = _activeDevice.asStateFlow()
 
   private val _isActiveTare = MutableStateFlow(false)
+  val isActiveTare = _isActiveTare.asStateFlow()
+
+  private val _currentTare = MutableStateFlow<Double?>(null)
+  val currentTare = _currentTare.asStateFlow()
+
   private val weightReadyChannel = Channel<Double>(Channel.UNLIMITED)
 
   val automaticPrintingEnable: Boolean
@@ -217,7 +223,7 @@ class MainViewModel(
     weightReadyChannel.tryReceive().getOrNull()
 
     //Faz a busca do peso na balança
-    val newWeight = withTimeoutOrNull(2000L) {
+    val newWeight = withTimeoutOrNull(3000L) {
       weightReadyChannel.receive()
     }
 
@@ -228,16 +234,27 @@ class MainViewModel(
     return newWeight
   }
 
-  suspend fun weighining(btConnected: BluetoothConnected) {
+  suspend fun weighining(btConnected: BluetoothConnected?) {
     Timber.i("weighing: Realizando pesagem")
+
+    if (btConnected == null) {
+      showMessage("Balança não pareada")
+      return
+    }
+
     if (checkProductIsNullOrEmpty()) {
       showMessage(resourceProvider.getString(R.string.error_get_product))
       return
     }
+
     try {
+      loadTare(btConnected, _currentTare.value ?: 0.0)
+      delay(500)
       val newWeight = getWeight(btConnected)
       val currentProduct = _mgvProduct.value
+      val currentTare = _currentTare.value
       val updatedProduct = currentProduct?.copy(
+        tare = currentTare ?: 0.0,
         weight = newWeight,
         totalPrice = currentProduct.price.times(newWeight)
       )
@@ -252,9 +269,10 @@ class MainViewModel(
     }
   }
 
-  suspend fun setTare(btConnected: BluetoothConnected, isActive: Boolean = true) {
+  suspend fun changeTare(btConnected: BluetoothConnected) {
     try {
-      val weight = if (isActive) {
+      _isActiveTare.value = !_isActiveTare.value
+      val weight = if (_isActiveTare.value) {
         getWeight(btConnected)
       } else {
         0.0
@@ -262,15 +280,22 @@ class MainViewModel(
       Timber.i("Peso para tarar: $weight")
       val tareBytes = Formatter.formatDataToLoadTareToledo(weight)
       btConnected.write(tareBytes)
-
-      val updatedProduct = _mgvProduct.value?.copy(tare = weight)
-      _mgvProduct.value = updatedProduct
-      _isActiveTare.value = isActive
+      _currentTare.update { weight }
     } catch (e: ClosedSocketException) {
       e.message?.let { emitMessage(it) }
     } catch (e: Exception) {
       e.message?.let { emitMessage(it) }
     }
+  }
+
+  private fun loadTare(btConnected: BluetoothConnected?, value: Double) {
+    if (btConnected == null) {
+      showMessage("Balança não pareada")
+      return
+    }
+
+    val newTare = Formatter.formatDataToLoadTareToledo(value)
+    btConnected.write(newTare)
   }
 
   private fun startCollectData(device: BluetoothConnected) {
@@ -442,7 +467,13 @@ class MainViewModel(
 
           if (!_isFixedProduct.value) {
             clearFields()
+          } else {
+            _mgvProduct.value = _mgvProduct.value?.copy(
+              weight = null,
+              totalPrice = null
+            )
           }
+
           _updateStatus.update { StatusApp.FINALIZAR }
 
         }

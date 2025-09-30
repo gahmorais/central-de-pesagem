@@ -62,6 +62,14 @@ class MainFragment : Fragment() {
       }
     }.launchIn(lifecycleScope)
 
+    mainViewModel.isActiveTare.onEach { isActiveTare ->
+      if (isActiveTare) {
+        binding.buttonTare.text = "Limpar tara"
+      } else {
+        binding.buttonTare.text = "Tara"
+      }
+    }.launchIn(lifecycleScope)
+
     return binding.root
   }
 
@@ -169,6 +177,7 @@ class MainFragment : Fragment() {
   }
 
   private fun configureObservers() {
+
     mainViewModel.devices.onEach { devices ->
       devices.mapIndexed { i, _ -> "Balança ${i + 1}" }
       ArrayAdapter(
@@ -206,12 +215,6 @@ class MainFragment : Fragment() {
     }
 
     binding.spinnerScale.onItemSelectedListener = itemListener
-  }
-
-  private fun success(message: String) {
-    Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT)
-      .setTextColor("#09AF00".toColorInt())
-      .show()
   }
 
   private fun error(message: String) {
@@ -262,13 +265,16 @@ class MainFragment : Fragment() {
       buttonTare.setOnClickListener {
         val connectedDevice = mainViewModel.activeDevice.value
         Timber.tag("MainFragment").d("Botão PESAR clicado")
+
         if (connectedDevice == null) {
           showMessage("Balança não pareada")
           return@setOnClickListener
         }
+
         lifecycleScope.launch {
-          mainViewModel.setTare(connectedDevice)
+          mainViewModel.changeTare(connectedDevice)
         }
+
       }
 
       inputProductCode.setOnKeyListener { _, keycode, event ->
@@ -284,10 +290,6 @@ class MainFragment : Fragment() {
       buttonWeighing.setOnClickListener {
         val connectedDevice = mainViewModel.activeDevice.value
         Timber.tag("MainFragment").d("Botão PESAR clicado")
-        if (connectedDevice == null) {
-          showMessage("Balança não pareada")
-          return@setOnClickListener
-        }
         lifecycleScope.launch {
           mainViewModel.weighining(connectedDevice)
         }
