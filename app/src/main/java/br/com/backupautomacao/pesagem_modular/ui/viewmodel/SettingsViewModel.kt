@@ -162,6 +162,6 @@ class SettingsViewModel(
   }
 
   fun setLabelTemplateQuant(template: String) {
-    configRepository.setTextConfig(KEY_LABEL_TEMPLATE_KG, template)
+    configRepository.setTextConfig(KEY_LABEL_TEMPLATE_QUANT, template)
   }
 }

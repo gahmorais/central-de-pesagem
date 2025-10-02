@@ -216,7 +216,11 @@ class HoneywellPrinter(
       }
     }
 
-    val zpl = buildZpl(context, product, showQuantity)
+    val zpl = try {
+      buildZpl(context, product, showQuantity)
+    } catch (e: Exception) {
+      throw e
+    }
     Timber.d("🖨️ --- ZPL GERADO ---\n$zpl\n🖨️ --- FIM DO ZPL ---")
     printZpl(zpl)
   }
@@ -230,8 +234,10 @@ class HoneywellPrinter(
   private fun buildZpl(context: Context, product: MgvProduct, showQuantity: Boolean): String {
     val selectedTemplateName = if (showQuantity) {
 //      viewModel.getLabelTemplateQuant()
+      Timber.i("Layout Quantidade")
       configRepository.getTextConfig(context.getString(R.string.key_label_template_quant))
     } else {
+      Timber.i("Layout Kilograma")
       configRepository.getTextConfig(context.getString(R.string.key_label_template_kg))
 //      viewModel.getLabelTemplateKg()
     }

@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -318,6 +319,8 @@ class MainViewModel(
         else -> updateWeight(bytes)
       }
 
+    }.catch { e ->
+      e.message?.let { showMessage(it) }
     }.launchIn(viewModelScope)
 
     jobsRunning.add(job)
@@ -522,7 +525,11 @@ class MainViewModel(
     }
 
     withContext(Dispatchers.IO) {
-      honeywellPrinter.print(product, isQuantityPrinting)
+      try {
+        honeywellPrinter.print(product, isQuantityPrinting)
+      } catch (e: Exception) {
+        e.message?.let { showMessage(it) }
+      }
     }
   }
 
