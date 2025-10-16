@@ -120,6 +120,7 @@
     <string name="text_block_product">Fixar produto</string>
     <string name="text_button_tare">Tara</string>
     <string name="weight_timeout_exceed">Tempo para receber o peso excedido</string>
+    <string name="placeholder_save_labels">Salvar Etiquetas</string>
 
     //STRINGS ETIQUETA
 

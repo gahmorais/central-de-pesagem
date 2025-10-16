@@ -30,7 +30,7 @@ class SettingsFragment : Fragment() {
     FragmentSettingsBinding.inflate(layoutInflater)
   }
 
-  private val viewModel by activityViewModel<SettingsViewModel>()
+  private val mViewModel by activityViewModel<SettingsViewModel>()
 
   override fun onCreateView(
     inflater: LayoutInflater, container: ViewGroup?,
@@ -57,6 +57,22 @@ class SettingsFragment : Fragment() {
   }
 
   private fun handleButtons() {
+
+    binding.saveLabels.setOnClickListener {
+      val labelFiles = LabelManager.listExternalLabelFiles(requireContext())
+
+      val idLabelKg = binding.spinnerLabelKg.selectedItemPosition
+      val idLabelQuant = binding.spinnerLabelQuant.selectedItemPosition
+
+      val currentLabelKg = labelFiles[idLabelKg]
+      val currentLabelQuant = labelFiles[idLabelQuant]
+
+      mViewModel.setLabelTemplateKg(currentLabelKg)
+      mViewModel.setLabelTemplateQuant(currentLabelQuant)
+
+      Toast.makeText(activity, "Etiquetas Salvas", Toast.LENGTH_LONG).show()
+    }
+
     binding.buttonSavePrinterConfig.setOnClickListener {
       val idRadioButton = binding.radioGroupPrinterType.checkedRadioButtonId
       val selectedPrinter = getSelectedRadioButton(idRadioButton)
@@ -66,13 +82,13 @@ class SettingsFragment : Fragment() {
         PrinterType.NETWORK -> saveNetworkConfig()
       }
 
-      viewModel.savePrinterConfig(selectedPrinter)
+      mViewModel.savePrinterConfig(selectedPrinter)
     }
 
     binding.buttonSaveServerAddress.setOnClickListener {
       val serverAddress = binding.textInputServerAddress.text.toString()
       Timber.d("endereço ip $serverAddress")
-      viewModel.saveServerAddress(serverAddress)
+      mViewModel.saveServerAddress(serverAddress)
     }
 
     binding.buttonSaveMgvConfig.setOnClickListener {
@@ -83,14 +99,14 @@ class SettingsFragment : Fragment() {
   private fun saveMgvConfig() {
     val password = binding.textInputMgvPassword.text.toString()
     val store = binding.textInputMgvStoreNumber.text.toString()
-    viewModel.saveApiConfig(password, store)
+    mViewModel.saveApiConfig(password, store)
     binding.textInputMgvPassword.setText("")
   }
 
   private fun saveNetworkConfig() {
     val ip = binding.textInputPrinterIp.text.toString().trim()
     val port = binding.textInputPrinterPort.text.toString().trim()
-    viewModel.saveNetworkConfig(ip, port)
+    mViewModel.saveNetworkConfig(ip, port)
   }
 
   private fun saveUsbConfig() {
@@ -99,7 +115,7 @@ class SettingsFragment : Fragment() {
     if (parts.size == 2) {
       val model = parts[0]
       val device = parts[1]
-      viewModel.savePrinterUsbName(model, device)
+      mViewModel.savePrinterUsbName(model, device)
     } else {
       Toast.makeText(requireContext(), "Formato inválido de impressora USB", Toast.LENGTH_SHORT)
         .show()
@@ -108,7 +124,7 @@ class SettingsFragment : Fragment() {
 
   private fun handleCheckbox() {
     binding.checkboxAutomaticPrint.setOnCheckedChangeListener { _, isChecked ->
-      viewModel.enableAutomaticPrint(isChecked)
+      mViewModel.enableAutomaticPrint(isChecked)
     }
   }
 
@@ -165,7 +181,7 @@ class SettingsFragment : Fragment() {
 
     binding.spinnerLabelKg.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-        viewModel.setLabelTemplateKg(labelFiles[pos])
+        parent.setSelection(pos)
       }
 
       override fun onNothingSelected(parent: AdapterView<*>) {}
@@ -173,32 +189,33 @@ class SettingsFragment : Fragment() {
 
     binding.spinnerLabelQuant.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
       override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
-        viewModel.setLabelTemplateQuant(labelFiles[pos])
+        parent.setSelection(pos)
       }
 
       override fun onNothingSelected(parent: AdapterView<*>) {}
     }
 
-    viewModel.labelTemplateKg.value.let { selected ->
+    mViewModel.labelTemplateKg.value.let { selected ->
       val index = labelFiles.indexOf(selected)
       if (index >= 0) binding.spinnerLabelKg.setSelection(index)
     }
 
-    viewModel.labelTemplateQuant.value.let { selected ->
+    mViewModel.labelTemplateQuant.value.let { selected ->
       val index = labelFiles.indexOf(selected)
       if (index >= 0) binding.spinnerLabelQuant.setSelection(index)
     }
   }
 
+
   private fun observeConfigFields() {
     viewLifecycleOwner.lifecycleScope.launch {
       repeatOnLifecycle(Lifecycle.State.STARTED) {
-        launch { viewModel.serverAddress.collect { binding.textInputServerAddress.setText(it) } }
-        launch { viewModel.printerIp.collect { binding.textInputPrinterIp.setText(it) } }
-        launch { viewModel.printerPort.collect { binding.textInputPrinterPort.setText(it) } }
-        launch { viewModel.storeNumber.collect { binding.textInputMgvStoreNumber.setText(it) } }
+        launch { mViewModel.serverAddress.collect { binding.textInputServerAddress.setText(it) } }
+        launch { mViewModel.printerIp.collect { binding.textInputPrinterIp.setText(it) } }
+        launch { mViewModel.printerPort.collect { binding.textInputPrinterPort.setText(it) } }
+        launch { mViewModel.storeNumber.collect { binding.textInputMgvStoreNumber.setText(it) } }
         launch {
-          viewModel.printerTypeLiveData.collect {
+          mViewModel.printerTypeLiveData.collect {
             binding.radioGroupPrinterType.check(
               getPrinterTypeId(it)
             )
@@ -211,10 +228,10 @@ class SettingsFragment : Fragment() {
 
   private fun handleMessages() {
     viewLifecycleOwner.lifecycleScope.launch {
-      viewModel.statusMessage.collect { message ->
+      mViewModel.statusMessage.collect { message ->
         if (message.isNotEmpty()) {
           Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
-          viewModel.clearStatusMessage()
+          mViewModel.clearStatusMessage()
         }
       }
     }
@@ -243,13 +260,14 @@ class SettingsFragment : Fragment() {
 
   override fun onResume() {
     super.onResume()
-    binding.checkboxAutomaticPrint.isChecked = viewModel.automaticPrintingEnable
+    binding.checkboxAutomaticPrint.isChecked = mViewModel.automaticPrintingEnable
     val configRepository = ConfigRepository(requireActivity())
     val serverAddress = configRepository.getConfig(ConfigRepository.SERVER_ADDRESS)
     val printerAddress = configRepository.getConfig(ConfigRepository.PRINTER_IP)
     val portAddress = configRepository.getIntConfig(ConfigRepository.PRINTER_PORT)
     val store = configRepository.getIntConfig(ConfigRepository.STORE_NUMBER)
     val printerType = configRepository.getTextConfig(ConfigRepository.PRINTER_TYPE)
+    val labelFiles = LabelManager.listExternalLabelFiles(requireContext())
     binding.apply {
       val selectedPrinter = getPrinterTypeId(printerType)
       radioGroupPrinterType.check(selectedPrinter)
@@ -257,7 +275,16 @@ class SettingsFragment : Fragment() {
       textInputPrinterPort.setText(portAddress.toString())
       textInputPrinterIp.setText(printerAddress)
       textInputMgvStoreNumber.setText(store.toString())
+
+      val currentTempQuant = mViewModel.currentLabelTemplateQuant()
+      val idTempQuant = labelFiles.indexOf(currentTempQuant)
+      spinnerLabelQuant.setSelection(idTempQuant)
+
+      val currentTempKg = mViewModel.currentLabelTemplateKg()
+      val idTempKg = labelFiles.indexOf(currentTempKg)
+      spinnerLabelKg.setSelection(idTempKg)
     }
+
   }
 
   private fun isInvalidAddress(address: String): Boolean {

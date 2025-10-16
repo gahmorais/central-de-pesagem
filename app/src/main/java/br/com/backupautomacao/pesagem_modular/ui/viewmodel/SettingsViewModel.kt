@@ -92,6 +92,14 @@ class SettingsViewModel(
     _statusMessage.value = resourceProvider.getString(R.string.save_printer_success)
   }
 
+  fun currentLabelTemplateKg(): String {
+    return configRepository.getTextConfig(KEY_LABEL_TEMPLATE_KG)
+  }
+
+  fun currentLabelTemplateQuant(): String {
+    return configRepository.getTextConfig(KEY_LABEL_TEMPLATE_QUANT)
+  }
+
   fun saveApiConfig(password: String, store: String) {
     when {
       password.isEmpty() -> {
