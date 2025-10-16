@@ -227,6 +227,7 @@ class MainFragment : Fragment() {
     val code = binding.inputProductCode.text.toString()
     mainViewModel.fetchItem(code)
     binding.inputProductCode.setText("")
+    hideKeyboard(binding.inputProductCode)
   }
 
   private fun print() {

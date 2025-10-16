@@ -69,10 +69,10 @@ class MainViewModel(
   private val apiPesagem: ApiPesagem
 ) : ViewModel(), SpeechDelegate {
 
-  private val _showQuantity = MutableLiveData(false)
-  val showQuantity = MutableLiveData(false)
+  private val _showQuantity = MutableStateFlow(false)
+  val showQuantity = _showQuantity.asStateFlow()
 
-  val quantity = MutableLiveData<String>()
+  val quantity = MutableLiveData("1")
 
   private val _mgvProduct = MutableLiveData<MgvProduct?>(null)
   val mgvProduct: LiveData<MgvProduct?> = _mgvProduct
@@ -137,8 +137,7 @@ class MainViewModel(
   }
 
   fun toggleShowQuantity() {
-//    _showQuantity.value = _showQuantity.value?.not()
-    showQuantity.value = showQuantity.value != true
+    _showQuantity.update { !_showQuantity.value }
   }
 
   fun setProduct(product: MgvProduct) {
@@ -390,12 +389,12 @@ class MainViewModel(
         }
 
         _mgvProduct.value = product
-        quantity.value = product.quantity?.toString() ?: ""
 
         val unitCode = product.unitOfMeasure
         Timber.i("fetchItem: Produto recebido - Código: ${product.code}, UnitOfMeasureInt: $unitCode")
-
-        _showQuantity.value = unitCode == UnitOfMeasure.UNIDADE
+        val isQuantity = unitCode == UnitOfMeasure.UNIDADE
+        Timber.i("É quantidade? $isQuantity")
+        _showQuantity.update { isQuantity }
 
         when (unitCode) {
           UnitOfMeasure.PESO -> {

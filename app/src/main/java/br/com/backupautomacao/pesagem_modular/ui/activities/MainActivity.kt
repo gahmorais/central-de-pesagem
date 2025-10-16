@@ -13,7 +13,6 @@ import br.com.backupautomacao.pesagem_modular.printers.Epson
 import br.com.backupautomacao.pesagem_modular.printers.HoneywellPrinter
 import br.com.backupautomacao.pesagem_modular.ui.ScreenSlidePagerAdapter
 import br.com.backupautomacao.pesagem_modular.ui.viewmodel.MainViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
@@ -33,15 +32,6 @@ class MainActivity : AppCompatActivity() {
 
     configRepository.initializeDefaults()
     setContentView(binding.root)
-
-    lifecycleScope.launch {
-      delay(3000)
-      try {
-        connectAndPrintUsb()
-      } catch (e: Exception) {
-        showMessage("Erro ao iniciar impressão: ${e.message}")
-      }
-    }
 
     val pagerAdapter = ScreenSlidePagerAdapter(this)
     binding.viewPager.adapter = pagerAdapter
