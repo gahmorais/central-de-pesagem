@@ -260,7 +260,7 @@ class HoneywellPrinter(
         }
 //        val tara = product.codTara ?: 0.0
 
-        val barcode = Formatter.formatBarcode(product.code, totalPrice)
+        val barcode = Formatter.formatBarcodeWeight(product.code, weight)
         val precoTotal = Formatter.formatPrice(totalPrice)
         val precoKilo = Formatter.formatPrice(unitPrice)
         val pesoFormatado = if (showQuantity) "" else Formatter.formatWeight(weight)

@@ -57,6 +57,12 @@ class Formatter private constructor() {
       return "2${code.padStart(6, '0')}${priceFormat}"
     }
 
+      fun formatBarcodeWeight(code: String, weight: Double): String {
+          val weigthDoubleToInt = round( weight * 1000).toInt()
+          val weightFormat = weigthDoubleToInt.toString().padStart(5, '0')
+          return "2${code.padStart(6, '0')}${weightFormat}"
+      }
+
       /*
       fun formatPorcoes(
           weight: Double?,
