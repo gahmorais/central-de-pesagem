@@ -262,7 +262,7 @@ class HoneywellPrinter(
     val weight = product.weight ?: 0.0
     val unitPrice = if (product.promotionalPrice > 0) product.promotionalPrice else product.price
     val totalPrice = if (showQuantity) {
-      unitPrice * (product.quantity ?: 0)
+      unitPrice * (product.quantity ?: 1)
     } else {
       unitPrice * weight
     }
@@ -274,7 +274,7 @@ class HoneywellPrinter(
     val pesoFormatado = if (showQuantity) "" else Formatter.formatWeight(weight)
 //        val tara = "0"
 //        val taraFormatada = if (showQuantity) "" else Formatter.formatWeight(tara)
-    val quantidadeFormatada = if (showQuantity) (product.quantity ?: 0).toString() else ""
+    val quantidadeFormatada = if (showQuantity) (product.quantity ?: 1).toString() else ""
     val taraFormatada = Formatter.formatWeight(product.tare)
 
     val dataAtualMillis = System.currentTimeMillis()

@@ -11,9 +11,9 @@
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 20,
-      "versionName": "1.5.5",
-      "outputFile": "PESAGEM_MODULAR_v1.5.5_20-release.apk"
+      "versionCode": 21,
+      "versionName": "1.5.6",
+      "outputFile": "PESAGEM_MODULAR_v1.5.6_21-release.apk"
     }
   ],
   "elementType": "File",
@@ -22,14 +22,14 @@
       "minApi": 28,
       "maxApi": 30,
       "baselineProfiles": [
-        "baselineProfiles/1/PESAGEM_MODULAR_v1.5.5_20-release.dm"
+        "baselineProfiles/1/PESAGEM_MODULAR_v1.5.6_21-release.dm"
       ]
     },
     {
       "minApi": 31,
       "maxApi": 2147483647,
       "baselineProfiles": [
-        "baselineProfiles/0/PESAGEM_MODULAR_v1.5.5_20-release.dm"
+        "baselineProfiles/0/PESAGEM_MODULAR_v1.5.6_21-release.dm"
       ]
     }
   ],
