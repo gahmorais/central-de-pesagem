@@ -141,12 +141,29 @@ class MainViewModel(
   }
 
   fun setProduct(product: MgvProduct) {
-    _mgvProduct.value = product
-    quantity.value = product.quantity?.toString() ?: "1"
+    val safeQuantity = (product.quantity ?: 1).takeIf { it > 0 } ?: 1
+    _mgvProduct.value = product.copy(quantity = safeQuantity)
+    quantity.value = safeQuantity.toString()
     _showQuantity.value = product.unitOfMeasure == UnitOfMeasure.UNIDADE
   }
 
+  fun updateProductQuantity(newQuantityStr: String) {
+    val newQuantity = newQuantityStr.toIntOrNull()?.takeIf { it > 0 } ?: 1
 
+    _mgvProduct.value?.let { product ->
+      val updatedProduct = product.copy(
+        quantity = newQuantity,
+        totalPrice = product.price * newQuantity
+      )
+      _mgvProduct.value = updatedProduct
+      quantity.value = newQuantity.toString()
+      emitMessage("Quantidade atualizada: $newQuantity")
+      loadPrice(updatedProduct.totalPrice ?: 0.0)
+    }
+  }
+
+
+  /*
   fun updateProductQuantity(newQuantityStr: String) {
 
     val newQuantity = newQuantityStr.toIntOrNull()
@@ -166,6 +183,8 @@ class MainViewModel(
       loadPrice(updatedProduct.totalPrice ?: 0.0)
     }
   }
+
+  */
 
   private fun applicationMonitor() {
     _updateStatus.onEach { status ->
@@ -435,53 +454,6 @@ class MainViewModel(
       }
     }
   }
-
-
-  /*
-  fun fetchItem(codItem: String) {
-    Timber.i("fetchItem: Buscando item")
-
-    _updateStatus.update { StatusApp.BUSCAR_PRODUTO }
-
-    viewModelScope.launch {
-      try {
-        val product = withContext(Dispatchers.IO) {
-          apiPesagem.getProduct(codItem)
-        }
-
-        _mgvProduct.value = product
-
-        val unitCode = product.unitOfMeasure
-        Timber.i("fetchItem: Produto recebido - Código: ${product.code}, UnitOfMeasureInt: $unitCode")
-        val isQuantity = unitCode == UnitOfMeasure.UNIDADE
-        Timber.i("É quantidade? $isQuantity")
-        _showQuantity.update { isQuantity }
-
-        when (unitCode) {
-          UnitOfMeasure.PESO -> {
-            Timber.i("fetchItem: Produto por peso - indo para REALIZAR_PESAGEM")
-            _updateStatus.update { StatusApp.REALIZAR_PESAGEM }
-          }
-
-          UnitOfMeasure.UNIDADE -> {
-            Timber.i("fetchItem: Produto por unidade - indo para GRAVAR_OPERACAO")
-            _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
-          }
-
-          else -> {
-            Timber.w("fetchItem: Produto sem unidade definida! Usando GRAVAR_OPERACAO como fallback.")
-            _updateStatus.update { StatusApp.GRAVAR_OPERACAO }
-          }
-        }
-
-      } catch (e: Exception) {
-        e.printStackTrace()
-        showMessage(e.message ?: "Ocorreu um erro")
-      }
-    }
-  }
-
-   */
 
   fun print() {
     if (checkProductIsNullOrEmpty()) {

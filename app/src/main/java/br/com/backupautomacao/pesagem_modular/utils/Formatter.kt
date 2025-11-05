@@ -16,6 +16,11 @@ class Formatter private constructor() {
       ).replace(".", ",")
     }
 
+    fun formatBarcodeQuantity(code: String, quantity: Int): String {
+      val quantityFormatted = quantity.toString().padStart(5, '0')
+      return "2${code.padStart(6, '0')}${quantityFormatted}"
+    }
+
     fun <T> formatWeight(value: T?): String {
       return String.format(Locale.ENGLISH, "%.3f Kg", value).replace(".", ",")
     }
